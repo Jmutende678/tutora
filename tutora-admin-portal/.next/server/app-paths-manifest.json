@@ -1,0 +1,7 @@
+{
+  "/_not-found": "app/_not-found.js",
+  "/api/stripe/create-customer/route": "app/api/stripe/create-customer/route.js",
+  "/api/webhooks/stripe/route": "app/api/webhooks/stripe/route.js",
+  "/page": "app/page.js",
+  "/pricing/page": "app/pricing/page.js"
+}
