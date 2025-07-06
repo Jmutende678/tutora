@@ -142,7 +142,7 @@ export default function Dashboard() {
         🚀 MAIN PAGE UPDATED - JULY 6th 7:50PM 🚀
       </div>
       
-      <div className="min-h-screen relative overflow-hidden p-8">
+      <div className="relative overflow-hidden p-8">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 h-80 w-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
