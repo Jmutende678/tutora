@@ -138,8 +138,8 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       {/* TEST: Visible indicator that new deployment is working */}
-      <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg">
-        ✅ NAVIGATION FIXED - v2.0
+      <div className="fixed top-4 right-4 z-50 bg-purple-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg animate-pulse">
+        🚀 MAIN PAGE UPDATED - JULY 6th 7:50PM 🚀
       </div>
       
       <div className="min-h-screen relative overflow-hidden p-8">
