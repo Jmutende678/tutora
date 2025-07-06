@@ -7,3 +7,4 @@ else
     npm install -g vercel
     vercel --prod
 fi
+/Users/johnmutende/Downloads/tutora-main/tutora-admin-portal
