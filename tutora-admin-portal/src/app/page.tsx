@@ -1,3 +1,4 @@
+// Cache buster - Force update: 2025-07-06-19:47
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -27,6 +28,7 @@ import StatsCard from '@/components/StatsCard'
 import Chart from '@/components/Chart'
 
 export default function Dashboard() {
+
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalCompanies: 0,
@@ -52,6 +54,8 @@ export default function Dashboard() {
     users: number
     plan: string
   }>>([])
+
+  // Auth logic removed for cache busting
 
   useEffect(() => {
     // Simulate fetching dashboard data with animation
@@ -128,6 +132,8 @@ export default function Dashboard() {
       default: return 'bg-gradient-to-r from-gray-400 to-gray-500'
     }
   }
+
+  // Loading and auth checks removed for cache busting
 
   return (
     <DashboardLayout>
