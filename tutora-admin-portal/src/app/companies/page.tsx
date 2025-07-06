@@ -6,14 +6,14 @@ import { Building2, Users, DollarSign, Plus, Search, Filter } from 'lucide-react
 export default function CompaniesPage() {
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden -m-8 p-8">
+      <div className="min-h-screen relative overflow-hidden p-8">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 h-80 w-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
           <div className="absolute -bottom-40 -left-40 h-80 w-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse animation-delay-2000"></div>
         </div>
 
-        <div className="relative z-10 space-y-8">
+        <div className="relative z-10 space-y-8 max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>

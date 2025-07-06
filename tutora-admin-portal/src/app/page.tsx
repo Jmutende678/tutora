@@ -136,7 +136,7 @@ export default function Dashboard() {
         ✅ NAVIGATION FIXED - v2.0
       </div>
       
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden -m-8 p-8">
+      <div className="min-h-screen relative overflow-hidden p-8">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 h-80 w-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
@@ -144,7 +144,7 @@ export default function Dashboard() {
           <div className="absolute top-40 left-40 h-60 w-60 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse animation-delay-4000"></div>
         </div>
 
-        <div className="relative z-10 space-y-8">
+        <div className="relative z-10 space-y-8 max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="animate-slide-up">
