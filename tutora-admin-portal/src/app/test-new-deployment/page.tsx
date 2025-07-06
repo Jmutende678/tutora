@@ -12,8 +12,9 @@ export default function TestNewDeployment() {
         </p>
         <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-8 text-white">
           <p className="text-lg mb-4">Timestamp: {new Date().toISOString()}</p>
-          <p className="text-lg">Commit: 37464fb6</p>
-          <p className="text-lg">Status: ✅ DEPLOYMENT SUCCESS</p>
+          <p className="text-lg">Commit: d48d0856</p>
+          <p className="text-lg">Status: ✅ DEPLOYMENT SUCCESS - FORCED UPDATE</p>
+          <p className="text-lg font-bold text-yellow-300">🔄 MANUAL DEPLOYMENT TRIGGER</p>
         </div>
         <div className="mt-8">
           <a 
