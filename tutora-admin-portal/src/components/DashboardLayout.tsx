@@ -118,15 +118,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </div>
 
-        {/* Main content area */}
-        <main className="flex-1 relative overflow-y-auto focus:outline-none">
-          <div className="py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-              <div className="animate-fade-in">
-                {children}
-              </div>
-            </div>
-          </div>
+        {/* Main content area - This should replace all content, not append */}
+        <main className="flex-1 relative overflow-y-auto focus:outline-none bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+          {/* Remove the extra wrapper div that was causing layout issues */}
+          {children}
         </main>
       </div>
     </div>

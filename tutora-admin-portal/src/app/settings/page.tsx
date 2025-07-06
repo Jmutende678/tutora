@@ -6,13 +6,13 @@ import { Settings, Save, User, Bell, Shield } from 'lucide-react'
 export default function SettingsPage() {
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden -m-8 p-8">
+      <div className="min-h-screen relative overflow-hidden p-8">
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -top-40 -right-40 h-80 w-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
           <div className="absolute -bottom-40 -left-40 h-80 w-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse animation-delay-2000"></div>
         </div>
 
-        <div className="relative z-10 space-y-8">
+        <div className="relative z-10 space-y-8 max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent mb-2">
