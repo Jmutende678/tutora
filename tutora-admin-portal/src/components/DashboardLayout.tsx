@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { 
   LayoutDashboard, 
   Building2, 
@@ -23,14 +25,15 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const pathname = usePathname()
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard, current: true, color: 'tutora-blue' },
-    { name: 'Companies', href: '/companies', icon: Building2, current: false, color: 'tutora-purple' },
-    { name: 'Users', href: '/users', icon: Users, current: false, color: 'tutora-green' },
-    { name: 'Payments', href: '/payments', icon: CreditCard, current: false, color: 'tutora-orange' },
-    { name: 'Settings', href: '/settings', icon: Settings, current: false, color: 'gray-600' },
-    { name: 'Support', href: '/support', icon: HelpCircle, current: false, color: 'tutora-pink' },
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard, current: pathname === '/', color: 'tutora-blue' },
+    { name: 'Companies', href: '/companies', icon: Building2, current: pathname === '/companies', color: 'tutora-purple' },
+    { name: 'Users', href: '/users', icon: Users, current: pathname === '/users', color: 'tutora-green' },
+    { name: 'Payments', href: '/payments', icon: CreditCard, current: pathname === '/payments', color: 'tutora-orange' },
+    { name: 'Settings', href: '/settings', icon: Settings, current: pathname === '/settings', color: 'gray-600' },
+    { name: 'Support', href: '/support', icon: HelpCircle, current: pathname === '/support', color: 'tutora-pink' },
   ]
 
   return (
@@ -156,7 +159,7 @@ function SidebarContent({ navigation }: { navigation: any[] }) {
       <div className="flex-1 flex flex-col overflow-y-auto px-4 py-6">
         <nav className="flex-1 space-y-2">
           {navigation.map((item, index) => (
-            <a
+            <Link
               key={item.name}
               href={item.href}
               className={`group flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-200 hover:scale-105 ${
@@ -183,7 +186,7 @@ function SidebarContent({ navigation }: { navigation: any[] }) {
                   <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
                 </div>
               )}
-            </a>
+            </Link>
           ))}
         </nav>
       </div>
