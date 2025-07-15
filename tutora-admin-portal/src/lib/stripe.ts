@@ -1,5 +1,4 @@
 import Stripe from 'stripe'
-import { nanoid } from 'nanoid'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
@@ -9,70 +8,84 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export interface PricingPlan {
   id: string
   name: string
-  price: number
-  interval: 'month' | 'year'
+  monthlyPrice: number
+  annualPrice: number
   features: string[]
   maxUsers: number
   maxModules: number
   priority: 'basic' | 'premium' | 'enterprise'
   stripeProductId?: string
-  stripePriceId?: string
+  stripeMonthlyPriceId?: string
+  stripeAnnualPriceId?: string
 }
 
 export const PRICING_PLANS: Record<string, PricingPlan> = {
-  basic: {
-    id: 'basic',
-    name: 'Basic',
-    price: 99,
-    interval: 'month',
+  starter: {
+    id: 'starter',
+    name: 'Starter',
+    monthlyPrice: 12,
+    annualPrice: 10,
     features: [
-      'Up to 50 users',
-      'Basic training modules',
-      'Progress tracking',
+      'Up to 25 users',
+      '5 AI-generated modules per month',
+      'Basic analytics & reporting',
       'Email support',
-      'Basic analytics'
+      'Mobile app access',
+      'Basic quiz & assessment tools'
     ],
-    maxUsers: 50,
-    maxModules: 10,
+    maxUsers: 25,
+    maxModules: 5,
     priority: 'basic',
-    stripePriceId: 'price_basic_monthly'
+    stripeProductId: 'prod_starter',
+    stripeMonthlyPriceId: 'price_starter_monthly',
+    stripeAnnualPriceId: 'price_starter_annual'
   },
-  premium: {
-    id: 'premium',
-    name: 'Premium',
-    price: 299,
-    interval: 'month',
+  professional: {
+    id: 'professional',
+    name: 'Professional',
+    monthlyPrice: 29,
+    annualPrice: 24,
     features: [
-      'Up to 200 users',
-      'Advanced training modules',
-      'Custom quizzes',
-      'Advanced analytics',
+      'Up to 100 users',
+      'Unlimited AI-generated modules',
+      'Advanced analytics & insights',
       'Priority support',
-      'Custom branding'
+      'Custom branding',
+      'Advanced quiz & certification',
+      'API access',
+      'Custom learning paths',
+      'Progress tracking & reporting'
     ],
-    maxUsers: 200,
-    maxModules: 50,
+    maxUsers: 100,
+    maxModules: -1,
     priority: 'premium',
-    stripePriceId: 'price_premium_monthly'
+    stripeProductId: 'prod_professional',
+    stripeMonthlyPriceId: 'price_professional_monthly',
+    stripeAnnualPriceId: 'price_professional_annual'
   },
   enterprise: {
     id: 'enterprise',
     name: 'Enterprise',
-    price: 999,
-    interval: 'month',
+    monthlyPrice: 79,
+    annualPrice: 65,
     features: [
       'Unlimited users',
-      'Custom training modules',
-      'Advanced AI features',
+      'Unlimited AI-generated modules',
+      'Advanced AI features & customization',
       'White-label solution',
-      'Dedicated support',
+      '24/7 dedicated support',
       'Custom integrations',
-      'SLA guarantee'
+      'Advanced security features',
+      'SLA guarantees',
+      'Custom deployment options',
+      'Dedicated account manager'
     ],
-    maxUsers: -1, // Unlimited
-    maxModules: -1, // Unlimited
+    maxUsers: -1,
+    maxModules: -1,
     priority: 'enterprise',
-    stripePriceId: 'price_enterprise_monthly'
+    stripeProductId: 'prod_enterprise',
+    stripeMonthlyPriceId: 'price_enterprise_monthly',
+    stripeAnnualPriceId: 'price_enterprise_annual'
   }
 }
 
@@ -85,6 +98,7 @@ export class StripeService {
 
   async createCheckoutSession(
     planId: string,
+    billingCycle: 'monthly' | 'annual',
     successUrl: string,
     cancelUrl: string,
     metadata?: Record<string, string>
@@ -94,46 +108,65 @@ export class StripeService {
       throw new Error('Invalid plan ID')
     }
 
-    const session = await this.stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `Tutora ${plan.name} Plan`,
-              description: `${plan.features.join(', ')}`,
-              images: ['https://tutora.com/logo.png'],
+    // For now, we'll use price_data since we don't have actual Stripe products set up
+    // In production, you'd use the actual price IDs from your Stripe dashboard
+    const unitAmount = billingCycle === 'annual' 
+      ? plan.annualPrice * 12 * 100 // Convert to cents and multiply by 12 for annual
+      : plan.monthlyPrice * 100 // Convert to cents
+
+    const interval = billingCycle === 'annual' ? 'year' : 'month'
+
+    try {
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: `Tutora ${plan.name} Plan`,
+                description: `${plan.features.slice(0, 3).join(', ')} and more...`,
+                images: ['https://tutoralearn.com/logo.png'],
+              },
+              unit_amount: unitAmount,
+              recurring: {
+                interval: interval,
+              },
             },
-            unit_amount: plan.price * 100,
-            recurring: {
-              interval: plan.interval,
-            },
+            quantity: 1,
           },
-          quantity: 1,
-        },
-      ],
-      mode: 'subscription',
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      metadata: {
-        planId,
-        ...metadata
-      },
-      subscription_data: {
+        ],
+        mode: 'subscription',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
         metadata: {
           planId,
+          billingCycle,
           ...metadata
-        }
-      },
-      customer_creation: 'always',
-      billing_address_collection: 'required',
-      tax_id_collection: {
-        enabled: true,
-      },
-    })
+        },
+        subscription_data: {
+          trial_period_days: 14,
+          metadata: {
+            planId,
+            billingCycle,
+            ...metadata
+          }
+        },
+        billing_address_collection: 'required',
+        tax_id_collection: {
+          enabled: true,
+        },
+        allow_promotion_codes: true,
+        automatic_tax: {
+          enabled: true,
+        },
+      })
 
-    return session
+      return session
+    } catch (error: any) {
+      console.error('Stripe session creation error:', error)
+      throw new Error(`Failed to create checkout session: ${error.message}`)
+    }
   }
 
   async createCustomer(email: string, name: string, companyName: string) {
@@ -150,12 +183,12 @@ export class StripeService {
   }
 
   async createPortalSession(customerId: string, returnUrl: string) {
-    const portalSession = await this.stripe.billingPortal.sessions.create({
+    const session = await this.stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: returnUrl,
     })
 
-    return portalSession
+    return session
   }
 
   async getSubscription(subscriptionId: string) {
@@ -163,36 +196,36 @@ export class StripeService {
   }
 
   async updateSubscription(subscriptionId: string, planId: string) {
-    const subscription = await this.stripe.subscriptions.retrieve(subscriptionId)
     const plan = PRICING_PLANS[planId]
-    
     if (!plan) {
       throw new Error('Invalid plan ID')
     }
 
-    // Create a new price for the subscription update
-    const price = await this.stripe.prices.create({
-      currency: 'usd',
-      unit_amount: plan.price * 100,
-      recurring: {
-        interval: plan.interval,
-      },
-      product_data: {
-        name: `Tutora ${plan.name} Plan`,
-      },
-    })
-
-    return await this.stripe.subscriptions.update(subscriptionId, {
-      items: [
-        {
-          id: subscription.items.data[0].id,
-          price: price.id,
+    const subscription = await this.stripe.subscriptions.retrieve(subscriptionId)
+    
+          // Create a new price for the subscription update
+      const price = await this.stripe.prices.create({
+        currency: 'usd',
+        unit_amount: plan.monthlyPrice * 100,
+        recurring: {
+          interval: 'month',
         },
-      ],
-      metadata: {
-        planId
-      }
-    })
+        product_data: {
+          name: `Tutora ${plan.name} Plan`,
+        },
+      })
+
+      return await this.stripe.subscriptions.update(subscriptionId, {
+        items: [
+          {
+            id: subscription.items.data[0].id,
+            price: price.id,
+          },
+        ],
+        metadata: {
+          planId
+        }
+      })
   }
 
   async cancelSubscription(subscriptionId: string) {
@@ -205,104 +238,65 @@ export class StripeService {
 
   async constructWebhookEvent(body: string, signature: string) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
-    
-    try {
-      return this.stripe.webhooks.constructEvent(body, signature, webhookSecret)
-    } catch (err) {
-      throw new Error(`Webhook signature verification failed: ${err}`)
-    }
+    return this.stripe.webhooks.constructEvent(body, signature, webhookSecret)
   }
 
   async handleWebhookEvent(event: Stripe.Event) {
+    console.log('Processing webhook event:', event.type)
+
     switch (event.type) {
       case 'checkout.session.completed':
-        return await this.handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
-      
+        await this.handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
+        break
       case 'customer.subscription.created':
-        return await this.handleSubscriptionCreated(event.data.object as Stripe.Subscription)
-      
+        await this.handleSubscriptionCreated(event.data.object as Stripe.Subscription)
+        break
       case 'customer.subscription.updated':
-        return await this.handleSubscriptionUpdated(event.data.object as Stripe.Subscription)
-      
+        await this.handleSubscriptionUpdated(event.data.object as Stripe.Subscription)
+        break
       case 'customer.subscription.deleted':
-        return await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
-      
+        await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
+        break
       case 'invoice.payment_succeeded':
-        return await this.handlePaymentSucceeded(event.data.object as Stripe.Invoice)
-      
+        await this.handlePaymentSucceeded(event.data.object as Stripe.Invoice)
+        break
       case 'invoice.payment_failed':
-        return await this.handlePaymentFailed(event.data.object as Stripe.Invoice)
-      
+        await this.handlePaymentFailed(event.data.object as Stripe.Invoice)
+        break
       default:
         console.log(`Unhandled event type: ${event.type}`)
     }
   }
 
   private async handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-    const { planId } = session.metadata!
-    const plan = PRICING_PLANS[planId]
-    
-    // This will be handled by the webhook API route
-    return {
-      type: 'checkout_completed',
-      customerId: session.customer,
-      subscriptionId: session.subscription,
-      planId,
-      plan,
-      session
-    }
+    console.log('Checkout completed:', session.id)
+    // Handle successful checkout - create company, send welcome email, etc.
   }
 
   private async handleSubscriptionCreated(subscription: Stripe.Subscription) {
-    return {
-      type: 'subscription_created',
-      customerId: subscription.customer,
-      subscriptionId: subscription.id,
-      planId: subscription.metadata.planId,
-      subscription
-    }
+    console.log('Subscription created:', subscription.id)
+    // Handle new subscription
   }
 
   private async handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-    return {
-      type: 'subscription_updated',
-      customerId: subscription.customer,
-      subscriptionId: subscription.id,
-      planId: subscription.metadata.planId,
-      subscription
-    }
+    console.log('Subscription updated:', subscription.id)
+    // Handle subscription changes
   }
 
   private async handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-    return {
-      type: 'subscription_deleted',
-      customerId: subscription.customer,
-      subscriptionId: subscription.id,
-      planId: subscription.metadata.planId,
-      subscription
-    }
+    console.log('Subscription deleted:', subscription.id)
+    // Handle subscription cancellation
   }
 
   private async handlePaymentSucceeded(invoice: Stripe.Invoice) {
-    return {
-      type: 'payment_succeeded',
-      customerId: invoice.customer,
-      subscriptionId: invoice.subscription,
-      amount: invoice.amount_paid,
-      invoice
-    }
+    console.log('Payment succeeded:', invoice.id)
+    // Handle successful payment
   }
 
   private async handlePaymentFailed(invoice: Stripe.Invoice) {
-    return {
-      type: 'payment_failed',
-      customerId: invoice.customer,
-      subscriptionId: invoice.subscription,
-      amount: invoice.amount_due,
-      invoice
-    }
+    console.log('Payment failed:', invoice.id)
+    // Handle failed payment
   }
 }
 
-export const stripeService = new StripeService()
-export default stripe 
+export const stripeService = new StripeService() 
