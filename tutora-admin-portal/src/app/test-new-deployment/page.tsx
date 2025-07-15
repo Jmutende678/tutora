@@ -10,11 +10,11 @@ export default function TestNewDeployment() {
         <p className="text-2xl text-white mb-8">
           If you can see this page, the deployment system is working!
         </p>
-        <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-8 text-white">
+        <div className="bg-white rounded-xl p-8 text-gray-900 shadow-lg">
           <p className="text-lg mb-4">Timestamp: {new Date().toISOString()}</p>
           <p className="text-lg">Commit: d48d0856</p>
           <p className="text-lg">Status: ✅ DEPLOYMENT SUCCESS - FORCED UPDATE</p>
-          <p className="text-lg font-bold text-yellow-300">🔄 MANUAL DEPLOYMENT TRIGGER</p>
+          <p className="text-lg font-bold text-yellow-600">🔄 MANUAL DEPLOYMENT TRIGGER</p>
         </div>
         <div className="mt-8">
           <a 

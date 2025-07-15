@@ -1,29 +1,21 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts'
-
-interface ChartData {
-  name: string
-  revenue: number
-  users: number
-  companies?: number
-}
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 
 interface ChartProps {
-  data: ChartData[]
+  data: any[]
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-black/80 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl">
-        <p className="font-bold text-white mb-3 text-lg">{`📊 ${label}`}</p>
+      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-lg">
+        <p className="font-bold text-gray-900 mb-3 text-lg">{label}</p>
         {payload.map((entry: any, index: number) => (
           <div key={index} className="flex items-center justify-between py-1">
-            <span className="text-white/80 text-sm font-medium flex items-center">
-              {entry.name === 'revenue' ? '💰' : entry.name === 'users' ? '👥' : '🏢'} 
-              <span className="ml-2 capitalize">{entry.name}</span>
+            <span className="text-gray-600 text-sm font-medium flex items-center">
+              <span className="capitalize">{entry.name}</span>
             </span>
-            <span className="font-bold text-white ml-4" style={{ color: entry.color }}>
-              {entry.name === 'revenue' ? `$${entry.value?.toLocaleString()}` : entry.value?.toLocaleString()}
+            <span className="font-bold text-gray-900 ml-4" style={{ color: entry.color }}>
+              {entry.value}
             </span>
           </div>
         ))}
@@ -36,10 +28,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export default function Chart({ data }: ChartProps) {
   return (
     <div className="h-96 relative">
-      {/* Background decoration with animated elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl"></div>
-      <div className="absolute top-4 right-4 h-20 w-20 bg-blue-400/10 rounded-full blur-2xl animate-pulse"></div>
-      <div className="absolute bottom-4 left-4 h-16 w-16 bg-purple-400/10 rounded-full blur-2xl animate-pulse animation-delay-2000"></div>
+      <div className="absolute inset-0 bg-white rounded-lg border border-gray-200"></div>
       
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
@@ -62,79 +51,47 @@ export default function Chart({ data }: ChartProps) {
           </defs>
           <CartesianGrid 
             strokeDasharray="3 3" 
-            stroke="rgba(255, 255, 255, 0.1)" 
-            strokeOpacity={0.5}
+            stroke="#E5E7EB" 
+            strokeOpacity={0.8}
           />
           <XAxis 
-            dataKey="name" 
-            axisLine={false}
+            dataKey="month" 
+            stroke="#6B7280" 
+            fontSize={12}
             tickLine={false}
-            tick={{ fill: 'rgba(255, 255, 255, 0.7)', fontSize: 12, fontWeight: 600 }}
+            axisLine={false}
           />
           <YAxis 
-            axisLine={false}
+            stroke="#6B7280" 
+            fontSize={12}
             tickLine={false}
-            tick={{ fill: 'rgba(255, 255, 255, 0.7)', fontSize: 12, fontWeight: 600 }}
+            axisLine={false}
+            tickFormatter={(value) => `${value}`}
           />
           <Tooltip content={<CustomTooltip />} />
           <Area
             type="monotone"
             dataKey="revenue"
             stroke="#3B82F6"
-            strokeWidth={4}
+            fillOpacity={1}
             fill="url(#revenueGradient)"
-            dot={{ fill: '#3B82F6', strokeWidth: 3, r: 6, stroke: '#1E40AF' }}
-            activeDot={{ r: 10, fill: '#3B82F6', strokeWidth: 4, stroke: '#ffffff' }}
           />
           <Area
             type="monotone"
             dataKey="users"
             stroke="#8B5CF6"
-            strokeWidth={4}
+            fillOpacity={1}
             fill="url(#usersGradient)"
-            dot={{ fill: '#8B5CF6', strokeWidth: 3, r: 6, stroke: '#7C3AED' }}
-            activeDot={{ r: 10, fill: '#8B5CF6', strokeWidth: 4, stroke: '#ffffff' }}
           />
-          {data[0]?.companies !== undefined && (
-            <Area
-              type="monotone"
-              dataKey="companies"
-              stroke="#EC4899"
-              strokeWidth={4}
-              fill="url(#companiesGradient)"
-              dot={{ fill: '#EC4899', strokeWidth: 3, r: 6, stroke: '#DB2777' }}
-              activeDot={{ r: 10, fill: '#EC4899', strokeWidth: 4, stroke: '#ffffff' }}
-            />
-          )}
+          <Area
+            type="monotone"
+            dataKey="companies"
+            stroke="#EC4899"
+            fillOpacity={1}
+            fill="url(#companiesGradient)"
+          />
         </AreaChart>
       </ResponsiveContainer>
-      
-      {/* Enhanced Legend */}
-      <div className="flex items-center justify-center space-x-8 mt-6">
-        <div className="flex items-center space-x-3 group cursor-pointer">
-          <div className="relative">
-            <div className="h-4 w-4 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full shadow-lg group-hover:shadow-blue-500/50 transition-all duration-300"></div>
-            <div className="absolute inset-0 h-4 w-4 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-30 animate-ping"></div>
-          </div>
-          <span className="text-sm font-semibold text-white/90 group-hover:text-white transition-colors duration-200">💰 Revenue</span>
-        </div>
-        <div className="flex items-center space-x-3 group cursor-pointer">
-          <div className="relative">
-            <div className="h-4 w-4 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full shadow-lg group-hover:shadow-purple-500/50 transition-all duration-300"></div>
-            <div className="absolute inset-0 h-4 w-4 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full opacity-0 group-hover:opacity-30 animate-ping"></div>
-          </div>
-          <span className="text-sm font-semibold text-white/90 group-hover:text-white transition-colors duration-200">👥 Users</span>
-        </div>
-        {data[0]?.companies !== undefined && (
-          <div className="flex items-center space-x-3 group cursor-pointer">
-            <div className="relative">
-              <div className="h-4 w-4 bg-gradient-to-r from-pink-400 to-pink-500 rounded-full shadow-lg group-hover:shadow-pink-500/50 transition-all duration-300"></div>
-              <div className="absolute inset-0 h-4 w-4 bg-gradient-to-r from-pink-400 to-pink-500 rounded-full opacity-0 group-hover:opacity-30 animate-ping"></div>
-            </div>
-            <span className="text-sm font-semibold text-white/90 group-hover:text-white transition-colors duration-200">🏢 Companies</span>
-          </div>
-        )}
-      </div>
     </div>
   )
 } 

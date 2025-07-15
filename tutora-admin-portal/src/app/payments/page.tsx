@@ -1,61 +1,240 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
-import { CreditCard, DollarSign, TrendingUp, Search, Filter } from 'lucide-react'
+import {
+  CreditCard,
+  DollarSign,
+  Calendar,
+  ArrowUpRight,
+  ArrowDownRight,
+  Filter,
+  Download,
+  ChevronDown,
+  TrendingUp,
+  Users
+} from 'lucide-react'
+import Image from 'next/image'
+
+interface Transaction {
+  id: string
+  company: string
+  amount: number
+  status: 'completed' | 'pending' | 'failed'
+  date: string
+  type: 'subscription' | 'one-time' | 'refund'
+}
 
 export default function PaymentsPage() {
+  const router = useRouter()
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+
+  useEffect(() => {
+    // Check authentication
+    const isAuthenticated = localStorage.getItem('admin_authenticated')
+    if (!isAuthenticated) {
+      router.push('/admin/login')
+      return
+    }
+
+    // Load demo data
+    setTransactions([
+      {
+        id: 'TX123456',
+        company: 'Tech Corp Inc.',
+        amount: 1299.99,
+        status: 'completed',
+        date: '2024-03-15',
+        type: 'subscription'
+      },
+      {
+        id: 'TX123457',
+        company: 'Global Solutions Ltd.',
+        amount: 899.99,
+        status: 'pending',
+        date: '2024-03-14',
+        type: 'one-time'
+      },
+      {
+        id: 'TX123458',
+        company: 'Digital Innovations',
+        amount: -299.99,
+        status: 'completed',
+        date: '2024-03-13',
+        type: 'refund'
+      },
+      {
+        id: 'TX123459',
+        company: 'Future Systems',
+        amount: 1499.99,
+        status: 'failed',
+        date: '2024-03-12',
+        type: 'subscription'
+      }
+    ])
+  }, [router])
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-emerald-50 text-emerald-700 border-emerald-100'
+      case 'pending': return 'bg-amber-50 text-amber-700 border-amber-100'
+      case 'failed': return 'bg-red-50 text-red-700 border-red-100'
+      default: return 'bg-slate-50 text-slate-700 border-slate-100'
+    }
+  }
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'subscription': return <Calendar className="h-4 w-4" />
+      case 'one-time': return <CreditCard className="h-4 w-4" />
+      case 'refund': return <ArrowDownRight className="h-4 w-4" />
+      default: return <DollarSign className="h-4 w-4" />
+    }
+  }
+
   return (
     <DashboardLayout>
-      <div className="min-h-screen relative overflow-hidden p-8">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 h-80 w-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 h-80 w-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse animation-delay-2000"></div>
+      <div className="px-4 py-8 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="bg-white shadow-sm rounded-lg p-6">
+          <h1 className="text-2xl font-bold text-gray-900">Payments Overview</h1>
+          <p className="text-gray-600 mt-1">Track and manage your payment activity</p>
         </div>
 
-        <div className="relative z-10 space-y-8 max-w-7xl mx-auto">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-blue-200 bg-clip-text text-transparent mb-2">
-                Payments
-              </h1>
-              <p className="text-xl text-white/70">
-                Track all payments and subscription revenue
-              </p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white shadow-sm rounded-lg p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <DollarSign className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                <p className="text-2xl font-semibold text-gray-900">$24,560</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="px-6 py-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-white font-semibold hover:bg-white/20 transition-all duration-300 hover:scale-105 flex items-center">
-                <Filter className="h-5 w-5 mr-2" />
-                Filter
-              </button>
+            <div className="mt-4">
+              <div className="flex items-center">
+                <TrendingUp className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-green-600 ml-1">12% increase</span>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6">
-            <h3 className="text-2xl font-bold text-white mb-4 flex items-center">
-              <CreditCard className="h-6 w-6 mr-3" />
-              Recent Payments
-            </h3>
-            <div className="space-y-4">
-              {[
-                { company: 'TechCorp Solutions', amount: '$2,999', date: '2 hours ago', status: 'Completed' },
-                { company: 'StartupXYZ Inc', amount: '$299', date: '1 day ago', status: 'Completed' },
-                { company: 'BigCorp Industries', amount: '$2,999', date: '2 days ago', status: 'Completed' },
-                { company: 'SmallBiz Co', amount: '$99', date: '3 days ago', status: 'Failed' },
-              ].map((payment, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-white/5 rounded-xl">
-                  <div>
-                    <div className="text-white font-semibold">{payment.company}</div>
-                    <div className="text-white/60 text-sm">{payment.date}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-white font-bold text-lg">{payment.amount}</div>
-                    <div className={`text-sm ${payment.status === 'Completed' ? 'text-green-400' : 'text-red-400'}`}>
-                      {payment.status}
-                    </div>
-                  </div>
-                </div>
-              ))}
+          <div className="bg-white shadow-sm rounded-lg p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-50 rounded-lg">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Active Subscriptions</p>
+                <p className="text-2xl font-semibold text-gray-900">1,240</p>
+              </div>
             </div>
+            <div className="mt-4">
+              <div className="flex items-center">
+                <TrendingUp className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-green-600 ml-1">8% increase</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white shadow-sm rounded-lg p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <CreditCard className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Successful Payments</p>
+                <p className="text-2xl font-semibold text-gray-900">3,521</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center">
+                <TrendingUp className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-green-600 ml-1">15% increase</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white shadow-sm rounded-lg p-6">
+            <div className="flex items-center">
+              <div className="p-2 bg-orange-50 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-orange-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Average Revenue</p>
+                <p className="text-2xl font-semibold text-gray-900">$19.80</p>
+              </div>
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center">
+                <TrendingUp className="h-4 w-4 text-green-500" />
+                <span className="text-sm text-green-600 ml-1">5% increase</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Transactions */}
+        <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900">Recent Transactions</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Transaction ID
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {transactions.map((transaction) => (
+                  <tr key={transaction.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {transaction.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {transaction.company}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <span className={`text-sm font-medium ${transaction.amount < 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                        {transaction.amount < 0 ? '-' : ''}${Math.abs(transaction.amount).toFixed(2)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        transaction.status === 'completed'
+                          ? 'bg-green-100 text-green-800'
+                          : transaction.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {transaction.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {new Date(transaction.date).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

@@ -1,448 +1,334 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, Star, Zap, Shield, Users, BookOpen, BarChart3, HeadphonesIcon, Sparkles, Crown, Rocket, ArrowRight, Globe, Lock, Heart } from 'lucide-react'
-
-const PRICING_PLANS = [
-  {
-    id: 'basic',
-    name: 'Starter',
-    price: 99,
-    yearlyPrice: 990,
-    description: 'Perfect for small teams taking their first step',
-    features: [
-      'Up to 50 users',
-      'Essential training modules',
-      'Progress tracking & insights',
-      '24/7 email support',
-      'Basic analytics dashboard',
-      'Mobile app access',
-      'SSL security'
-    ],
-    icon: <Rocket className="h-6 w-6" />,
-    gradient: 'from-blue-400 via-blue-500 to-blue-600',
-    glowColor: 'blue-500',
-    popular: false,
-    emoji: '🚀'
-  },
-  {
-    id: 'premium',
-    name: 'Professional',
-    price: 299,
-    yearlyPrice: 2990,
-    description: 'Advanced features for ambitious companies',
-    features: [
-      'Up to 200 users',
-      'Advanced training modules',
-      'Custom quizzes & assessments',
-      'Advanced analytics & AI insights',
-      'Priority support & onboarding',
-      'Custom branding & themes',
-      'API access & integrations',
-      'Advanced security features',
-      'Performance benchmarking'
-    ],
-    icon: <Crown className="h-6 w-6" />,
-    gradient: 'from-purple-400 via-purple-500 to-pink-500',
-    glowColor: 'purple-500',
-    popular: true,
-    emoji: '👑'
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: 999,
-    yearlyPrice: 9990,
-    description: 'Complete solution for industry leaders',
-    features: [
-      'Unlimited users',
-      'Custom training modules with AI',
-      'Advanced AI-powered features',
-      'White-label solution',
-      'Dedicated success manager',
-      'Custom integrations & SSO',
-      '99.9% SLA guarantee',
-      'Enterprise-grade security',
-      'Custom deployment options',
-      'Priority feature requests'
-    ],
-    icon: <Shield className="h-6 w-6" />,
-    gradient: 'from-orange-400 via-red-500 to-pink-500',
-    glowColor: 'orange-500',
-    popular: false,
-    emoji: '⚡'
-  }
-]
-
-const FAQ_ITEMS = [
-  {
-    question: 'How quickly can we get started?',
-    answer: 'Lightning fast! Once you complete payment, your company code and admin access are generated instantly. You can start adding users and content immediately.',
-    emoji: '⚡'
-  },
-  {
-    question: 'Can we customize the training content?',
-    answer: 'Absolutely! Premium and Enterprise plans include powerful content creation tools. Upload your materials, create custom quizzes, and use AI to generate personalized training modules.',
-    emoji: '🎨'
-  },
-  {
-    question: 'Is there a setup fee?',
-    answer: 'Zero setup fees! You only pay the subscription. We even provide free white-glove onboarding to get you running smoothly.',
-    emoji: '💝'
-  },
-  {
-    question: 'Can we change plans later?',
-    answer: 'Of course! Upgrade or downgrade anytime. Changes are instant with smart prorated billing.',
-    emoji: '🔄'
-  },
-  {
-    question: 'What happens to our data if we cancel?',
-    answer: 'Your data is yours forever. We provide 30 days to export everything before account closure. No data hostage situations!',
-    emoji: '🔒'
-  },
-  {
-    question: 'Do you offer refunds?',
-    answer: 'Yes! 14-day money-back guarantee. Not happy? We\'ll refund your first payment, no questions asked.',
-    emoji: '��'
-  }
-]
-
-const TESTIMONIALS = [
-  {
-    name: 'Sarah Chen',
-    role: 'VP of Learning, TechCorp',
-    avatar: '👩‍💼',
-    comment: 'Tutora transformed how we onboard new employees. 10x faster and way more engaging!'
-  },
-  {
-    name: 'Marcus Johnson',
-    role: 'CEO, StartupXYZ',
-    avatar: '👨‍💼',
-    comment: 'Best investment we made. Our team productivity increased 40% after implementing Tutora.'
-  },
-  {
-    name: 'Lisa Park',
-    role: 'HR Director, Enterprise Co',
-    avatar: '👩‍🎓',
-    comment: 'The AI-powered content creation is mind-blowing. It\'s like having a learning designer on staff.'
-  }
-]
+import Navigation from '@/components/Navigation'
+import { CheckCircle, ArrowRight, Zap, Shield, Users, BarChart3, Star, Crown } from 'lucide-react'
+import Link from 'next/link'
 
 export default function PricingPage() {
-  const [isAnnual, setIsAnnual] = useState(false)
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
+  const [isLoading, setIsLoading] = useState<string | null>(null)
 
-  const handleGetStarted = async (planId: string) => {
-    setSelectedPlan(planId)
-    setIsLoading(true)
+  const plans = [
+    {
+      id: 'starter',
+      name: "Starter",
+      description: "Perfect for small teams just getting started",
+      monthlyPrice: 12,
+      annualPrice: 10,
+      popular: false,
+      features: [
+        "Up to 25 team members",
+        "5 AI-generated modules per month",
+        "Basic analytics & reporting",
+        "Email support",
+        "Mobile app access",
+        "Basic quiz & assessment tools"
+      ],
+      limitations: [
+        "Limited to 5 modules per month",
+        "Basic support only"
+      ]
+    },
+    {
+      id: 'professional',
+      name: "Professional",
+      description: "Ideal for growing organizations",
+      monthlyPrice: 29,
+      annualPrice: 24,
+      popular: true,
+      features: [
+        "Up to 100 team members",
+        "Unlimited AI-generated modules",
+        "Advanced analytics & insights",
+        "Priority support",
+        "Custom branding",
+        "Advanced quiz & certification",
+        "API access",
+        "Custom learning paths",
+        "Progress tracking & reporting"
+      ],
+      limitations: []
+    },
+    {
+      id: 'enterprise',
+      name: "Enterprise",
+      description: "For large organizations with specific needs",
+      monthlyPrice: 79,
+      annualPrice: 65,
+      popular: false,
+      features: [
+        "Unlimited team members",
+        "Unlimited AI-generated modules",
+        "Advanced AI features & customization",
+        "White-label solution",
+        "24/7 dedicated support",
+        "Custom integrations",
+        "Advanced security features",
+        "SLA guarantees",
+        "Custom deployment options",
+        "Dedicated account manager"
+      ],
+      limitations: []
+    }
+  ]
 
+  const handleStartTrial = async (planId: string) => {
+    setIsLoading(planId)
+    
     try {
-      // Redirect to checkout form
-      window.location.href = `/checkout?plan=${planId}&billing=${isAnnual ? 'annual' : 'monthly'}`
+      // Create Stripe checkout session
+      const response = await fetch('/api/stripe/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planId,
+          billingCycle,
+          successUrl: `${window.location.origin}/success?plan=${planId}`,
+          cancelUrl: `${window.location.origin}/pricing`,
+        }),
+      })
+
+      const data = await response.json()
+      
+      if (data.success && data.url) {
+        window.location.href = data.url
+      } else {
+        console.error('Failed to create checkout session:', data.error)
+        alert('Failed to start checkout. Please try again.')
+      }
     } catch (error) {
-      console.error('Error starting checkout:', error)
-      setIsLoading(false)
+      console.error('Error creating checkout session:', error)
+      alert('An error occurred. Please try again.')
+    } finally {
+      setIsLoading(null)
     }
   }
 
-  const formatPrice = (price: number, yearlyPrice: number) => {
-    if (isAnnual) {
-      const monthlyEquivalent = Math.round(yearlyPrice / 12)
-      return {
-        amount: monthlyEquivalent,
-        period: '/month',
-        note: `$${yearlyPrice}/year`,
-        savings: `Save $${(price * 12) - yearlyPrice}`
-      }
+  const getPrice = (plan: any) => {
+    return billingCycle === 'annual' ? plan.annualPrice : plan.monthlyPrice
+  }
+
+  const getSavings = (plan: any) => {
+    if (billingCycle === 'annual') {
+      const monthlyCost = plan.monthlyPrice * 12
+      const annualCost = plan.annualPrice * 12
+      const savings = monthlyCost - annualCost
+      return Math.round((savings / monthlyCost) * 100)
     }
-    return {
-      amount: price,
-      period: '/month',
-      note: 'billed monthly',
-      savings: null
-    }
+    return 0
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 h-60 w-60 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
-      </div>
+    <div className="min-h-screen bg-white">
+      <Navigation />
       
-      {/* Header */}
-      <header className="relative z-50 bg-white/10 backdrop-blur-xl border-b border-white/10 sticky top-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center group">
-              <div className="h-12 w-12 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center shadow-lg group-hover:shadow-2xl group-hover:shadow-purple-500/25 transition-all duration-300 group-hover:scale-110">
-                <Sparkles className="h-6 w-6 text-white" />
-              </div>
-              <div className="ml-4">
-                <span className="text-2xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">Tutora</span>
-                <div className="text-sm text-purple-200 font-medium">Learning Platform</div>
-              </div>
+      <main className="pt-32">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-8">
+              <Zap className="h-4 w-4" />
+              <span>14-day free trial • No credit card required</span>
             </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="#features" className="text-white/80 hover:text-white transition-colors duration-200 font-medium">Features</a>
-              <a href="#pricing" className="text-white/80 hover:text-white transition-colors duration-200 font-medium">Pricing</a>
-              <a href="#testimonials" className="text-white/80 hover:text-white transition-colors duration-200 font-medium">Reviews</a>
-              <a href="#faq" className="text-white/80 hover:text-white transition-colors duration-200 font-medium">FAQ</a>
-            </nav>
-            <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-2xl font-semibold hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105">
-              Get Started
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="relative z-10 py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white/90 text-sm font-medium mb-8 hover:bg-white/20 transition-all duration-300">
-            <Sparkles className="h-4 w-4 mr-2 text-yellow-400" />
-            Join 1,800+ companies already transforming their teams
-          </div>
-          
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
-            Transform Your Team's
-            <br />
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse">
-              Learning Journey
-            </span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-white/80 mb-12 max-w-4xl mx-auto leading-relaxed">
-            Empower your employees with AI-powered training modules, track progress in real-time, and boost productivity with our intelligent learning platform that adapts to your team.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 mb-16">
-            <div className="flex items-center space-x-2">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="h-6 w-6 text-yellow-400 fill-current" />
-              ))}
-              <span className="text-white/90 font-semibold ml-2">4.9/5 from 2,100+ reviews</span>
-            </div>
-            <div className="flex items-center space-x-4 text-white/80">
-              <div className="flex items-center">
-                <Globe className="h-5 w-5 mr-2" />
-                <span>Global reach</span>
-              </div>
-              <div className="flex items-center">
-                <Lock className="h-5 w-5 mr-2" />
-                <span>Enterprise secure</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Toggle */}
-      <section className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-2">
-            <button
-              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                !isAnnual 
-                  ? 'bg-white text-gray-900 shadow-lg' 
-                  : 'text-white hover:bg-white/10'
-              }`}
-              onClick={() => setIsAnnual(false)}
-            >
-              Monthly
-            </button>
-            <button
-              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 relative ${
-                isAnnual 
-                  ? 'bg-white text-gray-900 shadow-lg' 
-                  : 'text-white hover:bg-white/10'
-              }`}
-              onClick={() => setIsAnnual(true)}
-            >
-              Annual
-              <span className="absolute -top-2 -right-2 bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-                Save 20%
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
-          {PRICING_PLANS.map((plan, index) => {
-            const pricing = formatPrice(plan.price, plan.yearlyPrice)
-            const isHovered = hoveredPlan === plan.id
+            <h1 className="text-5xl font-bold text-slate-900 mb-6">
+              Simple, Transparent Pricing
+            </h1>
+            <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
+              Transform your team training with AI-powered modules. Choose the plan that fits your organization's needs.
+            </p>
             
-            return (
-              <div
+            {/* Billing Toggle */}
+            <div className="flex items-center justify-center space-x-4 mb-12">
+              <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-slate-900' : 'text-slate-500'}`}>
+                Monthly
+              </span>
+              <button
+                onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
+                className="relative inline-flex h-6 w-11 items-center rounded-full bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    billingCycle === 'annual' ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+              <span className={`text-sm font-medium ${billingCycle === 'annual' ? 'text-slate-900' : 'text-slate-500'}`}>
+                Annual
+              </span>
+              {billingCycle === 'annual' && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Save up to 20%
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Pricing Cards */}
+          <div className="grid lg:grid-cols-3 gap-8 mb-16">
+            {plans.map((plan) => (
+              <div 
                 key={plan.id}
-                className={`relative group transition-all duration-500 hover:scale-105 ${
-                  plan.popular ? 'lg:-mt-4 lg:mb-4' : ''
+                className={`relative bg-white rounded-2xl shadow-lg border-2 transition-all duration-200 hover:shadow-xl ${
+                  plan.popular 
+                    ? 'border-blue-500 ring-2 ring-blue-100' 
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
-                onMouseEnter={() => setHoveredPlan(plan.id)}
-                onMouseLeave={() => setHoveredPlan(null)}
-                style={{ animationDelay: `${index * 150}ms` }}
               >
                 {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
-                    <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
-                      🔥 Most Popular
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <div className="inline-flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium">
+                      <Crown className="h-4 w-4" />
+                      <span>Most Popular</span>
                     </div>
                   </div>
                 )}
                 
-                <div className={`relative h-full bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 ${
-                  plan.popular ? 'ring-2 ring-purple-400 ring-opacity-60' : ''
-                } ${isHovered ? 'bg-white/20 shadow-2xl shadow-purple-500/20' : ''} transition-all duration-300`}>
-                  
-                  {/* Card glow effect */}
-                  <div className={`absolute inset-0 bg-gradient-to-r ${plan.gradient} opacity-0 ${
-                    isHovered ? 'opacity-10' : ''
-                  } rounded-3xl transition-opacity duration-300`}></div>
-                  
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className={`p-4 rounded-2xl bg-gradient-to-r ${plan.gradient} shadow-lg`}>
-                        {plan.icon}
-                      </div>
-                      <div className="text-3xl">{plan.emoji}</div>
-                    </div>
+                <div className="p-8">
+                  <div className="text-center mb-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <p className="text-gray-600 mb-6">{plan.description}</p>
                     
-                    <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                    <p className="text-white/70 mb-6 leading-relaxed">{plan.description}</p>
-                    
-                    <div className="mb-8">
-                      <div className="flex items-baseline">
-                        <span className="text-5xl font-bold text-white">${pricing.amount}</span>
-                        <span className="text-white/70 ml-2">{pricing.period}</span>
-                      </div>
-                      <div className="text-sm text-white/60 mt-1">{pricing.note}</div>
-                      {pricing.savings && (
-                        <div className="text-green-400 text-sm font-semibold mt-2">
-                          💰 {pricing.savings}
+                    <div className="mb-4">
+                      <span className="text-5xl font-bold text-gray-900">${getPrice(plan)}</span>
+                      <span className="text-gray-600 ml-2">/user/month</span>
+                      {billingCycle === 'annual' && (
+                        <div className="text-sm text-green-600 font-medium mt-1">
+                          Save {getSavings(plan)}% annually
                         </div>
                       )}
                     </div>
                     
                     <button
-                      onClick={() => handleGetStarted(plan.id)}
-                      disabled={isLoading && selectedPlan === plan.id}
-                      className={`w-full py-4 rounded-2xl font-bold text-lg transition-all duration-300 mb-8 ${
+                      onClick={() => handleStartTrial(plan.id)}
+                      disabled={isLoading === plan.id}
+                      className={`w-full py-3 px-6 rounded-lg font-semibold transition-all duration-200 ${
                         plan.popular
-                          ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-2xl hover:shadow-purple-500/25'
-                          : 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
-                      } ${isLoading && selectedPlan === plan.id ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg hover:scale-105'
+                          : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                      } ${isLoading === plan.id ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      {isLoading && selectedPlan === plan.id ? (
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                          Processing...
+                      {isLoading === plan.id ? (
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Processing...</span>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-center">
-                          Get Started
-                          <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
+                        <div className="flex items-center justify-center space-x-2">
+                          <span>Start Free Trial</span>
+                          <ArrowRight className="h-4 w-4" />
                         </div>
                       )}
                     </button>
-                    
-                    <div className="space-y-4">
-                      {plan.features.map((feature, featureIndex) => (
-                        <div key={featureIndex} className="flex items-center">
-                          <div className={`flex-shrink-0 h-6 w-6 rounded-full bg-gradient-to-r ${plan.gradient} flex items-center justify-center mr-3`}>
-                            <Check className="h-4 w-4 text-white" />
-                          </div>
-                          <span className="text-white/90 text-sm">{feature}</span>
-                        </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-gray-900">What's included:</h4>
+                    <ul className="space-y-3">
+                      {plan.features.map((feature, index) => (
+                        <li key={index} className="flex items-start space-x-3">
+                          <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-gray-600 text-sm">{feature}</span>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section id="testimonials" className="relative z-10 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-center text-white mb-16">
-            Loved by teams worldwide 🌎
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {TESTIMONIALS.map((testimonial, index) => (
-              <div 
-                key={index}
-                className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:scale-105"
-                style={{ animationDelay: `${index * 200}ms` }}
-              >
-                <div className="flex items-center mb-4">
-                  <div className="text-3xl mr-3">{testimonial.avatar}</div>
-                  <div>
-                    <h4 className="text-white font-semibold">{testimonial.name}</h4>
-                    <p className="text-white/70 text-sm">{testimonial.role}</p>
-                  </div>
-                </div>
-                <p className="text-white/90 italic">"{testimonial.comment}"</p>
-                <div className="flex mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                  ))}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="relative z-10 py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-center text-white mb-16">
-            Frequently Asked Questions 🤔
-          </h2>
-          
-          <div className="space-y-6">
-            {FAQ_ITEMS.map((item, index) => (
-              <div 
-                key={index}
-                className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <h3 className="text-xl font-semibold text-white mb-3 flex items-center">
-                  <span className="text-2xl mr-3">{item.emoji}</span>
-                  {item.question}
-                </h3>
-                <p className="text-white/80 leading-relaxed">{item.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative z-10 py-20">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-xl border border-white/20 rounded-3xl p-12">
-            <h2 className="text-4xl font-bold text-white mb-6">
-              Ready to transform your team? 🚀
+          {/* Feature Comparison */}
+          <div className="bg-gray-50 rounded-2xl p-8 mb-16">
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+              Why Choose Tutora?
             </h2>
-            <p className="text-xl text-white/80 mb-8">
-              Join thousands of companies already using Tutora to level up their teams
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Zap className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">AI-Powered Creation</h3>
+                <p className="text-gray-600">Turn any video or document into interactive training modules in minutes, not hours.</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BarChart3 className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Real-Time Analytics</h3>
+                <p className="text-gray-600">Track progress, completion rates, and engagement with detailed insights.</p>
+              </div>
+              <div className="text-center">
+                <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Shield className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">Enterprise Security</h3>
+                <p className="text-gray-600">SOC2 compliant with bank-grade security and SSO integration.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* FAQ Section */}
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
+              Frequently Asked Questions
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">How does the free trial work?</h3>
+                <p className="text-gray-600">Get full access to all features for 14 days. No credit card required to start.</p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Can I change plans anytime?</h3>
+                <p className="text-gray-600">Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.</p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">What payment methods do you accept?</h3>
+                <p className="text-gray-600">We accept all major credit cards, PayPal, and can arrange invoicing for enterprise customers.</p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Is there a setup fee?</h3>
+                <p className="text-gray-600">No setup fees. Pay only for active users on a monthly or annual basis.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-center text-white mb-16">
+            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Training?</h2>
+            <p className="text-xl opacity-90 mb-6">
+              Join thousands of companies already using Tutora to train their teams more effectively.
             </p>
-            <button className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105">
-              Start Your Free Trial 
-              <Heart className="inline h-5 w-5 ml-2" />
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => handleStartTrial('professional')}
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
+              >
+                Start Free Trial
+              </button>
+              <Link
+                href="/demo/ai-module-builder"
+                className="bg-blue-500 bg-opacity-20 text-white px-8 py-3 rounded-lg font-semibold hover:bg-opacity-30 transition-all"
+              >
+                Try Demo
+              </Link>
+            </div>
+          </div>
+
+          {/* Demo Bypass Link */}
+          <div className="text-center mb-8">
+            <Link 
+              href="/demo/ai-module-builder"
+              className="inline-flex items-center space-x-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <span>🚀</span>
+              <span>Skip to Demo (No signup required)</span>
+            </Link>
           </div>
         </div>
-      </section>
+      </main>
     </div>
   )
 } 
