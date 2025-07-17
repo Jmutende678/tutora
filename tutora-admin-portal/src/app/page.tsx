@@ -89,16 +89,14 @@ export default function HomePage() {
               <span>New: AI Module Builder Now Available</span>
             </div>
             <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 mb-6 leading-tight">
-              Train Smarter. Not Harder.
+              The Only AI-Powered Training Platform
               <br />
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Let AI Build Your Team's Training in Minutes
+                That Creates Modules in Minutes, Not Weeks
               </span>
             </h1>
             <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
-              Tutora turns your videos into interactive training modules with quizzes, 
-              analytics, and compliance tracking — all in one place. Trusted by leading 
-              companies worldwide.
+              Transform any video or document into engaging training modules automatically. <strong>57% faster creation</strong>, <strong>92% higher engagement</strong>, and <strong>$2,400+ annual savings</strong> per 100 employees. Join 500+ companies revolutionizing their workforce development.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link
@@ -132,6 +130,26 @@ export default function HomePage() {
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4 text-green-500" />
                 <span>Setup in 5 minutes</span>
+              </div>
+            </div>
+            
+            {/* Market Statistics */}
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div className="bg-white/50 rounded-lg p-6 border border-gray-100">
+                <div className="text-3xl font-bold text-blue-600 mb-2">$805.6B</div>
+                <div className="text-sm text-gray-600">Global training market by 2035</div>
+              </div>
+              <div className="bg-white/50 rounded-lg p-6 border border-gray-100">
+                <div className="text-3xl font-bold text-purple-600 mb-2">57%</div>
+                <div className="text-sm text-gray-600">Faster training creation with AI</div>
+              </div>
+              <div className="bg-white/50 rounded-lg p-6 border border-gray-100">
+                <div className="text-3xl font-bold text-green-600 mb-2">486%</div>
+                <div className="text-sm text-gray-600">Average ROI in first year</div>
+              </div>
+              <div className="bg-white/50 rounded-lg p-6 border border-gray-100">
+                <div className="text-3xl font-bold text-indigo-600 mb-2">500+</div>
+                <div className="text-sm text-gray-600">Companies using Tutora</div>
               </div>
             </div>
 
