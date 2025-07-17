@@ -35,7 +35,7 @@ export interface Company {
   name: string
   email: string
   companyCode: string
-  plan: 'basic' | 'premium' | 'enterprise'
+  plan: 'starter' | 'professional' | 'enterprise'
   status: 'active' | 'suspended' | 'cancelled'
   createdAt: Date
   updatedAt: Date
@@ -159,7 +159,7 @@ export class FirebaseService {
       name: companyData.name!,
       email: companyData.email!,
       companyCode,
-      plan: planId as 'basic' | 'premium' | 'enterprise',
+      plan: planId as 'starter' | 'professional' | 'enterprise',
       status: 'active',
       createdAt: new Date(),
       updatedAt: new Date(),

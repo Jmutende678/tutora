@@ -8,10 +8,12 @@ import 'package:tutora/screens/main_app.dart';
 
 class LoginScreen extends StatefulWidget {
   final String companyCode;
+  final String? companyName;
 
   const LoginScreen({
     super.key,
     required this.companyCode,
+    this.companyName,
   });
 
   @override
@@ -209,17 +211,32 @@ class _LoginScreenState extends State<LoginScreen>
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 16, vertical: 8),
                                   decoration: BoxDecoration(
-                                    color:
-                                        AppTheme.primaryColor.withValues(alpha: 0.1),
+                                    color: AppTheme.primaryColor
+                                        .withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: Text(
-                                    "[${widget.companyCode}]",
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.primaryColor,
-                                    ),
+                                  child: Column(
+                                    children: [
+                                      if (widget.companyName != null) ...[
+                                        Text(
+                                          widget.companyName!,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppTheme.primaryColor,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                      ],
+                                      Text(
+                                        "[${widget.companyCode}]",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppTheme.primaryColor,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
@@ -373,10 +390,12 @@ class _LoginScreenState extends State<LoginScreen>
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                              color:
+                                  AppTheme.primaryColor.withValues(alpha: 0.05),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: AppTheme.primaryColor.withValues(alpha: 0.2),
+                                color: AppTheme.primaryColor
+                                    .withValues(alpha: 0.2),
                               ),
                             ),
                             child: Column(

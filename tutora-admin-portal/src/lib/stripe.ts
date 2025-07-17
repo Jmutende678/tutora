@@ -101,20 +101,34 @@ export class StripeService {
     billingCycle: 'monthly' | 'annual',
     successUrl: string,
     cancelUrl: string,
-    metadata?: Record<string, string>
+    metadata?: Record<string, string>,
+    userCount?: number
   ) {
     const plan = PRICING_PLANS[planId]
     if (!plan) {
       throw new Error('Invalid plan ID')
     }
 
-    // For now, we'll use price_data since we don't have actual Stripe products set up
-    // In production, you'd use the actual price IDs from your Stripe dashboard
+    // Calculate dynamic pricing based on user count
+    const effectiveUserCount = userCount || 1
+    const perUserPrice = billingCycle === 'annual' ? plan.annualPrice : plan.monthlyPrice
+    const totalPrice = perUserPrice * effectiveUserCount
+    
+    // For annual billing, multiply by 12 months
     const unitAmount = billingCycle === 'annual' 
-      ? plan.annualPrice * 12 * 100 // Convert to cents and multiply by 12 for annual
-      : plan.monthlyPrice * 100 // Convert to cents
+      ? totalPrice * 12 * 100 // Convert to cents and multiply by 12 for annual
+      : totalPrice * 100 // Convert to cents
 
     const interval = billingCycle === 'annual' ? 'year' : 'month'
+
+    console.log('Pricing calculation:', {
+      planId,
+      perUserPrice,
+      effectiveUserCount,
+      totalPrice,
+      unitAmount: unitAmount / 100,
+      billingCycle
+    })
 
     try {
       const session = await this.stripe.checkout.sessions.create({
@@ -125,7 +139,7 @@ export class StripeService {
               currency: 'usd',
               product_data: {
                 name: `Tutora ${plan.name} Plan`,
-                description: `${plan.features.slice(0, 3).join(', ')} and more...`,
+                description: `${plan.features.slice(0, 3).join(', ')} and more... (${effectiveUserCount} users)`,
                 images: ['https://tutoralearn.com/logo.png'],
               },
               unit_amount: unitAmount,
@@ -142,6 +156,8 @@ export class StripeService {
         metadata: {
           planId,
           billingCycle,
+          userCount: effectiveUserCount.toString(),
+          totalMonthlyPrice: totalPrice.toString(),
           ...metadata
         },
         subscription_data: {
@@ -149,6 +165,8 @@ export class StripeService {
           metadata: {
             planId,
             billingCycle,
+            userCount: effectiveUserCount.toString(),
+            totalMonthlyPrice: totalPrice.toString(),
             ...metadata
           }
         },
@@ -160,6 +178,19 @@ export class StripeService {
         automatic_tax: {
           enabled: true,
         },
+        // Custom appearance for better readability
+        ui_mode: 'hosted',
+        custom_text: {
+          submit: {
+            message: 'Start your 14-day free trial today!'
+          }
+        },
+        // Improve appearance and readability
+        locale: 'en',
+        phone_number_collection: {
+          enabled: true
+        },
+        customer_creation: 'always'
       })
 
       return session
