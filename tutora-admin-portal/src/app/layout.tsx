@@ -6,8 +6,8 @@ import { Toaster } from 'react-hot-toast'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Tutora - Professional Learning Platform',
-  description: 'Transform your workforce with AI-powered learning modules and comprehensive training solutions',
+  title: 'AI Employee Training Platform | Create Modules in Minutes | Tutora',
+  description: 'Transform videos & documents into engaging training modules with AI. Join 500+ companies saving 60% on training costs. 57% faster creation, 92% engagement rates. Start free trial.',
 }
 
 export default function RootLayout({
