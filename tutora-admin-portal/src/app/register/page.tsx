@@ -88,12 +88,13 @@ export default function RegisterPage() {
           cancelUrl: `${window.location.origin}/register`,
           metadata: {
             companyName: formData.companyName,
-            contactName: `${formData.firstName} ${formData.lastName}`,
+            adminName: `${formData.firstName} ${formData.lastName}`,
             contactEmail: formData.email,
             contactPhone: formData.phone,
             industry: formData.industry,
             companySize: formData.companySize,
-            website: formData.website
+            website: formData.website,
+            jobTitle: formData.jobTitle
           }
         }),
       })

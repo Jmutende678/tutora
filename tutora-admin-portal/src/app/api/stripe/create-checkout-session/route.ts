@@ -3,7 +3,7 @@ import { stripeService } from '@/lib/stripe'
 
 export async function POST(request: NextRequest) {
   try {
-    const { planId, billingCycle, successUrl, cancelUrl } = await request.json()
+    const { planId, billingCycle, successUrl, cancelUrl, userCount, metadata } = await request.json()
 
     if (!planId || !billingCycle || !successUrl || !cancelUrl) {
       return NextResponse.json(
@@ -12,9 +12,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log('Creating checkout session for:', { planId, billingCycle })
+    console.log('Creating checkout session for:', { 
+      planId, 
+      billingCycle, 
+      userCount,
+      metadata 
+    })
 
-    // Create Stripe checkout session
+    // Create Stripe checkout session with dynamic pricing
     const session = await stripeService.createCheckoutSession(
       planId,
       billingCycle,
@@ -23,7 +28,10 @@ export async function POST(request: NextRequest) {
       {
         source: 'tutora_admin_portal',
         billing_cycle: billingCycle,
-      }
+        user_count: userCount?.toString(),
+        ...metadata
+      },
+      userCount // Pass userCount for pricing calculation
     )
 
     return NextResponse.json({

@@ -4,6 +4,7 @@ import 'package:tutora/theme/app_theme.dart';
 import 'package:tutora/utils/app_logo.dart';
 import 'package:tutora/widgets/custom_text_field.dart';
 import 'package:tutora/widgets/primary_button.dart';
+import 'package:tutora/services/firebase_service.dart'; // Added import for FirebaseService
 
 class CompanyCodeScreen extends StatefulWidget {
   const CompanyCodeScreen({super.key});
@@ -68,29 +69,34 @@ class _CompanyCodeScreenState extends State<CompanyCodeScreen>
     super.dispose();
   }
 
-  void _validateAndContinue() {
+  void _validateAndContinue() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      Future.delayed(const Duration(seconds: 1), () {
-        if (!mounted) return;
-
+      try {
         final companyCode = _companyCodeController.text.trim().toUpperCase();
-        final validCompanyCodes = ['ACME', 'TUTORA', 'DEMO', 'TEST'];
+
+        // Use Firebase service to lookup company
+        final firebaseService = FirebaseService();
+        final company = await firebaseService.getCompanyByCode(companyCode);
 
         setState(() {
           _isLoading = false;
         });
 
-        if (validCompanyCodes.contains(companyCode)) {
+        if (!mounted) return;
+
+        if (company != null) {
+          // Valid company found, proceed to login
           Navigator.pushReplacement(
             context,
             PageRouteBuilder(
               pageBuilder: (context, animation, secondaryAnimation) =>
                   LoginScreen(
                 companyCode: companyCode,
+                companyName: company['name'] ?? 'Unknown Company',
               ),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
@@ -110,13 +116,17 @@ class _CompanyCodeScreenState extends State<CompanyCodeScreen>
             ),
           );
         } else {
+          // Invalid company code
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Row(
                 children: [
                   Icon(Icons.error_outline, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Text('Invalid company code. Please try again.'),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                        'Invalid company code. Please check with your administrator.'),
+                  ),
                 ],
               ),
               backgroundColor: AppTheme.errorColor,
@@ -127,7 +137,32 @@ class _CompanyCodeScreenState extends State<CompanyCodeScreen>
             ),
           );
         }
-      });
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text('Connection error: ${e.toString()}'),
+                ),
+              ],
+            ),
+            backgroundColor: AppTheme.errorColor,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
     }
   }
 

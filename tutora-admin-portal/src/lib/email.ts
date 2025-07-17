@@ -1,4 +1,4 @@
-// import nodemailer from 'nodemailer'
+import nodemailer from 'nodemailer'
 import { Company } from './firebase'
 
 interface EmailTemplate {
@@ -29,51 +29,38 @@ export class EmailService {
     console.log('Sending welcome email to:', company.email)
     console.log('Company code:', company.companyCode)
     
-    // Mock email sending
-    const emailContent = `
-      Welcome to Tutora!
-      
-      Your company "${company.name}" has been successfully created.
-      Company Code: ${company.companyCode}
-      Plan: ${company.plan}
-      
-      You can now start using the Tutora learning platform.
-    `
+    // Check if SMTP is configured
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.log('SMTP not configured, skipping email')
+      return
+    }
     
-    console.log('Email content:', emailContent)
-    
-    // In production, you would uncomment the nodemailer code below:
-    /*
-    const transporter = nodemailer.createTransporter({
-      host: process.env.SMTP_HOST,
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    })
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      })
 
-    await transporter.sendMail({
-      from: process.env.FROM_EMAIL,
-      to: company.email,
-      subject: 'Welcome to Tutora - Your Learning Platform is Ready!',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #2E9CFF;">Welcome to Tutora!</h1>
-          <p>Congratulations! Your company "${company.name}" has been successfully created.</p>
-          <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3>Your Company Details:</h3>
-            <p><strong>Company Code:</strong> ${company.companyCode}</p>
-            <p><strong>Plan:</strong> ${company.plan}</p>
-            <p><strong>Max Users:</strong> ${company.maxUsers}</p>
-            <p><strong>Max Modules:</strong> ${company.maxModules}</p>
-          </div>
-          <p>You can now start using the Tutora learning platform and invite your team members.</p>
-        </div>
-      `,
-    })
-    */
+      const template = this.getWelcomeTemplate(company)
+
+      await transporter.sendMail({
+        from: `"Tutora" <${process.env.SMTP_USER}>`,
+        to: company.email,
+        subject: template.subject,
+        html: template.html,
+        text: template.text,
+      })
+      
+      console.log('✅ Welcome email sent successfully to:', company.email)
+    } catch (error) {
+      console.error('❌ Failed to send welcome email:', error)
+      throw error
+    }
   }
 
   async sendPaymentConfirmation(company: Company, amount: number): Promise<void> {
@@ -219,25 +206,25 @@ export class EmailService {
               
               <h3>What's included in your ${company.plan} plan:</h3>
               <div class="feature-list">
-                ${company.plan === 'basic' ? `
-                  <div class="feature-item">Up to 50 users</div>
-                  <div class="feature-item">Basic training modules</div>
-                  <div class="feature-item">Progress tracking</div>
+                ${company.plan === 'starter' ? `
+                  <div class="feature-item">Up to 25 users</div>
+                  <div class="feature-item">5 AI-generated modules per month</div>
+                  <div class="feature-item">Basic analytics & reporting</div>
                   <div class="feature-item">Email support</div>
-                  <div class="feature-item">Basic analytics</div>
-                ` : company.plan === 'premium' ? `
-                  <div class="feature-item">Up to 200 users</div>
-                  <div class="feature-item">Advanced training modules</div>
-                  <div class="feature-item">Custom quizzes</div>
-                  <div class="feature-item">Advanced analytics</div>
+                  <div class="feature-item">Mobile app access</div>
+                ` : company.plan === 'professional' ? `
+                  <div class="feature-item">Up to 100 users</div>
+                  <div class="feature-item">Unlimited AI-generated modules</div>
+                  <div class="feature-item">Advanced analytics & insights</div>
                   <div class="feature-item">Priority support</div>
                   <div class="feature-item">Custom branding</div>
+                  <div class="feature-item">Advanced quiz & certification</div>
                 ` : `
                   <div class="feature-item">Unlimited users</div>
-                  <div class="feature-item">Custom training modules</div>
-                  <div class="feature-item">Advanced AI features</div>
+                  <div class="feature-item">Unlimited AI-generated modules</div>
+                  <div class="feature-item">Advanced AI features & customization</div>
                   <div class="feature-item">White-label solution</div>
-                  <div class="feature-item">Dedicated support</div>
+                  <div class="feature-item">24/7 dedicated support</div>
                   <div class="feature-item">Custom integrations</div>
                   <div class="feature-item">SLA guarantee</div>
                 `}

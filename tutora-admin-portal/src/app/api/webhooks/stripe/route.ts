@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripeService } from '@/lib/stripe'
 import { firebaseService } from '@/lib/firebase'
+import { EmailService } from '@/lib/email'
+
+const emailService = new EmailService()
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,27 +54,53 @@ export async function POST(request: NextRequest) {
 async function handleCheckoutCompleted(event: any) {
   const session = event.data.object
   console.log('Checkout completed for session:', session.id)
+  console.log('Session metadata:', session.metadata)
 
   try {
     // Get customer details from Stripe
     const customer = await stripeService.getCustomer(session.customer as string)
+    console.log('Customer details:', customer)
+    
+    // Extract company information from session metadata
+    const companyName = session.metadata?.companyName || 'New Company'
+    const adminName = session.metadata?.adminName || (customer as any)?.name || 'Admin'
+    const customerEmail = (customer as any)?.email || session.customer_email
+    const companySize = session.metadata?.companySize || 'Unknown'
     
     // Create company in Firebase
     const companyData = {
-      name: session.metadata?.companyName || 'New Company',
-      email: (customer as any).email || session.customer_email,
+      name: companyName,
+      email: customerEmail,
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: session.subscription as string,
       adminUser: {
-        name: session.metadata?.adminName || 'Admin',
-        email: (customer as any).email || session.customer_email,
+        name: adminName,
+        email: customerEmail,
       },
+      billing: {
+        address: session.customer_details?.address?.line1,
+        city: session.customer_details?.address?.city,
+        country: session.customer_details?.address?.country,
+        postalCode: session.customer_details?.address?.postal_code,
+      }
     }
 
-    const planId = session.metadata?.planId || 'basic'
+    const planId = session.metadata?.planId || 'starter'
+    console.log('Creating company with planId:', planId)
+    
     const company = await firebaseService.createCompany(companyData, planId)
     
     console.log('Company created successfully:', company.companyCode)
+    
+    // Send welcome email
+    try {
+      await emailService.sendWelcomeEmail(company)
+      console.log('Welcome email sent successfully to:', company.email)
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError)
+      // Don't fail the entire process if email fails
+    }
+    
   } catch (error) {
     console.error('Error creating company:', error)
   }
