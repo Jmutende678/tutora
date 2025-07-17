@@ -114,10 +114,11 @@ export class StripeService {
     const perUserPrice = billingCycle === 'annual' ? plan.annualPrice : plan.monthlyPrice
     const totalPrice = perUserPrice * effectiveUserCount
     
-    // For annual billing, multiply by 12 months
+    // For annual billing, we charge the full year upfront (perUserPrice * userCount * 12 months)
+    // For monthly billing, we charge per month (perUserPrice * userCount)
     const unitAmount = billingCycle === 'annual' 
-      ? totalPrice * 12 * 100 // Convert to cents and multiply by 12 for annual
-      : totalPrice * 100 // Convert to cents
+      ? totalPrice * 12 * 100 // Convert to cents and multiply by 12 for annual payment
+      : totalPrice * 100 // Convert to cents for monthly payment
 
     const interval = billingCycle === 'annual' ? 'year' : 'month'
 
