@@ -61,60 +61,33 @@ export default function TrialPopup() {
           >
             <X className="h-5 w-5" />
           </button>
-          <div className="flex items-center space-x-3 mb-2">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Brain className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-slate-900">
-                Your team deserves better training.
-              </h3>
-            </div>
+          <div className="text-center mb-4">
+            <div className="text-4xl mb-4">🚀</div>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">
+              Your team deserves better training.
+            </h3>
+            <p className="text-slate-600">
+              Want to see how easy we make it?
+            </p>
           </div>
-          <p className="text-slate-600">
-            Want to see how easy we make it?
-          </p>
         </div>
 
         {/* Content */}
         <div className="p-6">
-          <div className="space-y-4 mb-6">
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-              <p className="text-slate-600">
-                <strong className="text-slate-900">Upload any video or document</strong> and watch our AI create interactive training modules automatically
-              </p>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-purple-600 rounded-full mt-2 flex-shrink-0"></div>
-              <p className="text-slate-600">
-                <strong className="text-slate-900">Track real progress</strong> with live analytics and employee completion rates
-              </p>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-green-600 rounded-full mt-2 flex-shrink-0"></div>
-              <p className="text-slate-600">
-                <strong className="text-slate-900">Save 57% time</strong> compared to traditional training creation methods
-              </p>
-            </div>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="space-y-3">
+          {/* CTA Button */}
+          <div className="space-y-4">
             <Link
               href="/demo/ai-module-builder"
               onClick={handleCTA}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center space-x-2"
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center justify-center"
             >
-              <span>Give me a preview</span>
-              <ArrowRight className="h-4 w-4" />
+              Give me a preview
             </Link>
-            <button
-              onClick={handleClose}
-              className="w-full text-slate-500 py-2 text-sm hover:text-slate-700 transition-colors"
-            >
-              Maybe later
-            </button>
+            <div className="text-center">
+              <p className="text-xs text-slate-500">
+                *No credit card required
+              </p>
+            </div>
           </div>
         </div>
 
