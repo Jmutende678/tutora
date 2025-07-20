@@ -340,68 +340,222 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Brief Pricing Section */}
-        <section className="py-20">
+        {/* Everything You Need to Train Your Team - MOVED UP */}
+        <section className="py-24">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-                Choose Your Plan
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                Everything You Need to Train Your Team
               </h2>
-              <p className="text-xl text-slate-600">
-                Flexible pricing that grows with your team. Start free, upgrade when you're ready.
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Built for modern teams who need to move fast and stay compliant. Create, deploy, and track training modules in minutes, not months.
               </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {pricingPlans.map((plan, index) => (
-                <div key={index} className={`p-8 rounded-2xl border-2 transition-all duration-300 relative ${
-                  plan.popular 
-                    ? 'border-blue-500 bg-blue-50 transform scale-105' 
-                    : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-lg'
-                }`}>
-                  {plan.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                      Most Popular
-                    </div>
-                  )}
-                  <h3 className="text-xl font-semibold text-slate-900 mb-2">{plan.name}</h3>
-                  <p className="text-slate-600 mb-4">{plan.description}</p>
-                  <div className="text-4xl font-bold text-slate-900 mb-6">
-                    {plan.price}<span className="text-base font-normal text-slate-600">/user/month</span>
-                  </div>
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center space-x-3">
-                        <Check className="h-4 w-4 text-green-500" />
-                        <span className="text-slate-600">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link 
-                    href="/register" 
-                    className={`w-full py-3 px-6 rounded-xl font-medium transition-colors block text-center ${
-                      plan.popular
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : index === 2
-                        ? 'bg-slate-900 text-white hover:bg-slate-800'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    {index === 2 ? 'Contact Sales' : 'Start Free Trial'}
-                  </Link>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-all duration-200">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-12 h-12 rounded-lg flex items-center justify-center mb-6">
+                  <Brain className="h-6 w-6 text-white" />
                 </div>
-              ))}
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">AI-Powered Course Creation</h3>
+                <p className="text-gray-600">Transform any video or document into an interactive training module in minutes. Our AI handles everything from quiz generation to progress tracking.</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-all duration-200">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-12 h-12 rounded-lg flex items-center justify-center mb-6">
+                  <BarChart3 className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">Real-Time Analytics</h3>
+                <p className="text-gray-600">Track completion rates, quiz scores, and engagement metrics. Get actionable insights to improve your team&apos;s learning experience.</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg transition-all duration-200">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 w-12 h-12 rounded-lg flex items-center justify-center mb-6">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-900">Enterprise Security</h3>
+                <p className="text-gray-600">SOC2 Type II certified, GDPR compliant, and SSO enabled. Your data is protected by bank-grade security measures.</p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* World-Class Support Section (Cleaner) */}
-        <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-100">
+        {/* Feature Spotlight - Man Using Phone with Cool Effects */}
+        <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-100 relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <div className="relative">
+                <div className="aspect-[4/3] relative rounded-2xl overflow-hidden shadow-2xl transform hover:scale-105 transition-all duration-500">
+                  <Image
+                    src="/assets/images/shutterstock_1901378431-scaled.jpg"
+                    alt="Professional using mobile training app"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  <div className="absolute bottom-6 left-6 right-6">
+                    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 transform translate-y-4 hover:translate-y-0 transition-all duration-300">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-sm font-medium text-gray-900">Training in progress...</span>
+                      </div>
+                      <div className="mt-2 bg-gray-200 rounded-full h-2">
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full w-3/4 animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Floating elements */}
+                <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-20 animate-bounce"></div>
+                <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-r from-blue-400 to-teal-400 rounded-full opacity-20 animate-pulse"></div>
+              </div>
+              <div>
+                <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                  Learn Anywhere, <br />
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Anytime, Any Device
+                  </span>
+                </h2>
+                <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+                  Your team can access training modules on any device. Native mobile apps with offline support ensure learning never stops, even without internet.
+                </p>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="h-4 w-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">Native iOS & Android apps</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="h-4 w-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">Offline module downloads</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="h-4 w-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">Cross-device progress sync</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <Check className="h-4 w-4 text-green-600" />
+                    </div>
+                    <span className="text-gray-700">Smart push notifications</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Experience Tutora in Action */}
+        <section className="py-24 bg-gradient-to-br from-gray-50 to-white rounded-2xl mb-24">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">Experience Tutora in Action</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Upload a short training video and watch as Tutora&apos;s AI transforms it into a comprehensive learning module within seconds.
+              </p>
+            </div>
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                <div className="p-8 border-b border-gray-100">
+                  <Link href="/demo/ai-module-builder" className="block relative group">
+                    <div className="aspect-video bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-6 hover:border-blue-500 transition-all cursor-pointer">
+                      <div className="bg-white rounded-full p-4 shadow-md mb-4 group-hover:scale-110 transition-transform">
+                        <Upload className="h-8 w-8 text-blue-600" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Try the AI Module Builder</h3>
+                      <p className="text-sm text-gray-600 text-center max-w-md">
+                        Upload any training video or document and see how our AI creates an interactive learning module in real-time.
+                      </p>
+                    </div>
+                    <div className="mt-8 grid grid-cols-3 gap-4">
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <Brain className="h-6 w-6 text-blue-600 mb-2" />
+                        <h4 className="font-medium text-gray-900 mb-1">Smart Analysis</h4>
+                        <p className="text-sm text-gray-600">AI extracts key concepts and learning objectives</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <BookOpen className="h-6 w-6 text-blue-600 mb-2" />
+                        <h4 className="font-medium text-gray-900 mb-1">Quiz Generation</h4>
+                        <p className="text-sm text-gray-600">Auto-generated questions to test understanding</p>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <BarChart3 className="h-6 w-6 text-blue-600 mb-2" />
+                        <h4 className="font-medium text-gray-900 mb-1">Progress Tracking</h4>
+                        <p className="text-sm text-gray-600">Monitor completion and performance</p>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+                <div className="bg-gray-50 p-8 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Ready to transform your training?</h4>
+                    <p className="text-sm text-gray-600">Get full access to all features with a free trial.</p>
+                  </div>
+                  <Link 
+                    href="/register"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all font-medium flex items-center space-x-2"
+                  >
+                    <span>Start Free Trial</span>
+                    <ArrowRight className="h-5 w-5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Enterprise-Grade Security & Privacy */}
+        <section className="py-24 bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl mb-24">
+          <div className="max-w-4xl mx-auto text-center px-6 lg:px-8">
+            <div className="mb-12">
+              <Shield className="h-16 w-16 text-blue-600 mx-auto mb-6" />
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">Enterprise-Grade Security & Privacy</h2>
+              <p className="text-xl text-gray-600">
+                Your data is protected by the same security standards used by Fortune 500 companies.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8 mb-12">
+              {securityFeatures.map((feature, index) => (
+                <div key={index} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className={`flex items-center justify-center w-12 h-12 rounded-lg mb-4 mx-auto ${
+                    feature.color === 'blue' ? 'bg-blue-100' :
+                    feature.color === 'green' ? 'bg-green-100' : 'bg-purple-100'
+                  }`}>
+                    <feature.icon className={`h-6 w-6 ${
+                      feature.color === 'blue' ? 'text-blue-600' :
+                      feature.color === 'green' ? 'text-green-600' : 'text-purple-600'
+                    }`} />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-gray-600 text-sm">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+            <div className="bg-white p-8 rounded-xl shadow-sm">
+              <h4 className="text-lg font-semibold mb-4">Additional Security Features</h4>
+              <div className="grid md:grid-cols-2 gap-4 text-left">
+                {additionalSecurity.map((feature, index) => (
+                  <div key={index} className="flex items-center">
+                    <Check className="h-5 w-5 text-green-500 mr-3" />
+                    <span className="text-gray-700">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* World-Class Support When You Need It */}
+        <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-100">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">
                 World-Class Support When You Need It
               </h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 Our dedicated customer success team is here to help you succeed. Fast response times, expert guidance, and ongoing support to maximize your training ROI.
               </p>
             </div>
@@ -433,129 +587,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Enterprise-Grade Security & Privacy */}
-        <section className="py-20">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <div className="text-5xl mb-6">🔒</div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-                Enterprise-Grade Security & Privacy
-              </h2>
-              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
-                Your data is protected by the same security standards used by Fortune 500 companies.
-              </p>
-            </div>
-
-            {/* Security Features */}
-            <div className="grid md:grid-cols-3 gap-8 mb-16">
-              {securityFeatures.map((feature, index) => (
-                <div key={index} className="bg-gray-50 p-8 rounded-2xl text-center">
-                  <div className={`w-16 h-16 mx-auto mb-6 rounded-full flex items-center justify-center ${
-                    feature.color === 'blue' ? 'bg-blue-100' :
-                    feature.color === 'green' ? 'bg-green-100' : 'bg-purple-100'
-                  }`}>
-                    <feature.icon className={`h-8 w-8 ${
-                      feature.color === 'blue' ? 'text-blue-600' :
-                      feature.color === 'green' ? 'text-green-600' : 'text-purple-600'
-                    }`} />
-                  </div>
-                  <h3 className="text-xl font-semibold text-slate-900 mb-3">{feature.title}</h3>
-                  <p className="text-slate-600">{feature.description}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Additional Security Features */}
-            <div className="bg-gray-50 p-8 rounded-2xl">
-              <h3 className="text-xl font-semibold text-slate-900 mb-6 text-center">Additional Security Features</h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                {additionalSecurity.map((feature, index) => (
-                  <div key={index} className="flex items-center space-x-3">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span className="text-slate-700">{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Powerful Features (Collapsible) */}
-        <section className="py-20 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="text-center mb-8">
-              <button
-                onClick={() => setFeaturesOpen(!featuresOpen)}
-                className="inline-flex items-center space-x-2 text-2xl font-bold text-slate-900 hover:text-blue-600 transition-colors"
-              >
-                <span>Powerful Features for Modern Training</span>
-                {featuresOpen ? <ChevronUp className="h-6 w-6" /> : <ChevronDown className="h-6 w-6" />}
-              </button>
-              <p className="text-slate-600 mt-2">
-                Everything you need to create, deploy, and track effective training programs.
-              </p>
-            </div>
-
-            {featuresOpen && (
-              <div className="space-y-12 animate-in slide-in-from-top duration-300">
-                {powerfulFeatures.map((feature, index) => (
-                  <div key={index} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                    <div className="grid md:grid-cols-2 gap-8 items-center">
-                      <div>
-                        <div className="flex items-center space-x-4 mb-4">
-                          <div className="text-4xl">{feature.icon}</div>
-                          <div>
-                            <h3 className="text-2xl font-bold text-slate-900">{feature.title}</h3>
-                            <p className="text-blue-600 font-medium">{feature.subtitle}</p>
-                          </div>
-                        </div>
-                        <p className="text-slate-600 mb-6 leading-relaxed">{feature.description}</p>
-                        <ul className="space-y-2">
-                          {feature.features.map((item, itemIndex) => (
-                            <li key={itemIndex} className="flex items-center space-x-3">
-                              <Check className="h-4 w-4 text-green-500" />
-                              <span className="text-slate-700">{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="bg-gray-100 p-8 rounded-xl text-center">
-                        <div className="text-6xl mb-4">{feature.icon}</div>
-                        <p className="text-slate-600 font-medium">{feature.subtitle}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Conversion Footer */}
-        <section className="py-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-24 text-white text-center">
-          <div className="max-w-4xl mx-auto px-6">
-            <h2 className="text-4xl font-bold mb-6">Ready to Modernize Your Team Training?</h2>
-            <p className="text-xl opacity-90 mb-8">
-              Join thousands of companies already training their teams with Tutora. Start your free trial today.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/register"
-                className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:shadow-lg transition-all duration-200 font-semibold"
-              >
-                Start Free Trial
-              </Link>
-              <Link
-                href="/contact"
-                className="bg-blue-500 bg-opacity-20 text-white px-8 py-4 rounded-lg hover:bg-opacity-30 transition-all duration-200 font-semibold"
-              >
-                Schedule a Demo
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Trusted by Leading Companies - RESTORED */}
+        {/* Trusted by Leading Companies - MOVED LATER */}
         <section className="py-24 bg-gradient-to-br from-gray-50 to-white rounded-2xl mb-24">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
@@ -637,6 +669,92 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Choose Your Plan - MOVED TO LATER */}
+        <section className="py-24">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+                Choose Your Plan
+              </h2>
+              <p className="text-xl text-slate-600">
+                Flexible pricing that grows with your team. Start free, upgrade when you're ready.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {pricingPlans.map((plan, index) => (
+                <div key={index} className={`p-8 rounded-2xl border-2 transition-all duration-300 relative ${
+                  plan.popular 
+                    ? 'border-blue-500 bg-blue-50 transform scale-105' 
+                    : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-lg'
+                }`}>
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                      Most Popular
+                    </div>
+                  )}
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">{plan.name}</h3>
+                  <p className="text-slate-600 mb-4">{plan.description}</p>
+                  <div className="text-4xl font-bold text-slate-900 mb-6">
+                    {plan.price}<span className="text-base font-normal text-slate-600">/user/month</span>
+                  </div>
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center space-x-3">
+                        <Check className="h-4 w-4 text-green-500" />
+                        <span className="text-slate-600">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link 
+                    href="/register" 
+                    className={`w-full py-3 px-6 rounded-xl font-medium transition-colors block text-center ${
+                      plan.popular
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : index === 2
+                        ? 'bg-slate-900 text-white hover:bg-slate-800'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    {index === 2 ? 'Contact Sales' : 'Start Free Trial'}
+                  </Link>
+                </div>
+              ))}
+            </div>
+            
+            {/* Pricing Footer Text */}
+            <div className="text-center mt-12">
+              <p className="text-gray-600 mb-4">All plans include 14-day free trial • No credit card required</p>
+              <Link href="/pricing" className="text-blue-600 hover:text-blue-700 font-semibold">
+                View detailed pricing comparison →
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Ready to Modernize Footer CTA - MOVED TO END */}
+        <section className="py-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-24 text-white text-center">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="text-4xl font-bold mb-6">Ready to Modernize Your Team Training?</h2>
+            <p className="text-xl opacity-90 mb-8">
+              Join thousands of companies already training their teams with Tutora. Start your free trial today.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/register"
+                className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:shadow-lg transition-all duration-200 font-semibold"
+              >
+                Start Free Trial
+              </Link>
+              <Link
+                href="/contact"
+                className="bg-blue-500 bg-opacity-20 text-white px-8 py-4 rounded-lg hover:bg-opacity-30 transition-all duration-200 font-semibold"
+              >
+                Schedule a Demo
+              </Link>
             </div>
           </div>
         </section>
