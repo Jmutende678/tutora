@@ -14,6 +14,21 @@ export default function AIModuleBuilder() {
   const [processingStatus, setProcessingStatus] = useState<string>('')
   const videoRef = useRef<HTMLVideoElement>(null)
   const router = useRouter()
+  
+  // Demo user info for sales notifications
+  const [showContactForm, setShowContactForm] = useState(true)
+  const [userInfo, setUserInfo] = useState({
+    name: '',
+    email: '',
+    company: '',
+    phone: ''
+  })
+
+  const handleUserInfoSubmit = () => {
+    if (userInfo.email && userInfo.name) {
+      setShowContactForm(false)
+    }
+  }
 
   const generateThumbnail = (videoFile: File) => {
     const video = document.createElement('video')
@@ -115,6 +130,30 @@ export default function AIModuleBuilder() {
     setProcessingStatus('Reading file content...')
 
     try {
+      // 🚀 Send demo usage notification to sales team
+      if (userInfo.email && userInfo.name) {
+        try {
+          await fetch('/api/sales/demo-usage', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: userInfo.name,
+              email: userInfo.email,
+              company: userInfo.company || 'Not provided',
+              phone: userInfo.phone || 'Not provided',
+              fileName: file.name,
+              fileType: file.type.startsWith('video/') ? 'video' : 'document',
+              action: 'demo_started'
+            })
+          })
+          console.log('🔥 Demo usage notification sent to sales@tutoralearn.com')
+        } catch (error) {
+          console.error('Failed to send demo notification:', error)
+        }
+      }
+
       console.log('Preparing file for AI processing...')
       setProgress(20)
       setProcessingStatus('Preparing file for AI processing...')
@@ -227,6 +266,31 @@ export default function AIModuleBuilder() {
       setProgress(100)
       setProcessingStatus('Processing complete! Redirecting to results...')
 
+      // 🚀 Send demo completion notification to sales team
+      if (userInfo.email && userInfo.name) {
+        try {
+          await fetch('/api/sales/demo-usage', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: userInfo.name,
+              email: userInfo.email,
+              company: userInfo.company || 'Not provided',
+              phone: userInfo.phone || 'Not provided',
+              fileName: file.name,
+              fileType: file.type.startsWith('video/') ? 'video' : 'document',
+              action: 'demo_completed',
+              moduleTitle: data.module.title || 'Untitled Module'
+            })
+          })
+          console.log('🔥 Demo completion notification sent to sales@tutoralearn.com')
+        } catch (error) {
+          console.error('Failed to send demo completion notification:', error)
+        }
+      }
+
       // Clean up video preview URL
       if (videoPreview) {
         URL.revokeObjectURL(videoPreview)
@@ -326,6 +390,92 @@ export default function AIModuleBuilder() {
             </div>
           </div>
         </div>
+
+        {/* Contact Form Modal */}
+        {showContactForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                🎯 Try Our AI Demo
+              </h2>
+              <p className="text-gray-600 mb-6 text-center">
+                Enter your details to access our AI Module Builder demo and see how it works with your content.
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={userInfo.name}
+                    onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Business Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={userInfo.email}
+                    onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your business email"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Name
+                  </label>
+                  <input
+                    type="text"
+                    value={userInfo.company}
+                    onChange={(e) => setUserInfo({...userInfo, company: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your company name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={userInfo.phone}
+                    onChange={(e) => setUserInfo({...userInfo, phone: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+              </div>
+              
+              <button
+                onClick={handleUserInfoSubmit}
+                disabled={!userInfo.name || !userInfo.email}
+                className={`w-full mt-6 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                  userInfo.name && userInfo.email
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                🚀 Access AI Demo
+              </button>
+              
+              <p className="text-xs text-gray-500 mt-4 text-center">
+                We'll send you a follow-up with tips and pricing info
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
           <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">

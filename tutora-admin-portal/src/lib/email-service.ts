@@ -667,6 +667,352 @@ The Tutora Team
       .trim()
   }
 
+  // 🚀 SALES NOTIFICATIONS - Send instant alerts to sales@tutoralearn.com
+  async sendSalesNotification(type: string, data: any): Promise<boolean> {
+    const salesEmail = 'sales@tutoralearn.com'
+    const template = this.getSalesNotificationTemplate(type, data)
+    
+    return await this.sendEmail(
+      salesEmail,
+      template.subject,
+      template.html,
+      template.text
+    )
+  }
+
+  // Security audit request notification
+  async sendSecurityAuditNotification(formData: {
+    companyName: string
+    email: string
+    phone?: string
+    message: string
+    urgency: string
+  }): Promise<boolean> {
+    const salesEmail = 'sales@tutoralearn.com'
+    const template = this.getSecurityAuditTemplate(formData)
+    
+    return await this.sendEmail(
+      salesEmail,
+      template.subject,
+      template.html,
+      template.text
+    )
+  }
+
+  // User registration notification
+  async sendRegistrationNotification(userData: {
+    companyName: string
+    email: string
+    name: string
+    teamSize: string
+    plan?: string
+  }): Promise<boolean> {
+    const salesEmail = 'sales@tutoralearn.com'
+    const template = this.getRegistrationTemplate(userData)
+    
+    return await this.sendEmail(
+      salesEmail,
+      template.subject,
+      template.html,
+      template.text
+    )
+  }
+
+  // Demo scheduled notification
+  async sendDemoNotification(demoData: {
+    companyName: string
+    email: string
+    name: string
+    phone?: string
+    preferredTime: string
+    message?: string
+  }): Promise<boolean> {
+    const salesEmail = 'sales@tutoralearn.com'
+    const template = this.getDemoTemplate(demoData)
+    
+    return await this.sendEmail(
+      salesEmail,
+      template.subject,
+      template.html,
+      template.text
+    )
+  }
+
+  // Module usage/completion notification
+  async sendModuleUsageNotification(usageData: {
+    userEmail: string
+    userName: string
+    companyName: string
+    moduleName: string
+    action: 'started' | 'completed' | 'failed'
+    completionRate?: number
+  }): Promise<boolean> {
+    const salesEmail = 'sales@tutoralearn.com'
+    const template = this.getModuleUsageTemplate(usageData)
+    
+    return await this.sendEmail(
+      salesEmail,
+      template.subject,
+      template.html,
+      template.text
+    )
+  }
+
+  // 🎨 SALES EMAIL TEMPLATES
+  private getSalesNotificationTemplate(type: string, data: any): EmailTemplate {
+    const subject = `🔥 NEW ${type.toUpperCase()} - Tutora Sales Alert`
+    
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Sales Alert</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0;">🔥 NEW ${type.toUpperCase()} ALERT!</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Time: ${new Date().toLocaleString()}</p>
+    </div>
+    
+    <div style="background: white; padding: 30px; border: 1px solid #ff6b6b; border-top: none; border-radius: 0 0 8px 8px;">
+        <h2 style="color: #ff6b6b;">Action Required 💰</h2>
+        <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow: auto;">${JSON.stringify(data, null, 2)}</pre>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
+            <strong>⚡ Follow up immediately for best conversion!</strong>
+        </div>
+    </div>
+</body>
+</html>`
+
+    const text = `NEW ${type.toUpperCase()} ALERT! 🔥\n\nTime: ${new Date().toLocaleString()}\n\nData:\n${JSON.stringify(data, null, 2)}\n\n⚡ Follow up immediately for best conversion!`
+
+    return { subject, html, text }
+  }
+
+  private getSecurityAuditTemplate(formData: {
+    companyName: string
+    email: string
+    phone?: string
+    message: string
+    urgency: string
+  }): EmailTemplate {
+    const subject = `🔒 ENTERPRISE SECURITY AUDIT REQUEST - ${formData.companyName}`
+    
+    const urgencyColor = formData.urgency === 'emergency' ? '#dc3545' : formData.urgency === 'urgent' ? '#fd7e14' : '#28a745'
+    
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Security Audit Request</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0;">🔒 ENTERPRISE SECURITY AUDIT REQUEST</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Time: ${new Date().toLocaleString()}</p>
+    </div>
+    
+    <div style="background: white; padding: 30px; border: 1px solid #667eea; border-top: none; border-radius: 0 0 8px 8px;">
+        <div style="background: ${urgencyColor}; color: white; padding: 10px; border-radius: 5px; text-align: center; margin-bottom: 20px;">
+            <strong>🚨 PRIORITY: ${formData.urgency.toUpperCase()}</strong>
+        </div>
+        
+        <h2 style="color: #667eea;">Company Details</h2>
+        <ul style="list-style: none; padding: 0;">
+            <li><strong>Company:</strong> ${formData.companyName}</li>
+            <li><strong>Email:</strong> <a href="mailto:${formData.email}">${formData.email}</a></li>
+            ${formData.phone ? `<li><strong>Phone:</strong> <a href="tel:${formData.phone}">${formData.phone}</a></li>` : ''}
+        </ul>
+        
+        <h3 style="color: #667eea;">Security Requirements</h3>
+        <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #667eea; border-radius: 5px;">
+            ${formData.message.replace(/\n/g, '<br>')}
+        </div>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #d4edda; border-left: 4px solid #28a745; border-radius: 5px;">
+            <strong>💰 ENTERPRISE PROSPECT - HIGH VALUE OPPORTUNITY!</strong><br>
+            Security audits typically lead to $5K-50K+ deals
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="mailto:${formData.email}" style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                📧 Reply to Prospect
+            </a>
+        </div>
+    </div>
+</body>
+</html>`
+
+    const text = `ENTERPRISE SECURITY AUDIT REQUEST 🔒\n\nPRIORITY: ${formData.urgency.toUpperCase()}\nTime: ${new Date().toLocaleString()}\n\nCompany: ${formData.companyName}\nEmail: ${formData.email}\n${formData.phone ? `Phone: ${formData.phone}\n` : ''}\nSecurity Requirements:\n${formData.message}\n\n💰 ENTERPRISE PROSPECT - HIGH VALUE OPPORTUNITY!\nSecurity audits typically lead to $5K-50K+ deals`
+
+    return { subject, html, text }
+  }
+
+  private getRegistrationTemplate(userData: {
+    companyName: string
+    email: string
+    name: string
+    teamSize: string
+    plan?: string
+  }): EmailTemplate {
+    const subject = `🎯 NEW USER REGISTRATION - ${userData.companyName}`
+    
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>New Registration</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-w-600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0;">🎯 NEW USER REGISTRATION!</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Time: ${new Date().toLocaleString()}</p>
+    </div>
+    
+    <div style="background: white; padding: 30px; border: 1px solid #28a745; border-top: none; border-radius: 0 0 8px 8px;">
+        <h2 style="color: #28a745;">New Prospect Details</h2>
+        <ul style="list-style: none; padding: 0;">
+            <li><strong>Name:</strong> ${userData.name}</li>
+            <li><strong>Company:</strong> ${userData.companyName}</li>
+            <li><strong>Email:</strong> <a href="mailto:${userData.email}">${userData.email}</a></li>
+            <li><strong>Team Size:</strong> ${userData.teamSize}</li>
+            ${userData.plan ? `<li><strong>Interested Plan:</strong> ${userData.plan}</li>` : ''}
+        </ul>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px;">
+            <strong>🔥 HOT LEAD - Contact within 5 minutes for 7x higher conversion!</strong>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="mailto:${userData.email}" style="background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-right: 10px;">
+                📧 Email Prospect
+            </a>
+            <a href="/admin/dashboard" style="background: #6c757d; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                📊 View Dashboard
+            </a>
+        </div>
+    </div>
+</body>
+</html>`
+
+    const text = `NEW USER REGISTRATION! 🎯\n\nTime: ${new Date().toLocaleString()}\n\nName: ${userData.name}\nCompany: ${userData.companyName}\nEmail: ${userData.email}\nTeam Size: ${userData.teamSize}\n${userData.plan ? `Interested Plan: ${userData.plan}\n` : ''}\n🔥 HOT LEAD - Contact within 5 minutes for 7x higher conversion!`
+
+    return { subject, html, text }
+  }
+
+  private getDemoTemplate(demoData: {
+    companyName: string
+    email: string
+    name: string
+    phone?: string
+    preferredTime: string
+    message?: string
+  }): EmailTemplate {
+    const subject = `🎥 DEMO SCHEDULED - ${demoData.companyName}`
+    
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Demo Scheduled</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0;">🎥 DEMO SCHEDULED!</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Time: ${new Date().toLocaleString()}</p>
+    </div>
+    
+    <div style="background: white; padding: 30px; border: 1px solid #6f42c1; border-top: none; border-radius: 0 0 8px 8px;">
+        <h2 style="color: #6f42c1;">Demo Request Details</h2>
+        <ul style="list-style: none; padding: 0;">
+            <li><strong>Name:</strong> ${demoData.name}</li>
+            <li><strong>Company:</strong> ${demoData.companyName}</li>
+            <li><strong>Email:</strong> <a href="mailto:${demoData.email}">${demoData.email}</a></li>
+            ${demoData.phone ? `<li><strong>Phone:</strong> <a href="tel:${demoData.phone}">${demoData.phone}</a></li>` : ''}
+            <li><strong>Preferred Time:</strong> ${demoData.preferredTime}</li>
+        </ul>
+        
+        ${demoData.message ? `
+        <h3 style="color: #6f42c1;">Additional Notes</h3>
+        <div style="background: #f8f9fa; padding: 15px; border-left: 4px solid #6f42c1; border-radius: 5px;">
+            ${demoData.message.replace(/\n/g, '<br>')}
+        </div>
+        ` : ''}
+        
+        <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-left: 4px solid #007bff; border-radius: 5px;">
+            <strong>💰 QUALIFIED PROSPECT - They want to see the product!</strong><br>
+            Demo requests have 40%+ close rates
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="mailto:${demoData.email}" style="background: #6f42c1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-right: 10px;">
+                📅 Schedule Demo
+            </a>
+            ${demoData.phone ? `<a href="tel:${demoData.phone}" style="background: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">📞 Call Now</a>` : ''}
+        </div>
+    </div>
+</body>
+</html>`
+
+    const text = `DEMO SCHEDULED! 🎥\n\nTime: ${new Date().toLocaleString()}\n\nName: ${demoData.name}\nCompany: ${demoData.companyName}\nEmail: ${demoData.email}\n${demoData.phone ? `Phone: ${demoData.phone}\n` : ''}Preferred Time: ${demoData.preferredTime}\n${demoData.message ? `Notes: ${demoData.message}\n` : ''}\n💰 QUALIFIED PROSPECT - They want to see the product!\nDemo requests have 40%+ close rates`
+
+    return { subject, html, text }
+  }
+
+  private getModuleUsageTemplate(usageData: {
+    userEmail: string
+    userName: string
+    companyName: string
+    moduleName: string
+    action: 'started' | 'completed' | 'failed'
+    completionRate?: number
+  }): EmailTemplate {
+    const actionEmoji = usageData.action === 'completed' ? '✅' : usageData.action === 'started' ? '▶️' : '❌'
+    const subject = `${actionEmoji} MODULE ${usageData.action.toUpperCase()} - ${usageData.companyName}`
+    
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Module Usage Alert</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #17a2b8 0%, #6610f2 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+        <h1 style="margin: 0;">${actionEmoji} MODULE ${usageData.action.toUpperCase()}</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Time: ${new Date().toLocaleString()}</p>
+    </div>
+    
+    <div style="background: white; padding: 30px; border: 1px solid #17a2b8; border-top: none; border-radius: 0 0 8px 8px;">
+        <h2 style="color: #17a2b8;">Usage Details</h2>
+        <ul style="list-style: none; padding: 0;">
+            <li><strong>User:</strong> ${usageData.userName} (${usageData.userEmail})</li>
+            <li><strong>Company:</strong> ${usageData.companyName}</li>
+            <li><strong>Module:</strong> ${usageData.moduleName}</li>
+            <li><strong>Action:</strong> ${usageData.action}</li>
+            ${usageData.completionRate ? `<li><strong>Completion Rate:</strong> ${usageData.completionRate}%</li>` : ''}
+        </ul>
+        
+        <div style="margin-top: 20px; padding: 15px; background: #f0f8ff; border-left: 4px solid #007bff; border-radius: 5px;">
+            <strong>📊 User Engagement Opportunity!</strong><br>
+            ${usageData.action === 'completed' ? 'Success! Follow up for expansion opportunities.' : 
+              usageData.action === 'started' ? 'User is actively engaging - perfect time to check in.' :
+              'User may need help - reach out with support.'}
+        </div>
+    </div>
+</body>
+</html>`
+
+    const text = `MODULE ${usageData.action.toUpperCase()} ${actionEmoji}\n\nTime: ${new Date().toLocaleString()}\n\nUser: ${usageData.userName} (${usageData.userEmail})\nCompany: ${usageData.companyName}\nModule: ${usageData.moduleName}\nAction: ${usageData.action}\n${usageData.completionRate ? `Completion Rate: ${usageData.completionRate}%\n` : ''}\n📊 User Engagement Opportunity!`
+
+    return { subject, html, text }
+  }
+
   // Test email connectivity
   async testConnection(): Promise<boolean> {
     if (!this.isConfigured || !this.transporter) {

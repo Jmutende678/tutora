@@ -88,8 +88,33 @@ export default function RegisterPage() {
     }
   }
 
-  const handleStartTrial = () => {
+  const handleStartTrial = async () => {
     const recommendedPlan = getRecommendedPlan()
+    
+    // 🚀 Send instant email notification to sales team
+    try {
+      await fetch('/api/sales/registration', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          companyName: formData.companyName,
+          email: formData.email,
+          name: `${formData.firstName} ${formData.lastName}`,
+          teamSize: formData.teamSize,
+          plan: recommendedPlan,
+          jobTitle: formData.jobTitle,
+          industry: formData.industry,
+          primaryGoal: formData.primaryGoal,
+          urgency: formData.urgency
+        })
+      })
+      console.log('🔥 Registration notification sent to sales@tutoralearn.com')
+    } catch (error) {
+      console.error('Failed to send registration notification:', error)
+    }
+    
     // Redirect to pricing with pre-selected plan and collected data
     const queryParams = new URLSearchParams({
       plan: recommendedPlan,

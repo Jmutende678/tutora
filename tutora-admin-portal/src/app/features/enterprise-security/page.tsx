@@ -47,15 +47,27 @@ export default function EnterpriseSecurityPage() {
     setIsSubmitting(true)
     
     try {
-      // Simulate form submission - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      setSubmitStatus('success')
-      setTimeout(() => {
-        setAuditModalOpen(false)
-        setSubmitStatus('idle')
-        setAuditForm({ companyName: '', email: '', phone: '', message: '', urgency: 'standard' })
-      }, 2000)
+      // Send email notification to sales team
+      const response = await fetch('/api/sales/security-audit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(auditForm)
+      })
+
+      if (response.ok) {
+        setSubmitStatus('success')
+        setTimeout(() => {
+          setAuditModalOpen(false)
+          setSubmitStatus('idle')
+          setAuditForm({ companyName: '', email: '', phone: '', message: '', urgency: 'standard' })
+        }, 2000)
+      } else {
+        throw new Error('Failed to submit request')
+      }
     } catch (error) {
+      console.error('Failed to submit audit request:', error)
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
