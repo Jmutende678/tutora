@@ -22,13 +22,45 @@ import {
   Clock,
   Users,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  X,
+  Send
 } from 'lucide-react'
 import { useState } from 'react'
 
 export default function EnterpriseSecurityPage() {
   const [faqOpen, setFaqOpen] = useState<number | null>(null)
   const [certOpen, setCertOpen] = useState<number | null>(null)
+  const [auditModalOpen, setAuditModalOpen] = useState(false)
+  const [auditForm, setAuditForm] = useState({
+    companyName: '',
+    email: '',
+    phone: '',
+    message: '',
+    urgency: 'standard'
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  const handleAuditRequest = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    
+    try {
+      // Simulate form submission - replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      setSubmitStatus('success')
+      setTimeout(() => {
+        setAuditModalOpen(false)
+        setSubmitStatus('idle')
+        setAuditForm({ companyName: '', email: '', phone: '', message: '', urgency: 'standard' })
+      }, 2000)
+    } catch (error) {
+      setSubmitStatus('error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const securityFeatures = [
     {
@@ -346,13 +378,13 @@ export default function EnterpriseSecurityPage() {
                     <span>Get Security Details</span>
                     <ArrowRight className="h-5 w-5" />
                   </Link>
-                  <Link 
-                    href="/support"
+                  <button 
+                    onClick={() => setAuditModalOpen(true)}
                     className="border border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-200 flex items-center justify-center space-x-2"
                   >
                     <Shield className="h-5 w-5" />
                     <span>Request Security Audit</span>
-                  </Link>
+                  </button>
                 </div>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
@@ -676,12 +708,12 @@ export default function EnterpriseSecurityPage() {
               >
                 Start Secure Trial
               </Link>
-              <Link
-                href="/support"
+              <button
+                onClick={() => setAuditModalOpen(true)}
                 className="bg-blue-500 bg-opacity-20 text-white px-8 py-4 rounded-xl font-semibold hover:bg-opacity-30 transition-all duration-200"
               >
                 Request Security Audit
-              </Link>
+              </button>
             </div>
             <div className="mt-8 text-blue-100 text-sm">
               SOC 2 Type II Certified • GDPR Compliant • 99.98% Uptime SLA
@@ -689,6 +721,138 @@ export default function EnterpriseSecurityPage() {
           </div>
         </section>
       </div>
+
+      {/* Security Audit Request Modal */}
+      {auditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Request Security Audit</h2>
+                  <p className="text-gray-600">Get access to our compliance reports and security documentation</p>
+                </div>
+                <button
+                  onClick={() => setAuditModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+            
+            <form onSubmit={handleAuditRequest} className="p-6">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Company Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={auditForm.companyName}
+                    onChange={(e) => setAuditForm({...auditForm, companyName: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter your company name"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Business Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={auditForm.email}
+                    onChange={(e) => setAuditForm({...auditForm, email: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter your business email"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={auditForm.phone}
+                    onChange={(e) => setAuditForm({...auditForm, phone: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Request Priority
+                  </label>
+                  <select
+                    value={auditForm.urgency}
+                    onChange={(e) => setAuditForm({...auditForm, urgency: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="standard">Standard (5-7 business days)</option>
+                    <option value="urgent">Urgent (2-3 business days)</option>
+                    <option value="emergency">Emergency (24 hours)</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Security Requirements & Questions *
+                  </label>
+                  <textarea
+                    required
+                    rows={6}
+                    value={auditForm.message}
+                    onChange={(e) => setAuditForm({...auditForm, message: e.target.value})}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Please describe your security audit requirements, compliance needs, or specific questions about our security controls..."
+                  />
+                </div>
+              </div>
+              
+              <div className="mt-8 flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setAuditModalOpen(false)}
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Submitting...</span>
+                    </>
+                  ) : submitStatus === 'success' ? (
+                    <>
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Request Sent!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      <span>Submit Request</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              <div className="mt-4 text-xs text-gray-500">
+                * Required fields. We'll respond within the selected timeframe with your security documentation and audit reports.
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 

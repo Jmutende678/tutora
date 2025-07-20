@@ -296,9 +296,19 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* How Tutora Works in 3 Simple Steps */}
-        <section className="py-20 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        {/* How Tutora Works in 3 Simple Steps - Enhanced with Bubble Effects */}
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
+          {/* Animated Background Bubbles */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-10 left-10 w-20 h-20 bg-blue-200 rounded-full opacity-20 animate-bounce" style={{animationDelay: '0s', animationDuration: '3s'}}></div>
+            <div className="absolute top-32 right-16 w-16 h-16 bg-purple-200 rounded-full opacity-30 animate-pulse" style={{animationDelay: '1s', animationDuration: '4s'}}></div>
+            <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-green-200 rounded-full opacity-25 animate-bounce" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
+            <div className="absolute top-1/2 right-10 w-24 h-24 bg-indigo-200 rounded-full opacity-20 animate-pulse" style={{animationDelay: '0.5s', animationDuration: '3.5s'}}></div>
+            <div className="absolute bottom-32 right-1/3 w-14 h-14 bg-pink-200 rounded-full opacity-30 animate-bounce" style={{animationDelay: '1.5s', animationDuration: '4.5s'}}></div>
+            <div className="absolute top-20 left-1/3 w-18 h-18 bg-cyan-200 rounded-full opacity-25 animate-pulse" style={{animationDelay: '3s', animationDuration: '6s'}}></div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
                 How Tutora Works in 3 Simple Steps
@@ -309,33 +319,99 @@ export default function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               {howItWorks.map((step, index) => (
-                <div key={index} className="relative bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
-                  <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl mb-6 font-bold text-lg">
+                <div key={index} className="group relative bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+                  {/* Card Background Bubbles */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                    <div className="absolute top-4 right-4 w-8 h-8 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full opacity-30 animate-ping"></div>
+                    <div className="absolute bottom-6 left-6 w-6 h-6 bg-gradient-to-r from-green-300 to-blue-300 rounded-full opacity-40 animate-pulse"></div>
+                    <div className="absolute top-1/2 right-8 w-4 h-4 bg-gradient-to-r from-purple-300 to-pink-300 rounded-full opacity-35 animate-bounce"></div>
+                  </div>
+
+                  {/* Enhanced Gradient Bubble Icon */}
+                  <div className={`relative flex items-center justify-center w-20 h-20 rounded-full mb-6 font-bold text-2xl text-white shadow-lg transform group-hover:scale-110 transition-all duration-300 ${
+                    index === 0 ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-blue-600' :
+                    index === 1 ? 'bg-gradient-to-br from-green-400 via-emerald-500 to-green-600' :
+                    'bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600'
+                  }`}>
+                    <div className="absolute inset-0 rounded-full bg-white opacity-20 group-hover:animate-ping"></div>
                     {step.step}
                   </div>
-                  <step.icon className="h-8 w-8 text-blue-600 mb-4" />
-                  <h3 className="text-xl font-semibold text-slate-900 mb-3">{step.title}</h3>
-                  <p className="text-slate-600 leading-relaxed">{step.description}</p>
+
+                  {/* Step Icon with Bubble Effect */}
+                  <div className="relative mb-4">
+                    <step.icon className={`h-10 w-10 transform group-hover:scale-110 transition-all duration-300 ${
+                      index === 0 ? 'text-blue-600' :
+                      index === 1 ? 'text-green-600' :
+                      'text-purple-600'
+                    }`} />
+                    <div className={`absolute inset-0 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 ${
+                      index === 0 ? 'bg-blue-500' :
+                      index === 1 ? 'bg-green-500' :
+                      'bg-purple-500'
+                    }`}></div>
+                  </div>
+
+                  <h3 className="text-xl font-semibold text-slate-900 mb-3 group-hover:text-slate-800 transition-colors duration-300">{step.title}</h3>
+                  <p className="text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors duration-300">{step.description}</p>
+                  
+                  {/* Enhanced Status Indicators with Bubble Effects */}
                   {index === 0 && (
-                    <div className="mt-4 text-sm text-blue-600 flex items-center space-x-2">
-                      <Clock className="h-4 w-4" />
-                      <span>10x faster than manual creation</span>
+                    <div className="mt-4 text-sm text-blue-600 flex items-center space-x-2 group-hover:text-blue-700 transition-colors duration-300">
+                      <div className="relative">
+                        <Clock className="h-4 w-4" />
+                        <div className="absolute inset-0 bg-blue-400 rounded-full opacity-0 group-hover:opacity-30 group-hover:animate-ping"></div>
+                      </div>
+                      <span className="font-medium">10x faster than manual creation</span>
                     </div>
                   )}
                   {index === 1 && (
-                    <div className="mt-4 text-sm text-green-600 flex items-center space-x-2">
-                      <Users className="h-4 w-4" />
-                      <span>Works on any device, anywhere</span>
+                    <div className="mt-4 text-sm text-green-600 flex items-center space-x-2 group-hover:text-green-700 transition-colors duration-300">
+                      <div className="relative">
+                        <Users className="h-4 w-4" />
+                        <div className="absolute inset-0 bg-green-400 rounded-full opacity-0 group-hover:opacity-30 group-hover:animate-ping"></div>
+                      </div>
+                      <span className="font-medium">Works on any device, anywhere</span>
                     </div>
                   )}
                   {index === 2 && (
-                    <div className="mt-4 text-sm text-purple-600 flex items-center space-x-2">
-                      <TrendingUp className="h-4 w-4" />
-                      <span>92% higher completion rates</span>
+                    <div className="mt-4 text-sm text-purple-600 flex items-center space-x-2 group-hover:text-purple-700 transition-colors duration-300">
+                      <div className="relative">
+                        <TrendingUp className="h-4 w-4" />
+                        <div className="absolute inset-0 bg-purple-400 rounded-full opacity-0 group-hover:opacity-30 group-hover:animate-ping"></div>
+                      </div>
+                      <span className="font-medium">92% higher completion rates</span>
                     </div>
                   )}
+
+                  {/* Floating Particles on Hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none">
+                    <div className="absolute top-8 left-12 w-2 h-2 bg-blue-400 rounded-full opacity-60 animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    <div className="absolute top-16 right-16 w-1 h-1 bg-purple-400 rounded-full opacity-70 animate-pulse" style={{animationDelay: '0.8s'}}></div>
+                    <div className="absolute bottom-12 left-20 w-1.5 h-1.5 bg-green-400 rounded-full opacity-50 animate-bounce" style={{animationDelay: '1.2s'}}></div>
+                    <div className="absolute bottom-20 right-12 w-2 h-2 bg-pink-400 rounded-full opacity-60 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                  </div>
+
+                  {/* Shimmer Effect on Hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 opacity-10"></div>
+                  </div>
                 </div>
               ))}
+            </div>
+
+            {/* Floating Action Bubbles */}
+            <div className="text-center mt-12">
+              <div className="inline-flex items-center space-x-4">
+                <div className="relative">
+                  <div className="w-4 h-4 bg-blue-400 rounded-full animate-bounce opacity-60" style={{animationDelay: '0s'}}></div>
+                </div>
+                <div className="relative">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-bounce opacity-70" style={{animationDelay: '0.3s'}}></div>
+                </div>
+                <div className="relative">
+                  <div className="w-4 h-4 bg-purple-400 rounded-full animate-bounce opacity-60" style={{animationDelay: '0.6s'}}></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
