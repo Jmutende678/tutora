@@ -309,7 +309,7 @@ export class RealTimeService {
       const now = new Date()
       const staleConnections: string[] = []
 
-      for (const [connectionId, connection] of this.connections) {
+      for (const [connectionId, connection] of Array.from(this.connections.entries())) {
         const lastPing = new Date(connection.lastPing)
         const timeDiff = now.getTime() - lastPing.getTime()
 
