@@ -532,39 +532,202 @@ export default function HomePage() {
         </section>
 
         {/* Conversion Footer */}
-        <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-          <div className="max-w-4xl mx-auto text-center px-6 lg:px-8">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-              Ready to Transform Your Team's Training?
-            </h2>
-            <p className="text-xl mb-8 opacity-90">
-              Join hundreds of companies already using AI to create better training experiences
+        <section className="py-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-24 text-white text-center">
+          <div className="max-w-4xl mx-auto px-6">
+            <h2 className="text-4xl font-bold mb-6">Ready to Modernize Your Team Training?</h2>
+            <p className="text-xl opacity-90 mb-8">
+              Join thousands of companies already training their teams with Tutora. Start your free trial today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/demo/ai-module-builder"
-                className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2"
-              >
-                <Play className="h-5 w-5" />
-                <span>Try It Free</span>
-              </Link>
-              <Link
                 href="/register"
-                className="bg-blue-800 text-white px-8 py-4 rounded-xl font-semibold hover:bg-blue-900 transition-colors flex items-center justify-center space-x-2"
+                className="bg-white text-blue-600 px-8 py-4 rounded-lg hover:shadow-lg transition-all duration-200 font-semibold"
               >
-                <Users className="h-5 w-5" />
-                <span>Book Demo</span>
+                Start Free Trial
               </Link>
               <Link
-                href="mailto:sales@tutoralearn.com"
-                className="bg-purple-800 text-white px-8 py-4 rounded-xl font-semibold hover:bg-purple-900 transition-colors flex items-center justify-center space-x-2"
+                href="/contact"
+                className="bg-blue-500 bg-opacity-20 text-white px-8 py-4 rounded-lg hover:bg-opacity-30 transition-all duration-200 font-semibold"
               >
-                <ArrowRight className="h-5 w-5" />
-                <span>Contact Sales</span>
+                Schedule a Demo
               </Link>
             </div>
           </div>
         </section>
+
+        {/* Trusted by Leading Companies - RESTORED */}
+        <section className="py-24 bg-gradient-to-br from-gray-50 to-white rounded-2xl mb-24">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">Trusted by Leading Companies</h2>
+              <p className="text-xl text-gray-600">See how organizations are transforming their workforce with Tutora</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-8">
+              {/* Testimonial 1 */}
+              <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-lg transition-all duration-200">
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-700 mb-6 text-lg">&quot;Tutora transformed our onboarding process. New hires are now productive 40% faster, and our employee satisfaction scores have never been higher.&quot;</p>
+                <div className="flex items-center space-x-4">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                    <Image
+                      alt="Sarah Chen"
+                      fill
+                      className="object-cover"
+                      src="/images/testimonial-1.jpg"
+                    />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900">Sarah Chen</div>
+                    <div className="text-gray-600">Head of Learning & Development</div>
+                    <div className="text-gray-500">TechFlow Solutions</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Testimonial 2 */}
+              <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-lg transition-all duration-200">
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-700 mb-6 text-lg">&quot;The AI-powered content creation is incredible. We&apos;ve built 50+ custom modules in just 3 months. Our team engagement with training went from 30% to 95%.&quot;</p>
+                <div className="flex items-center space-x-4">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                    <Image
+                      alt="Marcus Rodriguez"
+                      fill
+                      className="object-cover"
+                      src="/images/testimonial-2.jpg"
+                    />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900">Marcus Rodriguez</div>
+                    <div className="text-gray-600">VP of Human Resources</div>
+                    <div className="text-gray-500">InnovateCorpF</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Testimonial 3 */}
+              <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-lg transition-all duration-200">
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-700 mb-6 text-lg">&quot;ROI was evident within the first quarter. Reduced training costs by 60% while doubling the effectiveness. Tutora is now essential to our success.&quot;</p>
+                <div className="flex items-center space-x-4">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                    <Image
+                      alt="Lisa Thompson"
+                      fill
+                      className="object-cover"
+                      src="/images/testimonial-3.jpg"
+                    />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900">Lisa Thompson</div>
+                    <div className="text-gray-600">Chief People Officer</div>
+                    <div className="text-gray-500">GrowthTech</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Footer - RESTORED */}
+        <footer className="py-24 border-t border-gray-200">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+              {/* Logo and Description */}
+              <div className="col-span-2">
+                <Link href="/" className="flex items-center space-x-2 mb-6">
+                  <div className="relative w-10 h-10">
+                    <Image
+                      alt="Tutora"
+                      fill
+                      className="object-contain"
+                      src="/tutora_logo.png"
+                    />
+                  </div>
+                  <span className="text-xl font-semibold">Tutora</span>
+                </Link>
+                <p className="text-gray-600 mb-6">
+                  AI-powered training platform that helps teams learn faster and work better.
+                </p>
+                <div className="flex space-x-4">
+                  <Link href="https://apps.apple.com" className="block">
+                    <Image
+                      alt="Download on App Store"
+                      width={120}
+                      height={40}
+                      src="/images/appstore.svg"
+                    />
+                  </Link>
+                  <Link href="https://play.google.com" className="block">
+                    <Image
+                      alt="Get it on Google Play"
+                      width={120}
+                      height={40}
+                      src="/images/playstore.svg"
+                    />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Product Links */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">Product</h3>
+                <ul className="space-y-3">
+                  <li><Link href="/features" className="text-gray-600 hover:text-gray-900">Features</Link></li>
+                  <li><Link href="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link></li>
+                  <li><Link href="/testimonials" className="text-gray-600 hover:text-gray-900">Testimonials</Link></li>
+                  <li><Link href="/faq" className="text-gray-600 hover:text-gray-900">FAQ</Link></li>
+                </ul>
+              </div>
+
+              {/* Company Links */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">Company</h3>
+                <ul className="space-y-3">
+                  <li><Link href="/about" className="text-gray-600 hover:text-gray-900">About</Link></li>
+                  <li><Link href="/support" className="text-gray-600 hover:text-gray-900">Support</Link></li>
+                  <li><Link href="/contact" className="text-gray-600 hover:text-gray-900">Contact</Link></li>
+                  <li><Link href="/admin/login" className="text-gray-600 hover:text-gray-900">Admin Portal</Link></li>
+                </ul>
+              </div>
+
+              {/* Legal Links */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">Legal</h3>
+                <ul className="space-y-3">
+                  <li><Link href="/privacy" className="text-gray-600 hover:text-gray-900">Privacy</Link></li>
+                  <li><Link href="/terms" className="text-gray-600 hover:text-gray-900">Terms</Link></li>
+                  <li><Link href="/security" className="text-gray-600 hover:text-gray-900">Security</Link></li>
+                  <li><Link href="/gdpr" className="text-gray-600 hover:text-gray-900">GDPR</Link></li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Footer Bottom */}
+            <div className="mt-16 pt-8 border-t border-gray-200">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <p className="text-gray-500">© 2025 Tutora. All rights reserved.</p>
+                <div className="flex items-center space-x-6">
+                  <Link href="/privacy" className="text-gray-500 hover:text-gray-900">Privacy Policy</Link>
+                  <Link href="/terms" className="text-gray-500 hover:text-gray-900">Terms of Service</Link>
+                  <Link href="/cookies" className="text-gray-500 hover:text-gray-900">Cookie Policy</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   )
