@@ -1,53 +1,43 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { BookOpen, Building, Mail, User, Phone, MapPin, CreditCard, Check, ArrowLeft, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { 
+  Building, 
+  Mail, 
+  User, 
+  Users, 
+  ArrowRight, 
+  ArrowLeft, 
+  CheckCircle, 
+  Zap,
+  BarChart3,
+  Shield,
+  Smartphone
+} from 'lucide-react'
 import Link from 'next/link'
+import Navigation from '@/components/Navigation'
 
 export default function RegisterPage() {
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const [selectedPlan, setSelectedPlan] = useState('professional')
-  const [billingCycle, setBillingCycle] = useState('monthly')
-  const [isLoading, setIsLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
-    // Company Information
-    companyName: '',
-    industry: '',
-    companySize: '',
-    website: '',
-    
-    // Contact Information
+    // Step 1: Business Basics
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
+    companyName: '',
     jobTitle: '',
     
-    // Billing Information
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: 'United States'
+    // Step 2: Team Details
+    teamSize: '',
+    industry: '',
+    currentTrainingMethod: '',
+    
+    // Step 3: Needs Assessment
+    primaryGoal: '',
+    urgency: ''
   })
-
-  useEffect(() => {
-    const plan = searchParams.get('plan') || 'professional'
-    const billing = searchParams.get('billing') || 'monthly'
-    setSelectedPlan(plan)
-    setBillingCycle(billing)
-  }, [searchParams])
-
-  const planPricing = {
-    starter: { monthly: 12, annual: 10 },
-    professional: { monthly: 29, annual: 24 },
-    enterprise: { monthly: 79, annual: 65 }
-  }
-
-  const currentPrice = planPricing[selectedPlan as keyof typeof planPricing]?.[billingCycle as keyof typeof planPricing.starter] || 65
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -57,11 +47,38 @@ export default function RegisterPage() {
     }))
   }
 
+  const getRecommendedPlan = () => {
+    const teamSizeNum = parseInt(formData.teamSize.split('-')[0]) || 0
+    if (teamSizeNum <= 25) return 'basic'
+    if (teamSizeNum <= 250) return 'growth'
+    return 'enterprise'
+  }
+
+  const planDetails = {
+    basic: {
+      name: 'Basic',
+      price: '$12',
+      description: 'Perfect for small teams',
+      features: ['Up to 25 users', '5 AI modules/month', 'Basic analytics', 'Email support']
+    },
+    growth: {
+      name: 'Growth',
+      price: '$29',
+      description: 'For growing organizations',
+      features: ['Up to 250 users', 'Unlimited AI modules', 'Advanced analytics', 'Priority support'],
+      popular: true
+    },
+    enterprise: {
+      name: 'Enterprise',
+      price: '$79',
+      description: 'For large organizations',
+      features: ['Unlimited users', 'Advanced AI features', '24/7 dedicated support', 'Custom integrations']
+    }
+  }
+
   const handleNextStep = () => {
-    if (currentStep < 3) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1)
-    } else {
-      handleSubmit()
     }
   }
 
@@ -71,433 +88,439 @@ export default function RegisterPage() {
     }
   }
 
-  const handleSubmit = async () => {
-    setIsLoading(true)
-    
-    try {
-      // Create Stripe checkout session with user data
-      const response = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          planId: selectedPlan,
-          billingCycle,
-          successUrl: `${window.location.origin}/success?plan=${selectedPlan}`,
-          cancelUrl: `${window.location.origin}/register`,
-          metadata: {
-            companyName: formData.companyName,
-            adminName: `${formData.firstName} ${formData.lastName}`,
-            contactEmail: formData.email,
-            contactPhone: formData.phone,
-            industry: formData.industry,
-            companySize: formData.companySize,
-            website: formData.website,
-            jobTitle: formData.jobTitle
-          }
-        }),
-      })
-
-      const data = await response.json()
-      
-      if (data.success && data.url) {
-        // Redirect to Stripe checkout
-        window.location.href = data.url
-      } else {
-        console.error('Failed to create checkout session:', data.error)
-        alert('Failed to start checkout. Please try again.')
-      }
-    } catch (error) {
-      console.error('Registration error:', error)
-      alert('An error occurred. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
+  const handleStartTrial = () => {
+    const recommendedPlan = getRecommendedPlan()
+    // Redirect to pricing with pre-selected plan and collected data
+    const queryParams = new URLSearchParams({
+      plan: recommendedPlan,
+      email: formData.email,
+      company: formData.companyName,
+      size: formData.teamSize
+    })
+    router.push(`/pricing?${queryParams.toString()}`)
   }
 
-  const steps = [
-    {
-      number: 1,
-      title: "Company Information",
-      description: "Tell us about your organization"
-    },
-    {
-      number: 2,
-      title: "Contact Details",
-      description: "Your personal information"
-    },
-    {
-      number: 3,
-      title: "Review & Start Trial",
-      description: "Confirm your details and begin"
-    }
-  ]
-
-  const isStepValid = (step: number) => {
-    switch (step) {
+  const isStepValid = () => {
+    switch (currentStep) {
       case 1:
-        return formData.companyName && formData.industry && formData.companySize
+        return formData.firstName && formData.lastName && formData.email && formData.companyName && formData.jobTitle
       case 2:
-        return formData.firstName && formData.lastName && formData.email
+        return formData.teamSize && formData.industry && formData.currentTrainingMethod
       case 3:
-        return true
+        return formData.primaryGoal && formData.urgency
       default:
-        return false
+        return true
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center">
-              <div className="h-8 w-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <BookOpen className="h-5 w-5 text-white" />
-              </div>
-              <div className="ml-3 text-xl font-bold text-gray-900">Tutora</div>
-            </Link>
-            <Link href="/pricing" className="text-gray-600 hover:text-gray-900 flex items-center">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Pricing
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Progress Steps */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Setup Progress</h3>
-              
-              <div className="space-y-4">
-                {steps.map((step, index) => (
-                  <div key={step.number} className="flex items-start space-x-3">
-                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                      currentStep > step.number 
-                        ? 'bg-green-100 text-green-600' 
-                        : currentStep === step.number 
-                        ? 'bg-blue-100 text-blue-600' 
-                        : 'bg-gray-100 text-gray-400'
-                    }`}>
-                      {currentStep > step.number ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        step.number
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className={`text-sm font-medium ${
-                        currentStep >= step.number ? 'text-gray-900' : 'text-gray-400'
-                      }`}>
-                        {step.title}
-                      </p>
-                      <p className={`text-xs ${
-                        currentStep >= step.number ? 'text-gray-600' : 'text-gray-400'
-                      }`}>
-                        {step.description}
-                      </p>
-                    </div>
+      <Navigation />
+      
+      <div className="pt-20 pb-16">
+        <div className="max-w-4xl mx-auto px-6">
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              {[1, 2, 3, 4].map((step) => (
+                <div key={step} className="flex items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    currentStep >= step
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {currentStep > step ? <CheckCircle className="h-5 w-5" /> : step}
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <h4 className="text-sm font-medium text-gray-900 mb-4">Selected Plan</h4>
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-900">
-                      {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)}
-                    </span>
-                    <span className="text-sm font-bold text-blue-600">${currentPrice}/user/mo</span>
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    {billingCycle === 'annual' ? 'Billed annually' : 'Billed monthly'}
-                  </p>
-                  <p className="text-xs text-green-600 mt-1">
-                    14-day free trial included
-                  </p>
+                  {step < 4 && (
+                    <div className={`w-24 h-1 mx-2 ${
+                      currentStep > step ? 'bg-blue-600' : 'bg-gray-200'
+                    }`} />
+                  )}
                 </div>
-              </div>
+              ))}
+            </div>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {currentStep === 1 && "Let's get to know you"}
+                {currentStep === 2 && "Tell us about your team"}
+                {currentStep === 3 && "What are your training goals?"}
+                {currentStep === 4 && "Perfect! Here's our recommendation"}
+              </h1>
+              <p className="text-gray-600">
+                {currentStep === 1 && "We'll use this to personalize your experience"}
+                {currentStep === 2 && "This helps us recommend the right plan for you"}
+                {currentStep === 3 && "Understanding your needs helps us serve you better"}
+                {currentStep === 4 && "Based on your answers, we've found the perfect plan"}
+              </p>
             </div>
           </div>
 
-          {/* Form Steps */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm p-8">
-              {currentStep === 1 && (
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Company Information</h2>
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Company Name *
-                      </label>
-                      <div className="relative">
-                        <Building className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <input
-                          type="text"
-                          name="companyName"
-                          value={formData.companyName}
-                          onChange={handleInputChange}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Enter your company name"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Industry *
-                        </label>
-                        <select
-                          name="industry"
-                          value={formData.industry}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        >
-                          <option value="">Select industry</option>
-                          <option value="technology">Technology</option>
-                          <option value="healthcare">Healthcare</option>
-                          <option value="finance">Finance</option>
-                          <option value="education">Education</option>
-                          <option value="manufacturing">Manufacturing</option>
-                          <option value="retail">Retail</option>
-                          <option value="consulting">Consulting</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Company Size *
-                        </label>
-                        <select
-                          name="companySize"
-                          value={formData.companySize}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        >
-                          <option value="">Select size</option>
-                          <option value="1-10">1-10 employees</option>
-                          <option value="11-50">11-50 employees</option>
-                          <option value="51-200">51-200 employees</option>
-                          <option value="201-500">201-500 employees</option>
-                          <option value="501-1000">501-1000 employees</option>
-                          <option value="1000+">1000+ employees</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Website
-                      </label>
+          <div className="bg-white rounded-2xl shadow-lg p-8">
+            {/* Step 1: Business Basics */}
+            {currentStep === 1 && (
+              <div className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      First Name *
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                       <input
-                        type="url"
-                        name="website"
-                        value={formData.website}
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="https://yourcompany.com"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter your first name"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Last Name *
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter your last name"
+                        required
                       />
                     </div>
                   </div>
                 </div>
-              )}
 
-              {currentStep === 2 && (
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
-                  <div className="space-y-6">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          First Name *
-                        </label>
-                        <div className="relative">
-                          <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                          <input
-                            type="text"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleInputChange}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="John"
-                            required
-                          />
-                        </div>
-                      </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Work Email *
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter your work email"
+                      required
+                    />
+                  </div>
+                </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Last Name *
-                        </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Name *
+                  </label>
+                  <div className="relative">
+                    <Building className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <input
+                      type="text"
+                      name="companyName"
+                      value={formData.companyName}
+                      onChange={handleInputChange}
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter your company name"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Job Title *
+                  </label>
+                  <select
+                    name="jobTitle"
+                    value={formData.jobTitle}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select your role</option>
+                    <option value="ceo">CEO/Founder</option>
+                    <option value="hr-director">HR Director</option>
+                    <option value="learning-development">Learning & Development</option>
+                    <option value="operations">Operations Manager</option>
+                    <option value="training-manager">Training Manager</option>
+                    <option value="department-head">Department Head</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Team Details */}
+            {currentStep === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    How many people are in your team/organization? *
+                  </label>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {[
+                      { value: '1-10', label: '1-10 people' },
+                      { value: '11-25', label: '11-25 people' },
+                      { value: '26-50', label: '26-50 people' },
+                      { value: '51-100', label: '51-100 people' },
+                      { value: '101-250', label: '101-250 people' },
+                      { value: '251-500', label: '251-500 people' },
+                      { value: '501-1000', label: '501-1000 people' },
+                      { value: '1000+', label: '1000+ people' }
+                    ].map((option) => (
+                      <label key={option.value} className="relative">
                         <input
-                          type="text"
-                          name="lastName"
-                          value={formData.lastName}
+                          type="radio"
+                          name="teamSize"
+                          value={option.value}
+                          checked={formData.teamSize === option.value}
                           onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="Doe"
-                          required
+                          className="sr-only"
                         />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address *
+                        <div className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                          formData.teamSize === option.value
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}>
+                          <div className="flex items-center space-x-3">
+                            <Users className="h-5 w-5" />
+                            <span className="font-medium">{option.label}</span>
+                          </div>
+                        </div>
                       </label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="john@company.com"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Phone Number
-                        </label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="+1 (555) 123-4567"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Job Title
-                        </label>
-                        <input
-                          type="text"
-                          name="jobTitle"
-                          value={formData.jobTitle}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          placeholder="CEO, CTO, HR Manager, etc."
-                        />
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
-              )}
 
-              {currentStep === 3 && (
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Review & Start Trial</h2>
-                  <div className="space-y-6">
-                    <div className="bg-gray-50 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Details</h3>
-                      <div className="grid md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-600">Company:</span>
-                          <span className="ml-2 font-medium">{formData.companyName}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Industry:</span>
-                          <span className="ml-2 font-medium">{formData.industry}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Size:</span>
-                          <span className="ml-2 font-medium">{formData.companySize}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">Contact:</span>
-                          <span className="ml-2 font-medium">{formData.firstName} {formData.lastName}</span>
-                        </div>
-                      </div>
-                    </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    What industry are you in? *
+                  </label>
+                  <select
+                    name="industry"
+                    value={formData.industry}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select your industry</option>
+                    <option value="technology">Technology</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="finance">Finance & Banking</option>
+                    <option value="education">Education</option>
+                    <option value="manufacturing">Manufacturing</option>
+                    <option value="retail">Retail & E-commerce</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="real-estate">Real Estate</option>
+                    <option value="hospitality">Hospitality</option>
+                    <option value="non-profit">Non-Profit</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
 
-                    <div className="bg-blue-50 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Plan Summary</h3>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-lg font-medium">
-                          {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} Plan
-                        </span>
-                        <span className="text-2xl font-bold text-blue-600">${currentPrice}/user/mo</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-4">
-                        {billingCycle === 'annual' ? 'Billed annually' : 'Billed monthly'} • 14-day free trial
-                      </p>
-                      <div className="text-sm text-green-600 font-medium">
-                        ✓ No credit card required for trial
-                      </div>
-                    </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    How do you currently train your team? *
+                  </label>
+                  <select
+                    name="currentTrainingMethod"
+                    value={formData.currentTrainingMethod}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select current method</option>
+                    <option value="in-person">In-person workshops</option>
+                    <option value="video-calls">Video calls/Zoom meetings</option>
+                    <option value="documents">PDF documents/manuals</option>
+                    <option value="youtube">YouTube videos</option>
+                    <option value="lms">Existing LMS platform</option>
+                    <option value="informal">Informal/on-the-job training</option>
+                    <option value="none">No formal training process</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+            )}
 
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <h4 className="text-sm font-medium text-yellow-800 mb-2">What happens next?</h4>
-                      <ul className="text-sm text-yellow-700 space-y-1">
-                        <li>• Start your 14-day free trial immediately</li>
-                        <li>• Receive your company code and admin credentials</li>
-                        <li>• Access all features during your trial period</li>
-                        <li>• No charges until your trial ends</li>
-                      </ul>
-                    </div>
+            {/* Step 3: Needs Assessment */}
+            {currentStep === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    What's your primary training goal? *
+                  </label>
+                  <div className="space-y-3">
+                    {[
+                      { value: 'onboarding', label: 'Improve employee onboarding', icon: '🚀' },
+                      { value: 'compliance', label: 'Ensure compliance training', icon: '⚖️' },
+                      { value: 'skills', label: 'Develop team skills', icon: '📚' },
+                      { value: 'sales', label: 'Sales enablement', icon: '💼' },
+                      { value: 'productivity', label: 'Increase productivity', icon: '📈' },
+                      { value: 'retention', label: 'Improve employee retention', icon: '🤝' }
+                    ].map((option) => (
+                      <label key={option.value} className="relative">
+                        <input
+                          type="radio"
+                          name="primaryGoal"
+                          value={option.value}
+                          checked={formData.primaryGoal === option.value}
+                          onChange={handleInputChange}
+                          className="sr-only"
+                        />
+                        <div className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                          formData.primaryGoal === option.value
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}>
+                          <div className="flex items-center space-x-3">
+                            <span className="text-2xl">{option.icon}</span>
+                            <span className="font-medium">{option.label}</span>
+                          </div>
+                        </div>
+                      </label>
+                    ))}
                   </div>
                 </div>
-              )}
 
-              {/* Navigation Buttons */}
-              <div className="flex justify-between items-center mt-8 pt-8 border-t border-gray-200">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    How quickly do you want to get started? *
+                  </label>
+                  <select
+                    name="urgency"
+                    value={formData.urgency}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select timeline</option>
+                    <option value="immediately">Immediately (this week)</option>
+                    <option value="soon">Soon (within 2 weeks)</option>
+                    <option value="month">Within a month</option>
+                    <option value="quarter">Within 3 months</option>
+                    <option value="exploring">Just exploring options</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Step 4: Plan Recommendation */}
+            {currentStep === 4 && (
+              <div className="text-center">
+                <div className="mb-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                    Perfect! We recommend the {planDetails[getRecommendedPlan() as keyof typeof planDetails].name} plan
+                  </h2>
+                  <p className="text-gray-600 mb-8">
+                    Based on your team size of {formData.teamSize} people, this plan will give you the best value and features.
+                  </p>
+                </div>
+
+                {/* Recommended Plan Card */}
+                <div className="max-w-md mx-auto mb-8">
+                  {(() => {
+                    const plan = planDetails[getRecommendedPlan() as keyof typeof planDetails]
+                    return (
+                      <div className="border-2 border-blue-500 rounded-2xl p-6 bg-blue-50">
+                        <div className="text-center mb-6">
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                          <p className="text-gray-600 mb-4">{plan.description}</p>
+                          <div className="text-4xl font-bold text-blue-600 mb-2">
+                            {plan.price}<span className="text-lg text-gray-600">/user/month</span>
+                          </div>
+                        </div>
+                        <ul className="space-y-3 mb-6">
+                          {plan.features.map((feature, index) => (
+                            <li key={index} className="flex items-center space-x-3">
+                              <CheckCircle className="h-5 w-5 text-green-500" />
+                              <span className="text-gray-700">{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  })()}
+                </div>
+
+                <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 mb-8">
+                  <h3 className="font-semibold text-gray-900 mb-2">✨ What happens next?</h3>
+                  <div className="text-left max-w-md mx-auto space-y-2 text-sm text-gray-600">
+                    <p>• Start your 14-day free trial (no credit card required)</p>
+                    <p>• Upload your first training content in minutes</p>
+                    <p>• Invite your team and start tracking progress</p>
+                    <p>• Get dedicated onboarding support</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleStartTrial}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-lg transition-all duration-200 flex items-center space-x-2 mx-auto"
+                >
+                  <span>Start My Free Trial</span>
+                  <ArrowRight className="h-5 w-5" />
+                </button>
+                <p className="text-sm text-gray-500 mt-4">
+                  No credit card required • 14-day free trial • Cancel anytime
+                </p>
+              </div>
+            )}
+
+            {/* Navigation Buttons */}
+            {currentStep < 4 && (
+              <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
                 <button
                   onClick={handlePrevStep}
                   disabled={currentStep === 1}
-                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                  className={`px-6 py-3 rounded-lg font-medium flex items-center space-x-2 ${
                     currentStep === 1
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
                   }`}
                 >
-                  Previous
+                  <ArrowLeft className="h-5 w-5" />
+                  <span>Back</span>
                 </button>
 
                 <button
                   onClick={handleNextStep}
-                  disabled={!isStepValid(currentStep) || isLoading}
-                  className={`px-8 py-2 rounded-lg font-medium transition-all ${
-                    !isStepValid(currentStep) || isLoading
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : currentStep === 3
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  disabled={!isStepValid()}
+                  className={`px-8 py-3 rounded-lg font-medium flex items-center space-x-2 ${
+                    isStepValid()
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Processing...</span>
-                    </div>
-                  ) : currentStep === 3 ? (
-                    'Start Free Trial'
-                  ) : (
-                    'Next'
-                  )}
+                  <span>Continue</span>
+                  <ArrowRight className="h-5 w-5" />
                 </button>
+              </div>
+            )}
+          </div>
+
+          {/* Trust Signals */}
+          <div className="mt-8 text-center">
+            <div className="flex justify-center items-center space-x-8 text-sm text-gray-500">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-4 w-4" />
+                <span>SOC2 Certified</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>GDPR Compliant</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Users className="h-4 w-4" />
+                <span>10,000+ Happy Users</span>
               </div>
             </div>
           </div>
