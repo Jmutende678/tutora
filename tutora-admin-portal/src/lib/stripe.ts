@@ -190,8 +190,7 @@ export class StripeService {
         locale: 'en',
         phone_number_collection: {
           enabled: true
-        },
-        customer_creation: 'always'
+        }
       })
 
       return session

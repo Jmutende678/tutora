@@ -4,31 +4,59 @@ import { getAuth } from 'firebase-admin/auth'
 import { nanoid } from 'nanoid'
 // import { EmailService } from './email'
 
-// Firebase Admin configuration
+// Firebase Admin configuration with better error handling
 const firebaseConfig = {
   projectId: process.env.FIREBASE_PROJECT_ID,
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
   privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
 }
 
-// Initialize Firebase Admin
+// Initialize Firebase Admin with better error handling
 let app: App | null = null
-if (getApps().length === 0 && process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
-  try {
-    app = initializeApp({
-      credential: cert(firebaseConfig),
-      projectId: process.env.FIREBASE_PROJECT_ID,
-    })
-  } catch (error) {
-    console.log('Firebase initialization failed, running in development mode:', error)
+let isFirebaseAvailable = false
+
+function initializeFirebase() {
+  // Check if all required environment variables are present
+  const hasRequiredCredentials = 
+    process.env.FIREBASE_PROJECT_ID && 
+    process.env.FIREBASE_PRIVATE_KEY && 
+    process.env.FIREBASE_CLIENT_EMAIL &&
+    process.env.FIREBASE_PRIVATE_KEY.includes('BEGIN PRIVATE KEY')
+
+  if (getApps().length === 0 && hasRequiredCredentials) {
+    try {
+      app = initializeApp({
+        credential: cert(firebaseConfig),
+        projectId: process.env.FIREBASE_PROJECT_ID,
+      })
+      isFirebaseAvailable = true
+      console.log('✅ Firebase initialized successfully')
+    } catch (error) {
+      console.log('❌ Firebase initialization failed, running in development mode:', error)
+      app = null
+      isFirebaseAvailable = false
+    }
+  } else if (getApps().length > 0) {
+    app = getApps()[0]
+    isFirebaseAvailable = true
+    console.log('✅ Firebase already initialized')
+  } else {
+    console.log('⚠️ Firebase credentials not configured, running in development mode')
+    console.log('📝 To enable Firebase:')
+    console.log('   1. Set FIREBASE_PROJECT_ID in .env.local')
+    console.log('   2. Set FIREBASE_CLIENT_EMAIL in .env.local')
+    console.log('   3. Set FIREBASE_PRIVATE_KEY in .env.local')
     app = null
+    isFirebaseAvailable = false
   }
-} else if (getApps().length > 0) {
-  app = getApps()[0]
 }
+
+// Initialize Firebase
+initializeFirebase()
 
 export const db = app ? getFirestore(app) : null
 export const auth = app ? getAuth(app) : null
+export { isFirebaseAvailable }
 
 export interface Company {
   id: string

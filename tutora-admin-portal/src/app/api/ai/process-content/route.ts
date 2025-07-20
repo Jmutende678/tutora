@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import fs from 'fs'
-import path from 'path'
-import { promisify } from 'util'
-
-const writeFile = promisify(fs.writeFile)
-const unlink = promisify(fs.unlink)
 
 // Initialize OpenAI
 const openai = new OpenAI({
@@ -106,10 +100,11 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('📊 Content processed, length:', processedContent.length)
+    console.log('📋 First 200 characters of content:', processedContent.substring(0, 200))
 
     if (!processedContent || processedContent.length < 50) {
       return NextResponse.json({ 
-        error: 'Insufficient content extracted from file' 
+        error: 'Insufficient content extracted from file. Please ensure your file contains readable text.' 
       }, { status: 400 })
     }
 
@@ -132,7 +127,7 @@ export async function POST(request: NextRequest) {
       processingTime: moduleResult.processingTime
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('💥 Unexpected error in AI processing:', error)
     return NextResponse.json({ 
       error: 'Internal server error during processing' 
@@ -190,7 +185,7 @@ async function generateTrainingModule(content: string): Promise<{
           { role: "system", content: SYSTEM_PROMPT },
           { 
             role: "user", 
-            content: `Analyze this content and create a professional training module with quiz questions:\n\n${content.substring(0, 4000)}`
+            content: `Create a comprehensive training module based SPECIFICALLY on this uploaded content. Use the actual topics, concepts, and details from this content:\n\n${content.substring(0, 4000)}\n\nIMPORTANT: The training module title, description, content, and quiz questions must all be directly related to the topics covered in the above text. Do not use generic examples - use the specific subject matter provided.`
           }
         ],
         temperature: 0.7,
@@ -260,49 +255,18 @@ async function generateTrainingModule(content: string): Promise<{
 async function processVideoFile(file: File): Promise<string> {
   console.log('🎬 Processing video file for transcription...')
   
-  const buffer = await file.arrayBuffer()
-  const tempFilePath = path.join('/tmp', `video_${Date.now()}_${file.name}`)
-  
   try {
-    await writeFile(tempFilePath, Buffer.from(buffer))
-    console.log('📁 Video file saved temporarily')
-
-    // For large files, we might need to chunk them
-    const fileSize = buffer.byteLength
-    const maxChunkSize = 25 * 1024 * 1024 // 25MB chunks
-    
-    if (fileSize > maxChunkSize) {
-      console.log('📦 Large file detected, processing in chunks...')
-      return await processVideoInChunks(tempFilePath, fileSize, maxChunkSize)
-    } else {
-      console.log('🎯 Processing single video file...')
-      return await transcribeVideo(tempFilePath)
+    // Check file size (Whisper has a 25MB limit)
+    const maxSize = 25 * 1024 * 1024; // 25MB
+    if (file.size > maxSize) {
+      throw new Error(`Video file too large (${Math.round(file.size / (1024 * 1024))}MB). Please use a file smaller than 25MB.`)
     }
-  } finally {
-    // Clean up temp file
-    try {
-      await unlink(tempFilePath)
-      console.log('🧹 Temporary video file cleaned up')
-    } catch (cleanupError) {
-      console.log('⚠️ Failed to cleanup temp file:', cleanupError)
-    }
-  }
-}
 
-async function processVideoInChunks(filePath: string, fileSize: number, chunkSize: number): Promise<string> {
-  console.log(`📦 Processing video in chunks: ${Math.ceil(fileSize / chunkSize)} chunks`)
-  
-  // For now, just process the first chunk to avoid quota issues
-  // In production, you'd implement proper chunking
-  return await transcribeVideo(filePath)
-}
-
-async function transcribeVideo(filePath: string): Promise<string> {
-  try {
     console.log('🎤 Transcribing video with Whisper...')
     
+    // Create a File object that OpenAI can process directly
     const transcription = await openai.audio.transcriptions.create({
-      file: fs.createReadStream(filePath),
+      file: file,
       model: "whisper-1",
       response_format: "text",
       language: "en"
@@ -319,8 +283,17 @@ async function transcribeVideo(filePath: string): Promise<string> {
 async function processDocumentFile(file: File): Promise<string> {
   console.log('📄 Processing document file...')
   
-  const text = await file.text()
-  console.log('✅ Document text extracted')
-  
-  return text
+  try {
+    const text = await file.text()
+    console.log('✅ Document text extracted')
+    
+    if (!text || text.length < 10) {
+      throw new Error('Document appears to be empty or unreadable')
+    }
+    
+    return text
+  } catch (error: any) {
+    console.error('❌ Document processing failed:', error)
+    throw new Error(`Document processing failed: ${error.message}`)
+  }
 } 

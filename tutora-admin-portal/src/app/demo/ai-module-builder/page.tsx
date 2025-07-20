@@ -115,32 +115,29 @@ export default function AIModuleBuilder() {
     setProcessingStatus('Reading file content...')
 
     try {
-      // Read file content
-      const content = await readFileContent(file)
-      console.log('File content read successfully')
+      console.log('Preparing file for AI processing...')
       setProgress(20)
-      setProcessingStatus('File content read successfully. Preparing for AI processing...')
-
-      // If it's a video, include the thumbnail
-      const requestBody = {
-        content,
-        contentType: file.type,
-        fileName: file.name,
-        thumbnail: file.type.startsWith('video/') ? thumbnail : null,
-        duration: videoDuration
-      }
+      setProcessingStatus('Preparing file for AI processing...')
 
       console.log('Sending request to API...')
       setProgress(40)
-      setProcessingStatus('Sending content to AI for processing...')
+      setProcessingStatus('Sending file to AI for processing...')
 
-      // Send to API
+      // Create FormData for file upload (matching the working API format)
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      // Determine file type for API
+      let fileType = 'document'
+      if (file.type.startsWith('video/')) {
+        fileType = 'video'
+      }
+      formData.append('fileType', fileType)
+
+      // Send to API with proper multipart form data
       const response = await fetch('/api/ai/process-content', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody)
+        body: formData // No Content-Type header needed for FormData
       })
 
       console.log('Received API response:', response.status)
@@ -148,8 +145,14 @@ export default function AIModuleBuilder() {
       setProcessingStatus('Received response from AI. Processing results...')
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to process content')
+        let errorMessage = 'Failed to process content'
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch (e) {
+          errorMessage = `Server error: ${response.status} ${response.statusText}`
+        }
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
@@ -157,15 +160,58 @@ export default function AIModuleBuilder() {
       setProgress(80)
       setProcessingStatus('AI processing complete. Saving results...')
 
-      if (!data.success || !data.data) {
+      if (!data.success || !data.module) {
         throw new Error('Invalid response format')
       }
 
-      // Store the processed content in localStorage
-      localStorage.setItem('moduleContent', JSON.stringify(data.data.module))
-      localStorage.setItem('quizContent', JSON.stringify(data.data.quiz))
-      if (data.data.transcript) {
-        localStorage.setItem('transcriptContent', JSON.stringify(data.data.transcript))
+      // Convert complex content object to formatted string for display
+      let moduleContentString = `${data.module.title || 'Untitled Module'}\n\n${data.module.description || 'No description available'}\n\n`
+      
+      if (data.module.content && typeof data.module.content === 'object') {
+        Object.entries(data.module.content).forEach(([sectionTitle, sectionData]: [string, any]) => {
+          moduleContentString += `${sectionTitle}\n`
+          if (sectionData.definition) {
+            moduleContentString += `${sectionData.definition}\n\n`
+          }
+          if (sectionData.guidelines && Array.isArray(sectionData.guidelines)) {
+            sectionData.guidelines.forEach((guideline: string) => {
+              moduleContentString += `• ${guideline}\n`
+            })
+            moduleContentString += '\n'
+          }
+        })
+      }
+      
+      // Add learning objectives
+      if (data.module.learningObjectives && Array.isArray(data.module.learningObjectives)) {
+        moduleContentString += 'Learning Objectives:\n'
+        data.module.learningObjectives.forEach((objective: string) => {
+          moduleContentString += `• ${objective}\n`
+        })
+        moduleContentString += '\n'
+      }
+      
+      // Add key takeaways
+      if (data.module.keyTakeaways && Array.isArray(data.module.keyTakeaways)) {
+        moduleContentString += 'Key Takeaways:\n'
+        data.module.keyTakeaways.forEach((takeaway: string) => {
+          moduleContentString += `• ${takeaway}\n`
+        })
+      }
+      
+      localStorage.setItem('moduleContent', JSON.stringify(moduleContentString))
+      
+      // Store quiz questions correctly
+      if (data.module.quiz && data.module.quiz.questions && Array.isArray(data.module.quiz.questions)) {
+        localStorage.setItem('quizContent', JSON.stringify(data.module.quiz.questions))
+      }
+      
+      // Store the full module data for reference
+      localStorage.setItem('fullModuleData', JSON.stringify(data.module))
+      
+      // For videos, store any transcript if available
+      if (data.transcript) {
+        localStorage.setItem('transcriptContent', JSON.stringify(data.transcript))
       }
       if (thumbnail) {
         localStorage.setItem('videoThumbnail', thumbnail)
@@ -199,42 +245,98 @@ export default function AIModuleBuilder() {
     }
   }
 
-  const readFileContent = async (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
 
-      reader.onload = (e) => {
-        const content = e.target?.result
-        if (typeof content === 'string') {
-          resolve(content)
-        } else {
-          reject(new Error('Failed to read file content'))
-        }
-      }
-
-      reader.onerror = () => {
-        reject(new Error('Failed to read file'))
-      }
-
-      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
-        reader.readAsDataURL(file)
-      } else {
-        reader.readAsText(file)
-      }
-    })
-  }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white shadow-lg rounded-lg p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            AI Module Builder Demo
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Navigation Header */}
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Tutora</h1>
+              </div>
+              <div className="hidden md:block">
+                <div className="ml-10 flex items-baseline space-x-4">
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                    AI Module Builder
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => window.history.back()}
+                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center"
+              >
+                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd"/>
+                </svg>
+                Back
+              </button>
+              <button
+                onClick={() => window.location.href = '/'}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center"
+              >
+                <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                </svg>
+                Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl mb-6">
+            AI Training Module Builder
           </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Transform your training content into interactive learning modules with AI-powered insights, 
+            automatically generated quizzes, and comprehensive learning objectives.
+          </p>
+          
+          {/* Progress Steps */}
+          <div className="mt-8 flex justify-center">
+            <div className="flex items-center space-x-4">
+              <div className={`flex items-center ${file ? 'text-green-600' : 'text-gray-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${file ? 'bg-green-100' : 'bg-gray-100'}`}>
+                  1
+                </div>
+                <span className="ml-2 text-sm font-medium">Upload Content</span>
+              </div>
+              <div className="w-8 border-t border-gray-300"></div>
+              <div className={`flex items-center ${loading ? 'text-blue-600' : 'text-gray-400'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${loading ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                  2
+                </div>
+                <span className="ml-2 text-sm font-medium">AI Processing</span>
+              </div>
+              <div className="w-8 border-t border-gray-300"></div>
+              <div className="flex items-center text-gray-400">
+                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-sm font-semibold">
+                  3
+                </div>
+                <span className="ml-2 text-sm font-medium">Interactive Module</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+            Upload Your Training Content
+          </h2>
 
           <div className="space-y-6">
             {/* File Upload Section */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
+              file ? 'border-green-300 bg-green-50' : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50'
+            }`}>
               <input
                 type="file"
                 onChange={handleFileChange}
@@ -243,22 +345,80 @@ export default function AIModuleBuilder() {
                 accept=".txt,.md,.pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.gif,.mp4,.mov,.webm,.avi"
                 disabled={loading}
               />
+              
+              <div className="mb-4">
+                {file ? (
+                  <svg className="w-16 h-16 mx-auto text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                  </svg>
+                ) : (
+                  <svg className="w-16 h-16 mx-auto text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd"/>
+                  </svg>
+                )}
+              </div>
+
               <label
                 htmlFor="file-upload"
-                className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className={`cursor-pointer inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl transition-all duration-200 ${
+                  loading 
+                    ? 'bg-gray-400 text-white cursor-not-allowed' 
+                    : file
+                    ? 'bg-green-600 text-white hover:bg-green-700 transform hover:scale-105'
+                    : 'bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg`}
               >
-                {loading ? 'Processing...' : 'Select File'}
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : file ? (
+                  <>
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd"/>
+                    </svg>
+                    Change File
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd"/>
+                    </svg>
+                    Upload Training Content
+                  </>
+                )}
               </label>
+              
               {file && (
-                <p className="mt-2 text-sm text-gray-600">
-                  Selected: {file.name}
-                </p>
+                <div className="mt-4 p-4 bg-white rounded-lg border border-green-200">
+                  <div className="flex items-center justify-center">
+                    <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v12h8V4H6z" clipRule="evenodd"/>
+                    </svg>
+                    <span className="text-sm font-medium text-gray-900">{file.name}</span>
+                  </div>
+                  <p className="text-sm text-green-700 mt-2">
+                    ✅ File ready for AI processing!
+                  </p>
+                </div>
               )}
-              <p className="mt-2 text-xs text-gray-500">
-                Supports: Text files, PDFs, Documents, Images, and Videos (MP4, MOV, WEBM, AVI)
-                <br />
-                Max size: {file?.type.includes('video') ? '100MB' : '50MB'}
-              </p>
+              
+              {!file && (
+                <div className="mt-4">
+                  <p className="text-lg text-gray-600 mb-2">
+                    Drop your file here or click to browse
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    📄 Training documents (.txt, .pdf, .doc, .docx) • 🖼️ Images (.jpg, .png) • 🎥 Videos (.mp4, .mov)
+                    <br />
+                                         <span className="text-xs">Max size: 100MB for videos, 50MB for documents</span>
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Video Preview */}
