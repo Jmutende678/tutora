@@ -1,5 +1,8 @@
+'use client'
+
 import React from 'react'
 import Link from 'next/link'
+import Navigation from '@/components/Navigation'
 import { 
   Target, 
   Users, 
@@ -22,11 +25,6 @@ import {
   Clock,
   Building
 } from 'lucide-react'
-
-export const metadata = {
-  title: 'About Tutora | Revolutionizing Employee Training with AI | Our Mission',
-  description: 'Learn about Tutora\'s mission to democratize professional training. 500+ companies, $50M+ saved, 95% retention rate. Meet the team revolutionizing workforce development with AI.',
-}
 
 export default function AboutPage() {
   const achievements = [
@@ -156,6 +154,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Navigation />
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-50 to-purple-50 pt-32 pb-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">

@@ -1,7 +1,9 @@
 'use client'
 
+import React from 'react'
+import Link from 'next/link'
 import Navigation from '@/components/Navigation'
-import { Star } from 'lucide-react'
+import { Star, Quote, ArrowRight, Brain } from 'lucide-react'
 
 export default function TestimonialsPage() {
   const testimonials = [
