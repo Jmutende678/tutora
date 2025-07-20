@@ -152,7 +152,7 @@ export default function HomePage() {
       <TrialPopup />
       
       {/* Hero Section */}
-      <main className="pt-32">
+      <main className="pt-32 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-16">
             <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-8">
@@ -179,7 +179,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/register"
-                className="bg-white text-slate-700 px-8 py-4 rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 font-semibold flex items-center justify-center space-x-2 transform hover:scale-105"
+                className="bg-white text-slate-700 px-8 py-4 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 font-semibold flex items-center justify-center space-x-2 transform hover:scale-105"
               >
                 <ArrowRight className="h-5 w-5" />
                 <span>Book a Live Demo</span>
@@ -205,7 +205,7 @@ export default function HomePage() {
         </div>
 
         {/* How Tutora Works - moved above stats */}
-        <section className="py-20 bg-slate-50">
+        <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
@@ -217,7 +217,7 @@ export default function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               {howItWorks.map((step, index) => (
-                <div key={index} className="relative bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div key={index} className="relative bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all duration-300">
                   <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl mb-6 font-bold text-lg">
                     {step.step}
                   </div>
@@ -231,13 +231,13 @@ export default function HomePage() {
         </section>
 
         {/* Social Proof / Company Logos */}
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="text-center mb-12">
               <p className="text-sm font-medium text-slate-500 mb-6">TRUSTED BY COMPANIES WORLDWIDE</p>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center justify-items-center opacity-60">
                 {trustLogos.map((company, index) => (
-                  <div key={index} className="h-12 w-32 bg-slate-100 rounded-lg flex items-center justify-center">
+                  <div key={index} className="h-12 w-32 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100 hover:border-gray-200 transition-colors">
                     <span className="text-slate-600 font-medium text-sm">{company.name}</span>
                   </div>
                 ))}
@@ -247,7 +247,7 @@ export default function HomePage() {
         </section>
 
         {/* Interactive Stats Reveal */}
-        <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
+        <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
@@ -262,7 +262,7 @@ export default function HomePage() {
                 <div 
                   key={index}
                   data-stat-index={index}
-                  className={`bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center transition-all duration-700 transform ${
+                  className={`bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center transition-all duration-700 transform hover:border-blue-300 hover:shadow-lg ${
                     visibleStats.has(index) ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
                   }`}
                 >
@@ -278,7 +278,7 @@ export default function HomePage() {
         </section>
 
         {/* Plans & Pricing Snapshot */}
-        <section className="py-20 bg-white">
+        <section className="py-20 bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
@@ -306,12 +306,12 @@ export default function HomePage() {
                     <span className="text-slate-600">Basic analytics</span>
                   </li>
                 </ul>
-                <Link href="/register" className="w-full bg-slate-100 text-slate-700 py-3 px-6 rounded-xl font-medium hover:bg-slate-200 transition-colors block text-center">
+                <Link href="/register" className="w-full bg-gray-50 hover:bg-gray-100 text-slate-700 py-3 px-6 rounded-xl font-medium transition-colors block text-center border border-gray-200">
                   Start Free Trial
                 </Link>
               </div>
               
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 rounded-2xl text-white relative transform scale-105">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 rounded-2xl text-white relative transform scale-105 shadow-xl">
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium">
                   Most Popular
                 </div>
@@ -361,7 +361,7 @@ export default function HomePage() {
                     <span className="text-slate-600">Dedicated support</span>
                   </li>
                 </ul>
-                <Link href="/register" className="w-full bg-slate-100 text-slate-700 py-3 px-6 rounded-xl font-medium hover:bg-slate-200 transition-colors block text-center">
+                <Link href="/register" className="w-full bg-gray-50 hover:bg-gray-100 text-slate-700 py-3 px-6 rounded-xl font-medium transition-colors block text-center border border-gray-200">
                   Contact Sales
                 </Link>
               </div>
@@ -370,7 +370,7 @@ export default function HomePage() {
         </section>
 
         {/* Feature Highlights */}
-        <section className="py-20 bg-slate-50">
+        <section className="py-20 bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
@@ -382,7 +382,7 @@ export default function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
-                <div key={index} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div key={index} className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all duration-300">
                   <feature.icon className="h-12 w-12 text-blue-600 mb-6" />
                   <h3 className="text-xl font-semibold text-slate-900 mb-4">{feature.title}</h3>
                   <p className="text-slate-600 leading-relaxed">{feature.description}</p>

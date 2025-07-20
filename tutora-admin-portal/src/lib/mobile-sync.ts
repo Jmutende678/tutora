@@ -38,7 +38,7 @@ export interface LeaderboardEntry {
 
 export interface Notification {
   id: string
-  type: 'module_assigned' | 'certificate_earned' | 'leaderboard_update' | 'reminder' | 'announcement'
+  type: 'module_assigned' | 'module_completed' | 'certificate_earned' | 'leaderboard_update' | 'reminder' | 'announcement'
   title: string
   message: string
   userId: string
@@ -344,7 +344,7 @@ export class MobileSyncService {
     console.log('📱 Push notification sent:', notification.title)
   }
 
-  private async getUserNotifications(userId: string): Promise<Notification[]> {
+  async getUserNotifications(userId: string): Promise<Notification[]> {
     // TODO: Implement Firebase query for user notifications
     return []
   }

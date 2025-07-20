@@ -605,6 +605,64 @@ export class FirebaseAdminService {
     }
   }
 
+  // Module Management
+  async getModulesForCompany(companyId: string): Promise<Module[]> {
+    if (!db) return []
+
+    try {
+      const snapshot = await db.collection('modules')
+        .where('companyId', '==', companyId)
+        .where('isPublished', '==', true)
+        .orderBy('order', 'asc')
+        .get()
+
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Module))
+    } catch (error) {
+      console.error('❌ Error fetching modules:', error)
+      return []
+    }
+  }
+
+  async createModule(moduleData: Partial<Module>): Promise<Module> {
+    const newModule: Module = {
+      id: nanoid(),
+      companyId: moduleData.companyId!,
+      title: moduleData.title!,
+      description: moduleData.description!,
+      content: moduleData.content!,
+      type: moduleData.type || 'text',
+      duration: moduleData.duration || 0,
+      difficulty: moduleData.difficulty || 'beginner',
+      tags: moduleData.tags || [],
+      createdAt: isFirebaseAvailable ? Timestamp.now() : new Date().toISOString(),
+      updatedAt: isFirebaseAvailable ? Timestamp.now() : new Date().toISOString(),
+      createdBy: moduleData.createdBy!,
+      isPublished: false,
+      order: moduleData.order || 0,
+      prerequisites: moduleData.prerequisites || [],
+      resources: moduleData.resources || [],
+      analytics: {
+        totalViews: 0,
+        completionRate: 0,
+        averageScore: 0,
+        averageTime: 0,
+        lastAccessed: isFirebaseAvailable ? Timestamp.now() : new Date().toISOString()
+      }
+    }
+
+    if (db) {
+      try {
+        await db.collection('modules').doc(newModule.id).set(newModule)
+        console.log('✅ Module created:', newModule.title)
+      } catch (error) {
+        console.error('❌ Error creating module:', error)
+        throw error
+      }
+    }
+
+    return newModule
+  }
+
   // Utility methods
   private async generateCompanyCode(): Promise<string> {
     const prefix = process.env.COMPANY_CODE_PREFIX || 'TUT'
