@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-// Initialize OpenAI
-const openai = new OpenAI({
+// Initialize OpenAI (only if API key is available)
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-})
+}) : null
 
 // Model configuration with fallback priority
 const MODEL_CONFIGS = [
@@ -139,7 +139,7 @@ async function testOpenAIConnection(): Promise<{ success: boolean; error?: strin
   try {
     console.log('🔑 Testing OpenAI API key...')
     
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.OPENAI_API_KEY || !openai) {
       return { success: false, error: 'OpenAI API key not found in environment variables' }
     }
 
@@ -172,6 +172,13 @@ async function generateTrainingModule(content: string): Promise<{
   processingTime?: number;
   error?: string;
 }> {
+  if (!openai) {
+    return {
+      success: false,
+      error: 'OpenAI service not available. Please configure OPENAI_API_KEY.'
+    }
+  }
+
   const startTime = Date.now()
   
   // Try each model in priority order
@@ -255,6 +262,10 @@ async function generateTrainingModule(content: string): Promise<{
 async function processVideoFile(file: File): Promise<string> {
   console.log('🎬 Processing video file for transcription...')
   
+  if (!openai) {
+    throw new Error('OpenAI service not available. Please configure OPENAI_API_KEY.')
+  }
+
   try {
     // Check file size (Whisper has a 25MB limit)
     const maxSize = 25 * 1024 * 1024; // 25MB
