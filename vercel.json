@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd tutora-admin-portal && npm run build",
+  "installCommand": "cd tutora-admin-portal && npm install",
+  "outputDirectory": "tutora-admin-portal/.next"
+}
