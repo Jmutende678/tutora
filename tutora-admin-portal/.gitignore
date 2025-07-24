@@ -5,3 +5,4 @@ node_modules/
 .env.local*
 apikey.tmp
 tutora-admin-portal/.env.local
+.env.local
