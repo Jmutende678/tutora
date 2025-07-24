@@ -24,7 +24,7 @@ export default function FAQPage() {
     },
     {
       question: "How does the pricing work?",
-      answer: "Our pricing is per active learner per month. You only pay for team members who are actively using the platform. All plans include unlimited modules, progress tracking, and customer support. Enterprise plans include advanced analytics and priority support.",
+      answer: "Our pricing is bundle-based with included users and overflow pricing. Each plan includes a set number of users (Starter: 10, Growth: 25, Professional: 50) with additional users billed at a low monthly rate. All plans include unlimited modules, progress tracking, and customer support. Higher plans include advanced analytics and priority support.",
       isOpen: false
     },
     {

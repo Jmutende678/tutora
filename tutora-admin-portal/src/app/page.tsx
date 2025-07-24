@@ -76,12 +76,13 @@ export default function HomePage() {
 
   const pricingPlans = [
     {
-      name: 'Basic',
-      price: '$12',
+      name: 'Starter',
+      price: '$89',
       description: 'Perfect for small teams',
+      baseUsers: '10 users included',
       features: [
-        'Up to 25 users',
-        '5 AI modules/month',
+        'Up to 10 users (additional $8/user)',
+        '10 AI modules/month',
         'Basic analytics',
         'Email support',
         'Mobile app access'
@@ -89,11 +90,12 @@ export default function HomePage() {
     },
     {
       name: 'Growth',
-      price: '$29',
+      price: '$299',
       description: 'For growing organizations',
+      baseUsers: '25 users included',
       popular: true,
       features: [
-        'Up to 250 users',
+        'Up to 25 users (additional $12/user)',
         'Unlimited AI modules',
         'Advanced analytics',
         'Priority support',
@@ -102,16 +104,17 @@ export default function HomePage() {
       ]
     },
     {
-      name: 'Enterprise',
-      price: '$79',
-      description: 'For large organizations',
+      name: 'Professional',
+      price: '$699',
+      description: 'For established organizations',
+      baseUsers: '50 users included',
       features: [
-        'Unlimited users',
+        'Up to 50 users (additional $14/user)',
+        'Unlimited AI modules',
         'Advanced AI features',
-        'White-label solution',
-        '24/7 dedicated support',
-        'Custom integrations',
-        'SLA guarantees'
+        'White-label options',
+        'SSO integration',
+        'Advanced security'
       ]
     }
   ]
@@ -774,9 +777,10 @@ export default function HomePage() {
                   )}
                   <h3 className="text-xl font-semibold text-slate-900 mb-2">{plan.name}</h3>
                   <p className="text-slate-600 mb-4">{plan.description}</p>
-                  <div className="text-4xl font-bold text-slate-900 mb-6">
-                    {plan.price}<span className="text-base font-normal text-slate-600">/user/month</span>
+                  <div className="text-4xl font-bold text-slate-900 mb-2">
+                    {plan.price}<span className="text-base font-normal text-slate-600">/month</span>
                   </div>
+                  <p className="text-sm text-blue-600 font-medium mb-4">{plan.baseUsers}</p>
                   <ul className="space-y-3 mb-8">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center space-x-3">

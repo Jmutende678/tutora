@@ -49,30 +49,33 @@ export default function RegisterPage() {
 
   const getRecommendedPlan = () => {
     const teamSizeNum = parseInt(formData.teamSize.split('-')[0]) || 0
-    if (teamSizeNum <= 25) return 'basic'
+    if (teamSizeNum <= 25) return 'starter'
     if (teamSizeNum <= 250) return 'growth'
-    return 'enterprise'
+    return 'professional'
   }
 
   const planDetails = {
-    basic: {
-      name: 'Basic',
-      price: '$12',
+    starter: {
+      name: 'Starter',
+      price: '$89',
       description: 'Perfect for small teams',
-      features: ['Up to 25 users', '5 AI modules/month', 'Basic analytics', 'Email support']
+      baseUsers: '10 users included',
+      features: ['Up to 10 users (additional $8/user)', '10 AI modules/month', 'Basic analytics', 'Email support']
     },
     growth: {
       name: 'Growth',
-      price: '$29',
+      price: '$299',
       description: 'For growing organizations',
-      features: ['Up to 250 users', 'Unlimited AI modules', 'Advanced analytics', 'Priority support'],
+      baseUsers: '25 users included',
+      features: ['Up to 25 users (additional $12/user)', 'Unlimited AI modules', 'Advanced analytics', 'Priority support'],
       popular: true
     },
-    enterprise: {
-      name: 'Enterprise',
-      price: '$79',
-      description: 'For large organizations',
-      features: ['Unlimited users', 'Advanced AI features', '24/7 dedicated support', 'Custom integrations']
+    professional: {
+      name: 'Professional',
+      price: '$699',
+      description: 'For established organizations',
+      baseUsers: '50 users included',
+      features: ['Up to 50 users (additional $14/user)', 'Unlimited AI modules', 'Advanced AI features', 'SSO integration']
     }
   }
 
@@ -461,8 +464,9 @@ export default function RegisterPage() {
                           <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
                           <p className="text-gray-600 mb-4">{plan.description}</p>
                           <div className="text-4xl font-bold text-blue-600 mb-2">
-                            {plan.price}<span className="text-lg text-gray-600">/user/month</span>
+                            {plan.price}<span className="text-lg text-gray-600">/month</span>
                           </div>
+                          <p className="text-sm text-blue-600 font-medium mb-2">{plan.baseUsers}</p>
                         </div>
                         <ul className="space-y-3 mb-6">
                           {plan.features.map((feature, index) => (

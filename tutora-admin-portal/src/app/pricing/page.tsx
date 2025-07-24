@@ -226,7 +226,7 @@ export default function PricingPage() {
               Fair, Transparent Pricing
             </h1>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-              Pay only for what you use. No hidden fees, no user limits, just simple per-user pricing that scales with your team.
+              Bundle pricing that scales with your team. No hidden fees, predictable costs, with low-cost user overflows when you grow.
             </p>
             
             {/* User Count Input */}
@@ -298,10 +298,10 @@ export default function PricingPage() {
                         ${totalPrice.toLocaleString()}
                       </div>
                       <div className="text-sm text-slate-500 mb-3">
-                        ${calculatePrice(plan)}/user/month × {userCount} users
+                        ${plan.baseUsers} users included + ${userCount > plan.baseUsers ? (userCount - plan.baseUsers) + ' additional' : '0 additional'}
                       </div>
                       <div className="text-xs text-slate-400">
-                        Just ${dailyCost} per user per day
+                        Just ${(calculatePrice(plan) / userCount).toFixed(2)} per user per month
                       </div>
                       {isRecommendedPlan && (
                         <div className="mt-3 inline-flex items-center space-x-1 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-medium">
@@ -317,7 +317,7 @@ export default function PricingPage() {
             <div className="text-center mt-6">
               <div className="inline-flex items-center space-x-2 bg-white text-slate-700 px-4 py-2 rounded-lg text-sm shadow">
                 <Info className="h-4 w-4" />
-                <span>All plans include unlimited users • Pay only for active team members</span>
+                <span>Bundle pricing includes base users • Additional users billed at low monthly rates</span>
               </div>
             </div>
           </div>
@@ -369,7 +369,7 @@ export default function PricingPage() {
                       
                       <div className="mb-6">
                         <div className="text-sm text-gray-500 mb-2">
-                          ${calculatePrice(plan)}/user/month × {userCount} {userCount === 1 ? 'user' : 'users'}
+                          ${plan.baseUsers} users included{userCount > plan.baseUsers ? ` + ${userCount - plan.baseUsers} additional users` : ''}
                         </div>
                         <div className="flex items-baseline justify-center space-x-2">
                           <span className="text-4xl font-bold text-gray-900">${totalPrice.toLocaleString()}</span>

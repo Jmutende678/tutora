@@ -209,7 +209,7 @@ export default function AICourseCreationPage() {
     },
     {
       question: "Is there a limit to content size or number of modules?",
-      answer: "Limits depend on your plan. Basic plans include 5 AI modules per month, Growth plans offer unlimited modules, and Enterprise plans include custom processing limits. Individual files can be up to 100MB for documents and 5GB for videos."
+      answer: "Limits depend on your plan. Starter plans include 10 AI modules per month, Growth and Professional plans offer unlimited modules. Individual files can be up to 100MB for documents and 5GB for videos."
     },
     {
       question: "How does AI quiz generation work?",

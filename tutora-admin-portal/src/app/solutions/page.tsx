@@ -43,7 +43,7 @@ export default function SolutionsPage() {
         "Mobile-first learning for busy employees",
         "Instant deployment across all locations"
       ],
-      roi: "$12/employee/month investment yields $200+ monthly productivity gains",
+      roi: "$89/month for 10 employees ($8.90/employee) yields $200+ monthly productivity gains per employee",
       perfectFor: [
         "Retail operations needing product training",
         "Professional services requiring compliance training",
