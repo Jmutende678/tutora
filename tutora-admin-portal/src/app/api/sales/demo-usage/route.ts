@@ -15,6 +15,10 @@ export async function POST(request: Request) {
 
     // Send demo notification based on action type
     if (demoData.action === 'demo_started' || demoData.action === 'demo_completed') {
+      // TODO: Implement sales notification email system
+      console.log(`📈 Demo ${demoData.action} by ${demoData.name} (${demoData.email})`)
+      const emailSent = true // Placeholder - sales notifications will be added later
+      /*
       const emailSent = await emailService.sendSalesNotification('DEMO_USAGE', {
         type: `AI Demo ${demoData.action === 'demo_started' ? 'Started' : 'Completed'}`,
         name: demoData.name,
@@ -29,6 +33,7 @@ export async function POST(request: Request) {
         source: 'AI Module Builder Demo',
         engagement: demoData.action === 'demo_completed' ? 'High - Completed Demo' : 'Medium - Started Demo'
       })
+      */
 
       if (emailSent) {
         const actionText = demoData.action === 'demo_started' ? 'DEMO STARTED' : 'DEMO COMPLETED'

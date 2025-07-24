@@ -5,6 +5,7 @@ import 'package:tutora/utils/app_logo.dart';
 import 'package:tutora/widgets/custom_text_field.dart';
 import 'package:tutora/widgets/primary_button.dart';
 import 'package:tutora/screens/main_app.dart';
+import 'package:tutora/services/supabase_service.dart';
 
 class LoginScreen extends StatefulWidget {
   final String companyCode;
@@ -93,26 +94,25 @@ class _LoginScreenState extends State<LoginScreen>
         _isLoading = true;
       });
 
-      await Future.delayed(const Duration(seconds: 2));
+      try {
+        // Use real Supabase authentication
+        final supabaseService = SupabaseService();
+        final response = await supabaseService.signInWithEmailAndPassword(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
 
-      final validEmails = [
-        'admin@example.com',
-        'emma@example.com',
-        'michael@example.com',
-        'sophie@example.com',
-        'david@example.com',
-      ];
+        setState(() {
+          _isLoading = false;
+        });
 
-      final userEmail = _emailController.text.toLowerCase();
-      final isAdmin = userEmail.contains('admin');
-      final isValidUser = validEmails.contains(userEmail);
+        if (mounted && response != null && response.user != null) {
+          // Get user role and permissions
+          final userData = await supabaseService.getUserById(response.user!.id);
+          final isAdmin =
+              userData?['role'] == 'admin' || userData?['role'] == 'manager';
 
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        if (isValidUser) {
+          // Navigate to main app
           Navigator.pushReplacement(
             context,
             PageRouteBuilder(
@@ -136,16 +136,53 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           );
         } else {
+          // Authentication failed
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.white),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                          'Invalid email or password. Please check your credentials.'),
+                    ),
+                  ],
+                ),
+                backgroundColor: AppTheme.errorColor,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (mounted) {
+          String errorMessage = 'Login failed. Please try again.';
+
+          if (e.toString().contains('Invalid login credentials')) {
+            errorMessage =
+                'Invalid email or password. Please check your credentials.';
+          } else if (e.toString().contains('Email not confirmed')) {
+            errorMessage = 'Please check your email and confirm your account.';
+          } else if (e.toString().contains('network')) {
+            errorMessage = 'Network error. Please check your connection.';
+          }
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Row(
+              content: Row(
                 children: [
-                  Icon(Icons.error_outline, color: Colors.white),
+                  const Icon(Icons.error_outline, color: Colors.white),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                        'Invalid email or password. This user is not registered.'),
-                  ),
+                  Expanded(child: Text(errorMessage)),
                 ],
               ),
               backgroundColor: AppTheme.errorColor,
@@ -156,6 +193,8 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           );
         }
+
+        print('❌ Login error: $e');
       }
     }
   }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripeService } from '@/lib/stripe'
-import { firebaseService } from '@/lib/firebase'
+import { SupabaseService } from '@/lib/supabase-service'
 import { EmailService } from '@/lib/email'
 
 const emailService = new EmailService()
@@ -67,35 +67,34 @@ async function handleCheckoutCompleted(event: any) {
     const customerEmail = (customer as any)?.email || session.customer_email
     const companySize = session.metadata?.companySize || 'Unknown'
     
-    // Create company in Firebase
+    // Create company in Supabase
+    const supabaseService = new SupabaseService()
+    
     const companyData = {
       name: companyName,
-      email: customerEmail,
-      stripeCustomerId: session.customer as string,
-      stripeSubscriptionId: session.subscription as string,
+      billingEmail: customerEmail,
+      plan: (session.metadata?.planId || 'starter') as 'basic' | 'premium' | 'enterprise',
       adminUser: {
         name: adminName,
         email: customerEmail,
-      },
-      billing: {
-        address: session.customer_details?.address?.line1,
-        city: session.customer_details?.address?.city,
-        country: session.customer_details?.address?.country,
-        postalCode: session.customer_details?.address?.postal_code,
+        password: 'temp-password-' + Math.random().toString(36) // Temporary password
       }
     }
 
-    const planId = session.metadata?.planId || 'starter'
-    console.log('Creating company with planId:', planId)
+    console.log('Creating company with plan:', companyData.plan)
     
-    const company = await firebaseService.createCompany(companyData, planId)
+    const company = await supabaseService.createCompany(companyData)
     
     console.log('Company created successfully:', company.companyCode)
     
     // Send welcome email
     try {
-      await emailService.sendWelcomeEmail(company)
-      console.log('Welcome email sent successfully to:', company.email)
+      const emailData = {
+        ...company,
+        email: company.billingEmail // Map billingEmail to email for email service
+      }
+      await emailService.sendWelcomeEmail(emailData as any)
+      console.log('Welcome email sent successfully to:', company.billingEmail)
     } catch (emailError) {
       console.error('Failed to send welcome email:', emailError)
       // Don't fail the entire process if email fails

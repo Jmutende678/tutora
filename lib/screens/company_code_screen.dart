@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:tutora/screens/login_screen.dart';
-import 'package:tutora/theme/app_theme.dart';
-import 'package:tutora/utils/app_logo.dart';
+import 'package:flutter/services.dart';
 import 'package:tutora/widgets/custom_text_field.dart';
-import 'package:tutora/widgets/primary_button.dart';
-import 'package:tutora/services/firebase_service.dart'; // Added import for FirebaseService
+import 'package:tutora/widgets/enhanced_primary_button.dart';
+import 'package:tutora/widgets/enhanced_loading_state.dart';
+import 'package:tutora/widgets/enhanced_error_state.dart';
+import 'package:tutora/services/supabase_service.dart'; // NEW: Supabase service
+// FIREBASE BACKUP - Commented but preserved for future migration
+// import 'package:tutora/services/firebase_service.dart';
+import 'package:tutora/screens/login_screen.dart';
 
 class CompanyCodeScreen extends StatefulWidget {
   const CompanyCodeScreen({super.key});
@@ -13,315 +16,262 @@ class CompanyCodeScreen extends StatefulWidget {
   State<CompanyCodeScreen> createState() => _CompanyCodeScreenState();
 }
 
-class _CompanyCodeScreenState extends State<CompanyCodeScreen>
-    with TickerProviderStateMixin {
-  final _companyCodeController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+class _CompanyCodeScreenState extends State<CompanyCodeScreen> {
+  final TextEditingController _companyCodeController = TextEditingController();
   bool _isLoading = false;
-  late AnimationController _animationController;
-  late AnimationController _logoAnimationController;
-  late Animation<double> _fadeInAnimation;
-  late Animation<double> _slideAnimation;
-  late Animation<double> _logoScaleAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _logoAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-
-    _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-      ),
-    );
-
-    _slideAnimation = Tween<double>(begin: 50.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
-      ),
-    );
-
-    _logoScaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _logoAnimationController,
-        curve: Curves.elasticOut,
-      ),
-    );
-
-    _logoAnimationController.forward();
-    _animationController.forward();
-  }
+  String? _errorMessage;
+  Map<String, dynamic>? _companyData;
 
   @override
   void dispose() {
     _companyCodeController.dispose();
-    _animationController.dispose();
-    _logoAnimationController.dispose();
     super.dispose();
   }
 
-  void _validateAndContinue() async {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _validateCompanyCode() async {
+    if (_companyCodeController.text.trim().isEmpty) {
       setState(() {
-        _isLoading = true;
+        _errorMessage = 'Please enter your company code';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final companyCode = _companyCodeController.text.trim().toUpperCase();
+
+      // 🚀 SUPABASE SERVICE (Active)
+      final supabaseService = SupabaseService();
+      final company = await supabaseService.getCompanyByCode(companyCode);
+
+      // 🔥 FIREBASE BACKUP CODE (Commented but preserved)
+      /*
+      final firebaseService = FirebaseService();
+      final company = await firebaseService.getCompanyByCode(companyCode);
+      */
+
+      if (company != null) {
+        setState(() {
+          _companyData = company;
+          _isLoading = false;
+        });
+
+        // Show success and navigate to login
+        _showSuccessDialog(company);
+      } else {
+        setState(() {
+          _errorMessage = 'Company code not found. Please check and try again.';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage =
+            'Connection error. Please check your internet and try again.';
+        _isLoading = false;
       });
 
-      try {
-        final companyCode = _companyCodeController.text.trim().toUpperCase();
+      print('❌ Company lookup error: $e');
+    }
+  }
 
-        // Use Firebase service to lookup company
-        final firebaseService = FirebaseService();
-        final company = await firebaseService.getCompanyByCode(companyCode);
-
-        setState(() {
-          _isLoading = false;
-        });
-
-        if (!mounted) return;
-
-        if (company != null) {
-          // Valid company found, proceed to login
-          Navigator.pushReplacement(
-            context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  LoginScreen(
-                companyCode: companyCode,
-                companyName: company['name'] ?? 'Unknown Company',
+  void _showSuccessDialog(Map<String, dynamic> company) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 28),
+              SizedBox(width: 12),
+              Text('Company Found!'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome to ${company['name']}',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                const begin = Offset(1.0, 0.0);
-                const end = Offset.zero;
-                const curve = Curves.easeInOut;
-
-                var tween = Tween(begin: begin, end: end).chain(
-                  CurveTween(curve: curve),
-                );
-
-                return SlideTransition(
-                  position: animation.drive(tween),
-                  child: child,
+              SizedBox(height: 8),
+              Text(
+                'Plan: ${company['plan']?.toString().toUpperCase()}',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'You can now log in with your company email and password.',
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+            ],
+          ),
+          actions: [
+            EnhancedPrimaryButton(
+              text: 'Continue to Login',
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(
+                      companyCode: company['companyCode'] ?? '',
+                      companyName: company['name'],
+                    ),
+                  ),
                 );
               },
+              variant: ButtonVariant.primary,
+              size: ButtonSize.medium,
+              isFullWidth: false,
             ),
-          );
-        } else {
-          // Invalid company code
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.error_outline, color: Colors.white),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                        'Invalid company code. Please check with your administrator.'),
-                  ),
-                ],
-              ),
-              backgroundColor: AppTheme.errorColor,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          );
-        }
-      } catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
-
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text('Connection error: ${e.toString()}'),
-                ),
-              ],
-            ),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
+          ],
         );
-      }
-    }
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDarkMode
-                ? [
-                    AppTheme.primaryColor.withValues(alpha: 0.1),
-                    AppTheme.scaffoldBackgroundColorDark,
-                  ]
-                : [
-                    AppTheme.primaryColor.withValues(alpha: 0.05),
-                    Colors.white,
-                  ],
-          ),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        child: SafeArea(
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return Transform.translate(
-                offset: Offset(0, _slideAnimation.value),
-                child: Opacity(
-                  opacity: _fadeInAnimation.value,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const Spacer(),
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Text(
+                'Enter Company Code',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Your company administrator will provide you with a unique company code to access training modules.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 32),
 
-                          // Animated Logo section
-                          Center(
-                            child: ScaleTransition(
-                              scale: _logoScaleAnimation,
-                              child: AppLogo.getLogo(size: 120),
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-
-                          // Welcome text
-                          Text(
-                            "Welcome to Tutora",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? AppTheme.darkTextPrimaryColor
-                                  : AppTheme.textPrimaryColor,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          Text(
-                            "Your learning journey starts here",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isDarkMode
-                                  ? AppTheme.darkTextSecondaryColor
-                                  : AppTheme.textSecondaryColor,
-                            ),
-                          ),
-
-                          const SizedBox(height: 48),
-
-                          // Company code input
-                          Container(
-                            padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: isDarkMode
-                                  ? AppTheme.cardColorDark
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Company Code",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: isDarkMode
-                                        ? AppTheme.darkTextPrimaryColor
-                                        : AppTheme.textPrimaryColor,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                CustomTextField(
-                                  label: "",
-                                  controller: _companyCodeController,
-                                  hintText: "Enter your company code",
-                                  prefixIcon: Icons.business,
-                                  textCapitalization:
-                                      TextCapitalization.characters,
-                                  validator: (value) {
-                                    if (value == null || value.trim().isEmpty) {
-                                      return 'Please enter your company code';
-                                    }
-                                    if (value.trim().length < 3) {
-                                      return 'Company code must be at least 3 characters';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                                const SizedBox(height: 20),
-                                PrimaryButton(
-                                  text: "Continue",
-                                  onPressed:
-                                      _isLoading ? null : _validateAndContinue,
-                                  isLoading: _isLoading,
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const Spacer(),
-
-                          // Help text
-                          Center(
-                            child: Text(
-                              "Don't have a company code? Contact your administrator",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isDarkMode
-                                    ? AppTheme.darkTextSecondaryColor
-                                    : AppTheme.textSecondaryColor,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
+              // Company Code Input
+              Container(
+                child: TextFormField(
+                  controller: _companyCodeController,
+                  textCapitalization: TextCapitalization.characters,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9-]')),
+                  ],
+                  onFieldSubmitted: (_) => _validateCompanyCode(),
+                  decoration: InputDecoration(
+                    labelText: 'Company Code',
+                    hintText: 'e.g., TUT-2024-ABC123',
+                    prefixIcon: Icon(Icons.business),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.blue, width: 2),
                     ),
                   ),
                 ),
-              );
-            },
+              ),
+
+              // Error Message
+              if (_errorMessage != null) ...[
+                SizedBox(height: 16),
+                EnhancedErrorState(
+                  type: ErrorType.validation,
+                  customMessage: _errorMessage,
+                  onDismiss: () {
+                    setState(() {
+                      _errorMessage = null;
+                    });
+                  },
+                  showRetryButton: false,
+                ),
+              ],
+
+              SizedBox(height: 24),
+
+              // Validate Button
+              if (_isLoading)
+                EnhancedLoadingState(
+                  type: LoadingType.processing,
+                  customMessage: 'Validating company code...',
+                )
+              else
+                EnhancedPrimaryButton(
+                  text: 'Validate Code',
+                  onPressed: _validateCompanyCode,
+                  variant: ButtonVariant.primary,
+                  size: ButtonSize.large,
+                  leadingIcon: Icons.verified_user,
+                ),
+
+              Spacer(),
+
+              // Help Section
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.help_outline, color: Colors.blue.shade700),
+                        SizedBox(width: 8),
+                        Text(
+                          'Need Help?',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '• Company codes are provided by your administrator\n'
+                      '• Format: TUT-YEAR-XXXXXX (e.g., TUT-2024-ABC123)\n'
+                      '• Contact your HR department if you don\'t have one',
+                      style: TextStyle(
+                        color: Colors.blue.shade600,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
