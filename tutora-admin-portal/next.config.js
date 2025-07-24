@@ -1,5 +1,27 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Force clean build for proper @ alias resolution
+  experimental: {
+    // Disable build trace collection to prevent stack overflow
+    outputFileTracingExcludes: {
+      '*': ['node_modules/**/*'],
+    },
+  },
+  output: 'standalone',
+  webpack: (config) => {
+    // Ensure @ alias works in all environments
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+      '@/components': path.resolve(__dirname, 'src/components'),
+      '@/lib': path.resolve(__dirname, 'src/lib'),
+      '@/pages': path.resolve(__dirname, 'src/pages'),
+      '@/styles': path.resolve(__dirname, 'src/styles'),
+    }
+    return config
+  },
   async headers() {
     return [
       {
