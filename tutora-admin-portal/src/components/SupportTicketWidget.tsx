@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus, Send, Clock, AlertCircle, CheckCircle, X, Filter, Search } from 'lucide-react'
 
 interface SupportTicket {
@@ -46,12 +46,7 @@ export default function SupportTicketWidget({
     tags: [] as string[]
   })
 
-  // Load tickets on component mount
-  useEffect(() => {
-    loadTickets()
-  }, [filter])
-
-  const loadTickets = async () => {
+  const loadTickets = useCallback(async () => {
     setIsLoading(true)
     try {
       const params = new URLSearchParams()
@@ -69,7 +64,12 @@ export default function SupportTicketWidget({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [filter, companyCode, isAdmin])
+
+  // Load tickets on component mount
+  useEffect(() => {
+    loadTickets()
+  }, [loadTickets])
 
   const createTicket = async () => {
     if (!newTicket.subject.trim() || !newTicket.description.trim()) {

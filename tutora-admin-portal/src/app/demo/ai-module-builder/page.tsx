@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Clock, BookOpen, TrendingUp, Award, Settings, Edit, Heart, Share, Plus, Play, Eye, Target, Star } from 'lucide-react'
 
 export default function AIModuleBuilder() {
@@ -502,9 +503,11 @@ export default function AIModuleBuilder() {
                   {thumbnail && (
                     <div className="mt-4">
                       <h4 className="text-sm font-medium text-gray-900 mb-2">Generated Thumbnail</h4>
-                      <img
+                      <Image
                         src={thumbnail}
                         alt="Video thumbnail"
+                        width={128}
+                        height={96}
                         className="w-32 h-auto rounded-lg border border-gray-200"
                       />
                     </div>
@@ -683,13 +686,12 @@ export default function AIModuleBuilder() {
             {/* Clean Module Card */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
               <div className="relative h-48 bg-gradient-to-r from-blue-500 to-purple-600">
-                <img 
+                <Image 
                   src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"
                   alt={generatedModule.title}
+                  width={800}
+                  height={400}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop"
-                  }}
                 />
                 <div className="absolute top-4 left-4">
                   <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-medium">

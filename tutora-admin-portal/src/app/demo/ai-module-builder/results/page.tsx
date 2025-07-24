@@ -76,7 +76,7 @@ export default function AIModuleBuilderResults() {
         URL.revokeObjectURL(videoPreview)
       }
     }
-  }, [router])
+  }, [router, videoPreview])
 
   const handleQuizAnswer = (selectedAnswer: number) => {
     const currentQuestion = quizContent[currentQuestionIndex]
