@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tutora/theme/app_theme.dart';
+import 'package:tutora/utils/app_logo.dart';
+
 import 'package:tutora/widgets/custom_text_field.dart';
 import 'package:tutora/widgets/primary_button.dart';
 
@@ -27,7 +29,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       setState(() {
         _isLoading = true;
       });
-      
+
       // Simulate API call to send reset password email
       Future.delayed(const Duration(seconds: 1), () {
         setState(() {
@@ -41,10 +43,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Forgot Password'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppLogo.getIconOnly(size: 24),
+            const SizedBox(width: 8),
+            const Text('Forgot Password'),
+          ],
+        ),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -55,26 +64,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Icon
+                // Icon with Tutora logo
                 Center(
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: isDarkMode 
-                          ? const Color(0xFF2C2C2C) 
-                          : const Color(0xFFF0F6FF),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      _emailSent ? Icons.check : Icons.lock_reset,
-                      size: 40,
-                      color: AppTheme.primaryColor,
-                    ),
-                  ),
+                  child: _emailSent
+                      ? Icon(
+                          Icons.check_circle,
+                          size: 80,
+                          color: Colors.green,
+                        )
+                      : AppLogo.getLogo(size: 100),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Title and instructions
                 Text(
                   _emailSent ? "Recovery Email Sent" : "Reset Your Password",
@@ -82,8 +83,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: isDarkMode 
-                        ? AppTheme.darkTextPrimaryColor 
+                    color: isDarkMode
+                        ? AppTheme.darkTextPrimaryColor
                         : AppTheme.textPrimaryColor,
                   ),
                 ),
@@ -95,13 +96,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: isDarkMode 
-                        ? AppTheme.darkTextSecondaryColor 
+                    color: isDarkMode
+                        ? AppTheme.darkTextSecondaryColor
                         : AppTheme.textSecondaryColor,
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 if (!_emailSent) ...[
                   // Email input
                   CustomTextField(
@@ -113,14 +114,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Please enter your email";
-                      } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                          .hasMatch(value)) {
                         return "Please enter a valid email";
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Reset button
                   PrimaryButton(
                     text: "Send Recovery Email",
@@ -166,7 +168,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Back to login button
                   PrimaryButton(
                     text: "Back to Login",
@@ -175,7 +177,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Resend email button
                   TextButton(
                     onPressed: () {
@@ -193,7 +195,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                   ),
                 ],
-                
+
                 const SizedBox(height: 16),
                 Text(
                   "If you're still having trouble, please contact your company administrator.",
@@ -212,4 +214,4 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ),
     );
   }
-} 
+}

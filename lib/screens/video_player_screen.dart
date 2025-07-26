@@ -11,7 +11,7 @@ class VideoPlayerScreen extends StatefulWidget {
   final String videoTitle;
   final String videoUrl;
   final bool isUnskippable;
-  
+
   const VideoPlayerScreen({
     super.key,
     required this.module,
@@ -33,32 +33,32 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   final double _duration = 100; // Will be set from actual video duration
   Timer? _hideControlsTimer;
   Timer? _progressTimer;
-  
+
   @override
   void initState() {
     super.initState();
     // In a real app, we would initialize a video player package here
     _simulateVideoLoading();
   }
-  
+
   @override
   void dispose() {
     _hideControlsTimer?.cancel();
     _progressTimer?.cancel();
     super.dispose();
   }
-  
+
   void _simulateVideoLoading() async {
     // Simulate video loading delay
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (mounted) {
       setState(() {
         _isBuffering = false;
       });
     }
   }
-  
+
   void _togglePlayPause() {
     setState(() {
       _isPlaying = !_isPlaying;
@@ -70,19 +70,19 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       }
     });
   }
-  
+
   void _startProgressTimer() {
     _progressTimer?.cancel();
     _progressTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (_currentPosition < _duration) {
         setState(() {
           _currentPosition += 0.5;
-          
+
           // Mark as watched enough when 90% complete
           if (widget.isUnskippable && _currentPosition / _duration > 0.9) {
             _hasWatchedEnough = true;
           }
-          
+
           // Auto-pause at the end
           if (_currentPosition >= _duration) {
             _isPlaying = false;
@@ -94,7 +94,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       }
     });
   }
-  
+
   void _resetHideControlsTimer() {
     _hideControlsTimer?.cancel();
     _hideControlsTimer = Timer(const Duration(seconds: 3), () {
@@ -105,16 +105,18 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       }
     });
   }
-  
+
   void _showControlsTemporarily() {
     setState(() {
       _showControls = true;
     });
     _resetHideControlsTimer();
   }
-  
+
   void _seek(double position) {
-    if (widget.isUnskippable && position > _currentPosition && !_hasWatchedEnough) {
+    if (widget.isUnskippable &&
+        position > _currentPosition &&
+        !_hasWatchedEnough) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('You must watch the video before skipping ahead'),
@@ -123,19 +125,19 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       );
       return;
     }
-    
+
     setState(() {
       _currentPosition = position;
     });
     _resetHideControlsTimer();
   }
-  
+
   String _formatDuration(double seconds) {
     final int mins = seconds ~/ 60;
     final int secs = (seconds % 60).round();
     return '${mins.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
-  
+
   void _proceedToQuiz() {
     Navigator.push(
       context,
@@ -144,7 +146,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       ),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -172,19 +174,28 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   : Container(
                       color: Colors.black,
                       child: Center(
-                        child: Image.network(
-                          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
-                          fit: BoxFit.contain,
+                        child: Container(
+                          width: 200,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.play_circle_fill,
+                            size: 60,
+                            color: AppTheme.primaryColor,
+                          ),
                         ),
                       ),
                     ),
             ),
-            
+
             // Video controls overlay (shown/hidden based on _showControls)
             if (_showControls)
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -203,7 +214,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          
+
                           // Seek bar
                           Expanded(
                             child: SliderTheme(
@@ -224,9 +235,9 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               ),
                             ),
                           ),
-                          
+
                           const SizedBox(width: 8),
-                          
+
                           // Total duration
                           Text(
                             _formatDuration(_duration),
@@ -238,7 +249,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         ],
                       ),
                     ),
-                    
+
                     // Controls
                     Padding(
                       padding: const EdgeInsets.all(16),
@@ -246,9 +257,11 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.replay_10),
+                            icon: Icon(Icons.replay_10),
                             color: Colors.white,
-                            onPressed: () => _seek(_currentPosition - 10 < 0 ? 0 : _currentPosition - 10),
+                            onPressed: () => _seek(_currentPosition - 10 < 0
+                                ? 0
+                                : _currentPosition - 10),
                           ),
                           FloatingActionButton(
                             onPressed: _togglePlayPause,
@@ -259,25 +272,28 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.forward_10),
+                            icon: Icon(Icons.forward_10),
                             color: Colors.white,
                             onPressed: () {
                               if (widget.isUnskippable && !_hasWatchedEnough) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('You must watch the video before skipping ahead'),
+                                    content: Text(
+                                        'You must watch the video before skipping ahead'),
                                     backgroundColor: AppTheme.errorColor,
                                   ),
                                 );
                                 return;
                               }
-                              _seek(_currentPosition + 10 > _duration ? _duration : _currentPosition + 10);
+                              _seek(_currentPosition + 10 > _duration
+                                  ? _duration
+                                  : _currentPosition + 10);
                             },
                           ),
                         ],
                       ),
                     ),
-                    
+
                     // Unskippable indicator
                     if (widget.isUnskippable)
                       Container(
@@ -291,15 +307,19 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                           right: 16,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
+                          color: Colors.black.withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              _hasWatchedEnough ? Icons.check_circle : Icons.warning,
-                              color: _hasWatchedEnough ? Colors.green : Colors.amber,
+                              _hasWatchedEnough
+                                  ? Icons.check_circle
+                                  : Icons.warning,
+                              color: _hasWatchedEnough
+                                  ? Colors.green
+                                  : Colors.amber,
                               size: 20,
                             ),
                             const SizedBox(width: 8),
@@ -318,12 +338,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   ],
                 ),
               ),
-            
+
             // Video completion overlay
             if (_currentPosition >= _duration)
               Container(
                 width: double.infinity,
-                color: Colors.black.withOpacity(0.8),
+                color: Colors.black.withValues(alpha: 0.8),
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -332,10 +352,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.green.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.check_circle,
                         color: Colors.green,
                         size: 60,
@@ -395,4 +415,4 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       ),
     );
   }
-} 
+}

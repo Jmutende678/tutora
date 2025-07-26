@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tutora/models/module_model.dart';
 import 'package:tutora/screens/module_details_screen.dart';
 import 'package:tutora/theme/app_theme.dart';
+import 'package:tutora/utils/app_logo.dart';
 import 'package:tutora/widgets/module_card.dart';
 
 class ModuleListScreen extends StatefulWidget {
@@ -14,7 +15,12 @@ class ModuleListScreen extends StatefulWidget {
 class _ModuleListScreenState extends State<ModuleListScreen> {
   late List<ModuleModel> _modules;
   String _selectedFilter = 'All';
-  final List<String> _filters = ['All', 'In Progress', 'Completed', 'Not Started'];
+  final List<String> _filters = [
+    'All',
+    'In Progress',
+    'Completed',
+    'Not Started'
+  ];
 
   @override
   void initState() {
@@ -26,11 +32,15 @@ class _ModuleListScreenState extends State<ModuleListScreen> {
     if (_selectedFilter == 'All') {
       return _modules;
     } else if (_selectedFilter == 'In Progress') {
-      return _modules.where((m) => m.status == ModuleStatus.inProgress).toList();
+      return _modules
+          .where((m) => m.status == ModuleStatus.inProgress)
+          .toList();
     } else if (_selectedFilter == 'Completed') {
       return _modules.where((m) => m.status == ModuleStatus.completed).toList();
     } else {
-      return _modules.where((m) => m.status == ModuleStatus.notStarted).toList();
+      return _modules
+          .where((m) => m.status == ModuleStatus.notStarted)
+          .toList();
     }
   }
 
@@ -41,7 +51,14 @@ class _ModuleListScreenState extends State<ModuleListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Modules'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppLogo.getIconOnly(size: 24),
+            const SizedBox(width: 8),
+            const Text('My Modules'),
+          ],
+        ),
         centerTitle: true,
       ),
       body: Column(
@@ -64,9 +81,9 @@ class _ModuleListScreenState extends State<ModuleListScreen> {
                         });
                       },
                       backgroundColor: isDarkMode
-                          ? AppTheme.darkSurfaceColor
+                          ? AppTheme.cardColorDark
                           : Colors.grey.shade100,
-                      selectedColor: AppTheme.primaryColor.withOpacity(0.2),
+                      selectedColor: AppTheme.primaryColor.withValues(alpha: 0.2),
                       checkmarkColor: AppTheme.primaryColor,
                     ),
                   );
@@ -115,4 +132,4 @@ class _ModuleListScreenState extends State<ModuleListScreen> {
       ),
     );
   }
-} 
+}

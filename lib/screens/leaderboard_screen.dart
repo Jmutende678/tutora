@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tutora/models/user_model.dart';
 import 'package:tutora/theme/app_theme.dart';
+import 'package:tutora/utils/app_logo.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -9,369 +10,317 @@ class LeaderboardScreen extends StatefulWidget {
   State<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class _LeaderboardScreenState extends State<LeaderboardScreen> {
+class _LeaderboardScreenState extends State<LeaderboardScreen>
+    with TickerProviderStateMixin {
   bool _isLoading = true;
   late List<UserModel> _leaderboardUsers;
-  String _selectedTimeFrame = 'Weekly';
-  int _currentUserRank = 0;
-  
+  String _selectedTimeFrame = 'This Week';
+  final int _currentUserRank = 4;
+  late AnimationController _animationController;
+  late AnimationController _rankAnimationController;
+  late Animation<double> _fadeInAnimation;
+  late Animation<double> _slideUpAnimation;
+  late Animation<double> _rankScaleAnimation;
+
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _rankAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+
+    _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+      ),
+    );
+
+    _slideUpAnimation = Tween<double>(begin: 30.0, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
+      ),
+    );
+
+    _rankScaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _rankAnimationController,
+        curve: Curves.elasticOut,
+      ),
+    );
+
     _loadLeaderboardData();
   }
-  
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _rankAnimationController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadLeaderboardData() async {
-    // In a real app, we would fetch this data from the backend
     await Future.delayed(const Duration(seconds: 1));
-    
-    // Sample data for UI demonstration
+
+    if (!mounted) return;
+
     _leaderboardUsers = [
       UserModel(
         id: '1',
-        name: 'Emma Johnson',
-        email: 'emma@example.com',
-        points: 750,
-        position: 'HR Specialist',
-        profileImageUrl: 'https://randomuser.me/api/portraits/women/1.jpg',
+        name: 'Sarah Johnson',
+        email: 'sarah@example.com',
+        points: 3450,
+        position: 'Senior Sales Manager',
+        profileImageUrl: null,
       ),
       UserModel(
         id: '2',
         name: 'Michael Chen',
         email: 'michael@example.com',
-        points: 720,
-        position: 'Sales Manager',
-        profileImageUrl: 'https://randomuser.me/api/portraits/men/2.jpg',
+        points: 2890,
+        position: 'Marketing Director',
+        profileImageUrl: null,
       ),
       UserModel(
         id: '3',
-        name: 'Current User', // This would be the logged-in user
-        email: 'current@example.com',
-        points: 680,
-        position: 'Marketing Specialist',
-        profileImageUrl: 'https://randomuser.me/api/portraits/women/3.jpg',
+        name: 'Emma Wilson',
+        email: 'emma@example.com',
+        points: 2720,
+        position: 'Product Manager',
+        profileImageUrl: null,
       ),
       UserModel(
         id: '4',
-        name: 'David Wilson',
-        email: 'david@example.com',
-        points: 650,
-        position: 'Customer Success',
-        profileImageUrl: 'https://randomuser.me/api/portraits/men/4.jpg',
+        name: 'You', // Current user
+        email: 'current@example.com',
+        points: 2150,
+        position: 'Learning Specialist',
+        profileImageUrl: null,
       ),
       UserModel(
         id: '5',
-        name: 'Sophia Martinez',
-        email: 'sophia@example.com',
-        points: 620,
-        position: 'Product Manager',
-        profileImageUrl: 'https://randomuser.me/api/portraits/women/5.jpg',
+        name: 'David Martinez',
+        email: 'david@example.com',
+        points: 1980,
+        position: 'Customer Success',
+        profileImageUrl: null,
       ),
       UserModel(
         id: '6',
-        name: 'James Taylor',
-        email: 'james@example.com',
-        points: 580,
-        position: 'Sales Representative',
-        profileImageUrl: 'https://randomuser.me/api/portraits/men/6.jpg',
-      ),
-      UserModel(
-        id: '7',
-        name: 'Olivia Brown',
-        email: 'olivia@example.com',
-        points: 540,
-        position: 'Customer Support',
-        profileImageUrl: 'https://randomuser.me/api/portraits/women/7.jpg',
-      ),
-      UserModel(
-        id: '8',
-        name: 'Ethan Davis',
-        email: 'ethan@example.com',
-        points: 510,
-        position: 'Software Developer',
-        profileImageUrl: 'https://randomuser.me/api/portraits/men/8.jpg',
-      ),
-      UserModel(
-        id: '9',
-        name: 'Ava Garcia',
-        email: 'ava@example.com',
-        points: 480,
-        position: 'UX Designer',
-        profileImageUrl: 'https://randomuser.me/api/portraits/women/9.jpg',
-      ),
-      UserModel(
-        id: '10',
-        name: 'Noah Rodriguez',
-        email: 'noah@example.com',
-        points: 450,
-        position: 'IT Specialist',
-        profileImageUrl: 'https://randomuser.me/api/portraits/men/10.jpg',
+        name: 'Sophia Brown',
+        email: 'sophia@example.com',
+        points: 1850,
+        position: 'HR Specialist',
+        profileImageUrl: null,
       ),
     ];
-    
-    // Find current user's rank
-    _currentUserRank = _leaderboardUsers.indexWhere((user) => user.id == '3') + 1;
-    
-    setState(() {
-      _isLoading = false;
-    });
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      _animationController.forward();
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          _rankAnimationController.forward();
+        }
+      });
+    }
   }
-  
+
   void _changeTimeFrame(String timeFrame) {
-    setState(() {
-      _selectedTimeFrame = timeFrame;
-      _isLoading = true;
-    });
-    
-    _loadLeaderboardData();
+    if (mounted) {
+      setState(() {
+        _selectedTimeFrame = timeFrame;
+        _isLoading = true;
+      });
+
+      _loadLeaderboardData();
+    }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Leaderboard'),
-        centerTitle: true,
-      ),
+      backgroundColor: isDarkMode
+          ? AppTheme.scaffoldBackgroundColorDark
+          : AppTheme.scaffoldBackgroundColorLight,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // Time frame selector
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: SegmentedButton<String>(
-                    segments: const [
-                      ButtonSegment<String>(
-                        value: 'Weekly',
-                        label: Text('Weekly'),
-                      ),
-                      ButtonSegment<String>(
-                        value: 'Monthly',
-                        label: Text('Monthly'),
-                      ),
-                      ButtonSegment<String>(
-                        value: 'All Time',
-                        label: Text('All Time'),
-                      ),
-                    ],
-                    selected: {_selectedTimeFrame},
-                    onSelectionChanged: (Set<String> selection) {
-                      _changeTimeFrame(selection.first);
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                        (Set<WidgetState> states) {
-                          if (states.contains(WidgetState.selected)) {
-                            return AppTheme.primaryColor;
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-                
-                // Top 3 users
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(30),
-                      bottomRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _buildTopUser(_leaderboardUsers[1], 2, 180),
-                      _buildTopUser(_leaderboardUsers[0], 1, 220),
-                      _buildTopUser(_leaderboardUsers[2], 3, 160),
-                    ],
-                  ),
-                ),
-                
-                // Current user's rank
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDarkMode
-                          ? AppTheme.darkSurfaceColor
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          offset: const Offset(0, 2),
-                          blurRadius: 10,
-                        ),
-                      ],
-                      border: Border.all(
-                        color: AppTheme.primaryColor,
-                        width: 2,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: AppTheme.primaryColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              _currentUserRank.toString(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
+          : AnimatedBuilder(
+              animation: _animationController,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(0, _slideUpAnimation.value),
+                  child: Opacity(
+                    opacity: _fadeInAnimation.value,
+                    child: CustomScrollView(
+                      slivers: [
+                        // App Bar with gradient
+                        SliverAppBar(
+                          expandedHeight: 200,
+                          pinned: true,
+                          flexibleSpace: FlexibleSpaceBar(
+                            background: Container(
+                              decoration: BoxDecoration(
+                                color: isDarkMode
+                                    ? AppTheme.cardColorDark
+                                    : Colors.white,
                               ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundImage: NetworkImage(
-                            _leaderboardUsers[_currentUserRank - 1].profileImageUrl ?? '',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'You',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: isDarkMode
-                                      ? AppTheme.darkTextPrimaryColor
-                                      : AppTheme.textPrimaryColor,
-                                ),
-                              ),
-                              Text(
-                                _leaderboardUsers[_currentUserRank - 1].position ?? '',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: isDarkMode
-                                      ? AppTheme.darkTextSecondaryColor
-                                      : AppTheme.textSecondaryColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Color(0xFFFFD700),
-                                size: 20,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                _leaderboardUsers[_currentUserRank - 1].points.toString(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                
-                // Other users
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _leaderboardUsers.length - 3, // Excluding top 3
-                    itemBuilder: (context, index) {
-                      final actualIndex = index + 3; // Start from the 4th user
-                      final user = _leaderboardUsers[actualIndex];
-                      
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: isDarkMode
-                                ? AppTheme.darkSurfaceColor
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                offset: const Offset(0, 2),
-                                blurRadius: 5,
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: AppTheme.primaryColor.withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    (actualIndex + 1).toString(),
-                                    style: const TextStyle(
-                                      color: AppTheme.primaryColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundImage: NetworkImage(user.profileImageUrl ?? ''),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
+                              child: Center(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
+                                    AppLogo.getSmallLogo(size: 48),
+                                    const SizedBox(height: 8),
                                     Text(
-                                      user.name,
+                                      'Leaderboard',
                                       style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
                                         color: isDarkMode
                                             ? AppTheme.darkTextPrimaryColor
                                             : AppTheme.textPrimaryColor,
                                       ),
                                     ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          backgroundColor: isDarkMode
+                              ? AppTheme.cardColorDark
+                              : Colors.white,
+                          elevation: 0,
+                        ),
+
+                        // Time frame selector
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildTimeFrameChip('This Week'),
+                                  const SizedBox(width: 8),
+                                  _buildTimeFrameChip('This Month'),
+                                  const SizedBox(width: 8),
+                                  _buildTimeFrameChip('All Time'),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Current User Rank Card - Inspired by Flutter Flow
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: ScaleTransition(
+                              scale: _rankScaleAnimation,
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 24),
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      AppTheme.primaryColor
+                                          .withValues(alpha: 0.1),
+                                      AppTheme.primaryColor
+                                          .withValues(alpha: 0.05),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: AppTheme.primaryColor
+                                        .withValues(alpha: 0.3),
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppTheme.primaryColor
+                                          .withValues(alpha: 0.1),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text(
-                                      user.position ?? '',
+                                      'Your Current Rank',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: isDarkMode
+                                            ? AppTheme.darkTextSecondaryColor
+                                            : AppTheme.textSecondaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16, vertical: 8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.amber,
+                                            borderRadius:
+                                                BorderRadius.circular(25),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.amber
+                                                    .withValues(alpha: 0.3),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Text(
+                                            '#$_currentUserRank',
+                                            style: const TextStyle(
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Icon(
+                                          Icons.emoji_events,
+                                          color: Colors.amber,
+                                          size: 32,
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      '2,150 points',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDarkMode
+                                            ? AppTheme.darkTextPrimaryColor
+                                            : AppTheme.textPrimaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '350 points to Top 3',
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: isDarkMode
@@ -379,173 +328,314 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                             : AppTheme.textSecondaryColor,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.primaryColor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.star,
-                                      color: Color(0xFFFFD700),
-                                      size: 16,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      user.points.toString(),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        color: AppTheme.primaryColor,
+                                    const SizedBox(height: 16),
+                                    // Progress bar
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: LinearProgressIndicator(
+                                        value: 0.72,
+                                        backgroundColor: isDarkMode
+                                            ? Colors.grey[700]
+                                            : Colors.grey[200],
+                                        valueColor:
+                                            const AlwaysStoppedAnimation<Color>(
+                                                Colors.amber),
+                                        minHeight: 8,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      );
-                    },
+
+                        // Top Performers Section
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Top Performers',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDarkMode
+                                        ? AppTheme.darkTextPrimaryColor
+                                        : AppTheme.textPrimaryColor,
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      _selectedTimeFrame,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppTheme.primaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Leaderboard List
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final user = _leaderboardUsers[index];
+                              final rank = index + 1;
+                              final isCurrentUser = user.name == 'You';
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 4),
+                                child: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: isCurrentUser
+                                        ? AppTheme.primaryColor
+                                            .withValues(alpha: 0.1)
+                                        : (isDarkMode
+                                            ? AppTheme.cardColorDark
+                                            : Colors.white),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: isCurrentUser
+                                        ? Border.all(
+                                            color: AppTheme.primaryColor
+                                                .withValues(alpha: 0.3))
+                                        : null,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withValues(alpha: 0.05),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      // Rank badge
+                                      Container(
+                                        width: 32,
+                                        height: 32,
+                                        decoration: BoxDecoration(
+                                          color: _getRankColor(rank),
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: _getRankColor(rank)
+                                                  .withValues(alpha: 0.3),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Center(
+                                          child: rank <= 3
+                                              ? Icon(
+                                                  _getRankIcon(rank),
+                                                  color: Colors.white,
+                                                  size: 16,
+                                                )
+                                              : Text(
+                                                  rank.toString(),
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+
+                                      // Profile image
+                                      CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor: AppTheme.primaryColor
+                                            .withValues(alpha: 0.1),
+                                        child: Icon(
+                                          Icons.person,
+                                          color: AppTheme.primaryColor,
+                                          size: 18,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+
+                                      // User info
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 4),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                user.name,
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: isDarkMode
+                                                      ? AppTheme
+                                                          .darkTextPrimaryColor
+                                                      : AppTheme
+                                                          .textPrimaryColor,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              if (user.position != null &&
+                                                  user.position!
+                                                      .isNotEmpty) ...[
+                                                const SizedBox(height: 1),
+                                                Text(
+                                                  user.position!,
+                                                  style: TextStyle(
+                                                    fontSize: 9,
+                                                    color: isDarkMode
+                                                        ? AppTheme
+                                                            .darkTextSecondaryColor
+                                                        : AppTheme
+                                                            .textSecondaryColor,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+
+                                      // Points
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primaryColor
+                                              .withValues(alpha: 0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                              size: 12,
+                                            ),
+                                            const SizedBox(width: 2),
+                                            Text(
+                                              '${user.points}',
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppTheme.primaryColor,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                            childCount: _leaderboardUsers.length,
+                          ),
+                        ),
+
+                        // Bottom spacing
+                        const SliverToBoxAdapter(
+                          child: SizedBox(height: 100),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                );
+              },
             ),
     );
   }
-  
-  Widget _buildTopUser(UserModel user, int rank, double height) {
+
+  Widget _buildTimeFrameChip(String timeFrame) {
+    final isSelected = _selectedTimeFrame == timeFrame;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    return Column(
-      children: [
-        Container(
-          width: 70,
-          height: 70,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: rank == 1
-                  ? const Color(0xFFFFD700) // Gold
-                  : rank == 2
-                      ? const Color(0xFFC0C0C0) // Silver
-                      : const Color(0xFFCD7F32), // Bronze
-              width: 3,
+
+    return GestureDetector(
+      onTap: () => _changeTimeFrame(timeFrame),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.primaryColor
+              : (isDarkMode ? AppTheme.cardColorDark : Colors.white),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(3.0),
-            child: CircleAvatar(
-              backgroundImage: NetworkImage(user.profileImageUrl ?? ''),
-            ),
+          ],
+        ),
+        child: Text(
+          timeFrame,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isSelected
+                ? Colors.white
+                : (isDarkMode
+                    ? AppTheme.darkTextPrimaryColor
+                    : AppTheme.textPrimaryColor),
           ),
         ),
-        const SizedBox(height: 8),
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: rank == 1
-                ? const Color(0xFFFFD700).withOpacity(0.2) // Gold
-                : rank == 2
-                    ? const Color(0xFFC0C0C0).withOpacity(0.2) // Silver
-                    : const Color(0xFFCD7F32).withOpacity(0.2), // Bronze
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              rank.toString(),
-              style: TextStyle(
-                color: rank == 1
-                    ? const Color(0xFFFFD700) // Gold
-                    : rank == 2
-                        ? const Color(0xFFC0C0C0) // Silver
-                        : const Color(0xFFCD7F32), // Bronze
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: 90,
-          child: Text(
-            user.name,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: isDarkMode
-                  ? AppTheme.darkTextPrimaryColor
-                  : AppTheme.textPrimaryColor,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 4,
-          ),
-          decoration: BoxDecoration(
-            color: rank == 1
-                ? const Color(0xFFFFD700).withOpacity(0.2) // Gold
-                : rank == 2
-                    ? const Color(0xFFC0C0C0).withOpacity(0.2) // Silver
-                    : const Color(0xFFCD7F32).withOpacity(0.2), // Bronze
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.star,
-                color: Color(0xFFFFD700),
-                size: 14,
-              ),
-              const SizedBox(width: 2),
-              Text(
-                user.points.toString(),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: rank == 1
-                      ? const Color(0xFFD4AF37) // Gold
-                      : rank == 2
-                          ? const Color(0xFFA7A7AD) // Silver
-                          : const Color(0xFFAD8A56), // Bronze
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: 60,
-          height: height,
-          decoration: BoxDecoration(
-            color: rank == 1
-                ? const Color(0xFFFFD700) // Gold
-                : rank == 2
-                    ? const Color(0xFFC0C0C0) // Silver
-                    : const Color(0xFFCD7F32), // Bronze
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
-} 
+
+  Color _getRankColor(int rank) {
+    switch (rank) {
+      case 1:
+        return const Color(0xFFFFD700); // Gold
+      case 2:
+        return const Color(0xFFC0C0C0); // Silver
+      case 3:
+        return const Color(0xFFCD7F32); // Bronze
+      default:
+        return AppTheme.primaryColor;
+    }
+  }
+
+  IconData _getRankIcon(int rank) {
+    switch (rank) {
+      case 1:
+        return Icons.looks_one;
+      case 2:
+        return Icons.looks_two;
+      case 3:
+        return Icons.looks_3;
+      default:
+        return Icons.star;
+    }
+  }
+}

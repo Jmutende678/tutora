@@ -9,19 +9,20 @@ class UserManagementScreen extends StatefulWidget {
   State<UserManagementScreen> createState() => _UserManagementScreenState();
 }
 
-class _UserManagementScreenState extends State<UserManagementScreen> with SingleTickerProviderStateMixin {
+class _UserManagementScreenState extends State<UserManagementScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
   bool _isAddingUser = false;
   String _searchQuery = '';
-  
+
   // Form controllers
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _positionController = TextEditingController();
   bool _isManager = false;
-  
+
   // Mock user data
   late List<UserModel> _users;
   late List<UserModel> _filteredUsers;
@@ -45,7 +46,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
   Future<void> _loadUsers() async {
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 1));
-    
+
     // In a real app, this would fetch from a backend
     _users = [
       UserModel(
@@ -54,7 +55,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
         email: 'emma@example.com',
         points: 750,
         position: 'HR Specialist',
-        profileImageUrl: 'https://randomuser.me/api/portraits/women/1.jpg',
+        profileImageUrl: null,
         joinDate: DateTime.now().subtract(const Duration(days: 120)),
         isManager: false,
       ),
@@ -64,7 +65,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
         email: 'michael@example.com',
         points: 720,
         position: 'Sales Manager',
-        profileImageUrl: 'https://randomuser.me/api/portraits/men/2.jpg',
+        profileImageUrl: null,
         joinDate: DateTime.now().subtract(const Duration(days: 90)),
         isManager: true,
       ),
@@ -74,17 +75,19 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
         email: 'sophie@example.com',
         points: 680,
         position: 'Marketing Specialist',
-        profileImageUrl: 'https://randomuser.me/api/portraits/women/3.jpg',
+        profileImageUrl: null,
         joinDate: DateTime.now().subtract(const Duration(days: 60)),
         isManager: false,
       ),
     ];
-    
+
     _filteredUsers = List.from(_users);
-    
-    setState(() {
-      _isLoading = false;
-    });
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _filterUsers() {
@@ -92,15 +95,21 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
       _filteredUsers = List.from(_users);
       return;
     }
-    
-    setState(() {
-      _filteredUsers = _users.where((user) {
-        final nameMatch = user.name.toLowerCase().contains(_searchQuery.toLowerCase());
-        final emailMatch = user.email.toLowerCase().contains(_searchQuery.toLowerCase());
-        final positionMatch = (user.position ?? '').toLowerCase().contains(_searchQuery.toLowerCase());
-        return nameMatch || emailMatch || positionMatch;
-      }).toList();
-    });
+
+    if (mounted) {
+      setState(() {
+        _filteredUsers = _users.where((user) {
+          final nameMatch =
+              user.name.toLowerCase().contains(_searchQuery.toLowerCase());
+          final emailMatch =
+              user.email.toLowerCase().contains(_searchQuery.toLowerCase());
+          final positionMatch = (user.position ?? '')
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase());
+          return nameMatch || emailMatch || positionMatch;
+        }).toList();
+      });
+    }
   }
 
   void _addUser() {
@@ -108,9 +117,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
       setState(() {
         _isAddingUser = true;
       });
-      
+
       // Simulate network delay
       Future.delayed(const Duration(seconds: 1), () {
+        if (!mounted) return;
+
         // Create new user with random ID
         final newUser = UserModel(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -120,24 +131,24 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
           points: 0,
           isManager: _isManager,
           joinDate: DateTime.now(),
-          profileImageUrl: 'https://randomuser.me/api/portraits/${_isManager ? 'men' : 'women'}/${_users.length + 1}.jpg',
+          profileImageUrl: null,
         );
-        
+
         setState(() {
           _users.add(newUser);
           _filterUsers();
           _isAddingUser = false;
-          
+
           // Clear form
           _nameController.clear();
           _emailController.clear();
           _positionController.clear();
           _isManager = false;
         });
-        
+
         // Switch to users list tab
         _tabController.animateTo(0);
-        
+
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -163,18 +174,20 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              
-              setState(() {
-                _users.removeWhere((u) => u.id == user.id);
-                _filterUsers();
-              });
-              
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('User removed successfully'),
-                  backgroundColor: AppTheme.errorColor,
-                ),
-              );
+
+              if (mounted) {
+                setState(() {
+                  _users.removeWhere((u) => u.id == user.id);
+                  _filterUsers();
+                });
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('User removed successfully'),
+                    backgroundColor: AppTheme.errorColor,
+                  ),
+                );
+              }
             },
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorColor),
             child: const Text('Remove'),
@@ -192,7 +205,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('User Management'),
@@ -232,7 +245,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
             },
             decoration: InputDecoration(
               hintText: 'Search users...',
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -240,7 +253,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
             ),
           ),
         ),
-        
+
         // User count
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -260,7 +273,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                 onPressed: () {
                   _tabController.animateTo(1);
                 },
-                icon: const Icon(Icons.add),
+                icon: Icon(Icons.add),
                 label: const Text('Add User'),
                 style: TextButton.styleFrom(
                   foregroundColor: AppTheme.primaryColor,
@@ -269,7 +282,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
             ],
           ),
         ),
-        
+
         // Users list
         Expanded(
           child: _filteredUsers.isEmpty
@@ -317,10 +330,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                             // User avatar
                             CircleAvatar(
                               radius: 30,
-                              backgroundImage: NetworkImage(user.profileImageUrl ?? ''),
+                              backgroundColor:
+                                  AppTheme.primaryColor.withValues(alpha: 0.1),
+                              child: Icon(
+                                Icons.person,
+                                color: AppTheme.primaryColor,
+                                size: 30,
+                              ),
                             ),
                             const SizedBox(width: 16),
-                            
+
                             // User details
                             Expanded(
                               child: Column(
@@ -344,8 +363,10 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: AppTheme.primaryColor.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(4),
+                                            color: AppTheme.primaryColor
+                                                .withValues(alpha: 0.1),
+                                            borderRadius:
+                                                BorderRadius.circular(4),
                                           ),
                                           child: const Text(
                                             'Admin',
@@ -399,7 +420,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                                         ),
                                       ),
                                       const SizedBox(width: 16),
-                                      const Icon(
+                                      Icon(
                                         Icons.star,
                                         size: 14,
                                         color: Colors.amber,
@@ -417,7 +438,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                                     ],
                                   ),
                                   const SizedBox(height: 16),
-                                  
+
                                   // Action buttons
                                   Row(
                                     children: [
@@ -426,11 +447,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                                           onPressed: () {
                                             // In a real app, this would open a form to edit the user
                                           },
-                                          icon: const Icon(Icons.edit, size: 16),
+                                          icon:
+                                              Icon(Icons.edit, size: 16),
                                           label: const Text('Edit'),
                                           style: OutlinedButton.styleFrom(
-                                            foregroundColor: AppTheme.primaryColor,
-                                            padding: const EdgeInsets.symmetric(vertical: 8),
+                                            foregroundColor:
+                                                AppTheme.primaryColor,
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8),
                                           ),
                                         ),
                                       ),
@@ -438,11 +462,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                                       Expanded(
                                         child: OutlinedButton.icon(
                                           onPressed: () => _removeUser(user),
-                                          icon: const Icon(Icons.delete, size: 16),
+                                          icon: Icon(Icons.delete,
+                                              size: 16),
                                           label: const Text('Remove'),
                                           style: OutlinedButton.styleFrom(
-                                            foregroundColor: AppTheme.errorColor,
-                                            padding: const EdgeInsets.symmetric(vertical: 8),
+                                            foregroundColor:
+                                                AppTheme.errorColor,
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8),
                                           ),
                                         ),
                                       ),
@@ -481,7 +508,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
               ),
             ),
             const SizedBox(height: 24),
-            
+
             // User form
             Card(
               elevation: 2,
@@ -504,7 +531,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Name field
                     TextFormField(
                       controller: _nameController,
@@ -521,7 +548,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Email field
                     TextFormField(
                       controller: _emailController,
@@ -535,20 +562,22 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                         if (value == null || value.isEmpty) {
                           return 'Please enter an email';
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value)) {
                           return 'Please enter a valid email';
                         }
-                        
+
                         // Check if email already exists
-                        if (_users.any((user) => user.email.toLowerCase() == value.toLowerCase())) {
+                        if (_users.any((user) =>
+                            user.email.toLowerCase() == value.toLowerCase())) {
                           return 'This email is already in use';
                         }
-                        
+
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Position field
                     TextFormField(
                       controller: _positionController,
@@ -565,7 +594,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                       },
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Admin switch
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -590,7 +619,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                         ),
                       ],
                     ),
-                    
+
                     // Admin description
                     Text(
                       'Admins can manage users, upload videos, and create modules and quizzes.',
@@ -603,7 +632,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                       ),
                     ),
                     const SizedBox(height: 32),
-                    
+
                     // Submit button
                     SizedBox(
                       width: double.infinity,
@@ -619,16 +648,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
                                   strokeWidth: 3,
                                 ),
                               )
-                            : const Icon(Icons.person_add),
+                            : Icon(Icons.person_add),
                         label: Text(_isAddingUser ? 'Adding...' : 'Add User'),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Help text
                     Text(
                       'An email will be sent to the user with instructions to set their password.',
@@ -649,4 +678,4 @@ class _UserManagementScreenState extends State<UserManagementScreen> with Single
       ),
     );
   }
-} 
+}

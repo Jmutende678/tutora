@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:tutora/screens/home_screen.dart';
+import 'package:tutora/screens/modules_screen.dart';
 import 'package:tutora/screens/leaderboard_screen.dart';
-import 'package:tutora/screens/admin/admin_dashboard.dart';
+import 'package:tutora/screens/profile_screen.dart';
+import 'package:tutora/screens/admin/admin_main.dart';
 import 'package:tutora/widgets/bottom_nav_bar.dart';
 
 class MainApp extends StatefulWidget {
   final bool isAdmin;
-  
+  final int initialIndex;
+
   const MainApp({
     super.key,
     this.isAdmin = false,
+    this.initialIndex = 0,
   });
 
   @override
@@ -19,19 +23,20 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   int _currentIndex = 0;
   late PageController _pageController;
-  
+
   @override
   void initState() {
     super.initState();
+    _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: _currentIndex);
   }
-  
+
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
   }
-  
+
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -42,7 +47,7 @@ class _MainAppState extends State<MainApp> {
       );
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,11 +60,11 @@ class _MainAppState extends State<MainApp> {
           });
         },
         children: [
-          const HomeScreen(),
-          const Center(child: Text('Modules Screen')),
+          HomeScreen(onNavigateToTab: _onTabTapped),
+          const ModulesScreen(),
           const LeaderboardScreen(),
-          const Center(child: Text('Profile Screen')),
-          if (widget.isAdmin) const AdminDashboardScreen(),
+          const ProfileScreen(),
+          if (widget.isAdmin) const AdminMainScreen(),
         ],
       ),
       bottomNavigationBar: BottomNavBar(
@@ -69,4 +74,4 @@ class _MainAppState extends State<MainApp> {
       ),
     );
   }
-} 
+}

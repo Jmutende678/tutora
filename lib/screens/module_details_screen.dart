@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:tutora/models/module_model.dart';
 import 'package:tutora/screens/quiz_screen.dart';
+import 'package:tutora/screens/module_content_screen.dart';
 import 'package:tutora/theme/app_theme.dart';
 import 'package:tutora/widgets/primary_button.dart';
 
 class ModuleDetailsScreen extends StatelessWidget {
   final ModuleModel module;
-  
+
   const ModuleDetailsScreen({
     super.key,
     required this.module,
@@ -15,7 +16,7 @@ class ModuleDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -25,7 +26,7 @@ class ModuleDetailsScreen extends StatelessWidget {
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                color: _getModuleColor().withOpacity(0.1),
+                color: _getModuleColor().withValues(alpha: 0.1),
                 child: Center(
                   child: Icon(
                     _getCategoryIcon(),
@@ -43,11 +44,12 @@ class ModuleDetailsScreen extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              titlePadding: const EdgeInsets.only(left: 72, bottom: 16, right: 16),
+              titlePadding:
+                  const EdgeInsets.only(left: 72, bottom: 16, right: 16),
               expandedTitleScale: 1.0,
             ),
           ),
-          
+
           // Module content
           SliverToBoxAdapter(
             child: Padding(
@@ -59,9 +61,10 @@ class ModuleDetailsScreen extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: _getModuleColor().withOpacity(0.1),
+                          color: _getModuleColor().withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
@@ -86,15 +89,16 @@ class ModuleDetailsScreen extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.1),
+                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.timer_outlined,
                               color: AppTheme.primaryColor,
                               size: 16,
@@ -113,9 +117,9 @@ class ModuleDetailsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Description
                   Text(
                     'Description',
@@ -137,9 +141,9 @@ class ModuleDetailsScreen extends StatelessWidget {
                           : AppTheme.textSecondaryColor,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Module content sections
                   Text(
                     'Module Content',
@@ -152,18 +156,18 @@ class ModuleDetailsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Creating mock sections for demonstration
                   ..._buildModuleSections(context),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Points value
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: isDarkMode
-                          ? Colors.grey.shade800.withOpacity(0.3)
+                          ? Colors.grey.shade800.withValues(alpha: 0.3)
                           : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -172,10 +176,10 @@ class ModuleDetailsScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: AppTheme.primaryColor.withOpacity(0.1),
+                            color: AppTheme.primaryColor.withValues(alpha: 0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.star_rounded,
                             color: AppTheme.primaryColor,
                             size: 24,
@@ -210,9 +214,9 @@ class ModuleDetailsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
+
                   // Start/Continue button
                   PrimaryButton(
                     text: _getActionButtonText(),
@@ -235,7 +239,7 @@ class ModuleDetailsScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   List<Widget> _buildModuleSections(BuildContext context) {
     // This is just dummy data, in a real app these would come from the module data
     final sectionTitles = [
@@ -245,7 +249,7 @@ class ModuleDetailsScreen extends StatelessWidget {
       'Case Studies',
       'Assessment Quiz',
     ];
-    
+
     final sectionIcons = [
       Icons.play_circle_outline,
       Icons.lightbulb_outline,
@@ -253,42 +257,44 @@ class ModuleDetailsScreen extends StatelessWidget {
       Icons.cases_outlined,
       Icons.quiz_outlined,
     ];
-    
+
     final sectionCompletions = [
       true,
-      module.status == ModuleStatus.inProgress || module.status == ModuleStatus.completed,
+      module.status == ModuleStatus.inProgress ||
+          module.status == ModuleStatus.completed,
       module.status == ModuleStatus.inProgress && module.progress > 0.5,
       module.status == ModuleStatus.completed,
       module.status == ModuleStatus.completed,
     ];
-    
+
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return List.generate(sectionTitles.length, (index) {
       final isCompleted = sectionCompletions[index];
-      
+
       return Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
-          color: isDarkMode ? AppTheme.darkSurfaceColor : Colors.white,
+          color: isDarkMode ? AppTheme.cardColorDark : Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               offset: const Offset(0, 2),
               blurRadius: 5,
             ),
           ],
         ),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: isCompleted
-                  ? AppTheme.completedColor.withOpacity(0.1)
+                  ? AppTheme.completedColor.withValues(alpha: 0.1)
                   : isDarkMode
-                      ? Colors.grey.shade800.withOpacity(0.5)
+                      ? Colors.grey.shade800.withValues(alpha: 0.5)
                       : Colors.grey.shade100,
               shape: BoxShape.circle,
             ),
@@ -324,8 +330,9 @@ class ModuleDetailsScreen extends StatelessWidget {
             size: isCompleted ? 20 : 16,
           ),
           onTap: () {
-            // Navigate to section content or quiz
+            // Navigate to appropriate content based on section
             if (index == sectionTitles.length - 1) {
+              // Final assessment/quiz
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -333,10 +340,32 @@ class ModuleDetailsScreen extends StatelessWidget {
                 ),
               );
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Opening ${sectionTitles[index]}'),
-                  duration: const Duration(seconds: 1),
+              // Navigate to module content screen with specific section
+              ContentType contentType;
+              switch (index) {
+                case 0:
+                  contentType = ContentType.introduction;
+                  break;
+                case 1:
+                  contentType = ContentType.keyConcepts;
+                  break;
+                case 2:
+                  contentType = ContentType.bestPractices;
+                  break;
+                case 3:
+                  contentType = ContentType.caseStudies;
+                  break;
+                default:
+                  contentType = ContentType.introduction;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ModuleContentScreen(
+                    module: module,
+                    contentType: contentType,
+                  ),
                 ),
               );
             }
@@ -345,7 +374,7 @@ class ModuleDetailsScreen extends StatelessWidget {
       );
     });
   }
-  
+
   String _getStatusText() {
     switch (module.status) {
       case ModuleStatus.notStarted:
@@ -356,7 +385,7 @@ class ModuleDetailsScreen extends StatelessWidget {
         return 'Completed';
     }
   }
-  
+
   IconData _getStatusIcon() {
     switch (module.status) {
       case ModuleStatus.notStarted:
@@ -367,7 +396,7 @@ class ModuleDetailsScreen extends StatelessWidget {
         return Icons.check_circle_outline;
     }
   }
-  
+
   Color _getModuleColor() {
     switch (module.status) {
       case ModuleStatus.notStarted:
@@ -378,7 +407,7 @@ class ModuleDetailsScreen extends StatelessWidget {
         return AppTheme.completedColor;
     }
   }
-  
+
   IconData _getCategoryIcon() {
     switch (module.category.toLowerCase()) {
       case 'safety':
@@ -395,7 +424,7 @@ class ModuleDetailsScreen extends StatelessWidget {
         return Icons.menu_book_outlined;
     }
   }
-  
+
   String _getActionButtonText() {
     switch (module.status) {
       case ModuleStatus.notStarted:
@@ -406,7 +435,7 @@ class ModuleDetailsScreen extends StatelessWidget {
         return 'Review Module';
     }
   }
-  
+
   IconData _getActionButtonIcon() {
     switch (module.status) {
       case ModuleStatus.notStarted:
@@ -417,4 +446,4 @@ class ModuleDetailsScreen extends StatelessWidget {
         return Icons.refresh;
     }
   }
-} 
+}

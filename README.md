@@ -32,12 +32,7 @@ Tutora is a mobile and web application designed to help small businesses onboard
    flutter pub get
    ```
 
-3. Make sure to place your logo image in:
-   ```
-   assets/images/logo.png
-   ```
-
-4. Run the app:
+3. Run the app:
    ```
    flutter run
    ```

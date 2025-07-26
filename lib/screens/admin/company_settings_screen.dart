@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:tutora/theme/app_theme.dart';
-import 'package:tutora/utils/placeholder_logo.dart';
+import 'package:tutora/utils/app_logo.dart';
 
 class CompanySettingsScreen extends StatefulWidget {
   const CompanySettingsScreen({super.key});
@@ -166,7 +166,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
         fit: BoxFit.contain,
       );
     } else {
-      return PlaceholderLogo.getLogoWidget();
+      return AppLogo.getLogo(size: 120);
     }
   }
 
@@ -262,7 +262,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
                                                   strokeWidth: 3,
                                                 ),
                                               )
-                                            : const Icon(Icons.upload),
+                                            : Icon(Icons.upload),
                                         label: Text(_isUploading
                                             ? 'Uploading...'
                                             : 'Upload Logo'),
@@ -276,7 +276,7 @@ class _CompanySettingsScreenState extends State<CompanySettingsScreen> {
                                         OutlinedButton.icon(
                                           onPressed:
                                               _isUploading ? null : removeLogo,
-                                          icon: const Icon(Icons.delete),
+                                          icon: Icon(Icons.delete),
                                           label: const Text('Remove Logo'),
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor:

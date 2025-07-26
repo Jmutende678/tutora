@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:tutora/screens/login_screen.dart';
-import 'package:tutora/theme/app_theme.dart';
-import 'package:tutora/utils/placeholder_logo.dart';
+import 'package:flutter/services.dart';
 import 'package:tutora/widgets/custom_text_field.dart';
-import 'package:tutora/widgets/primary_button.dart';
+import 'package:tutora/widgets/enhanced_primary_button.dart';
+import 'package:tutora/widgets/enhanced_loading_state.dart';
+import 'package:tutora/widgets/enhanced_error_state.dart';
+import 'package:tutora/services/supabase_service.dart'; // NEW: Supabase service
+// FIREBASE BACKUP - Commented but preserved for future migration
+// import 'package:tutora/services/firebase_service.dart';
+import 'package:tutora/screens/login_screen.dart';
 
 class CompanyCodeScreen extends StatefulWidget {
   const CompanyCodeScreen({super.key});
@@ -12,200 +16,265 @@ class CompanyCodeScreen extends StatefulWidget {
   State<CompanyCodeScreen> createState() => _CompanyCodeScreenState();
 }
 
-class _CompanyCodeScreenState extends State<CompanyCodeScreen> with SingleTickerProviderStateMixin {
-  final _companyCodeController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+class _CompanyCodeScreenState extends State<CompanyCodeScreen> {
+  final TextEditingController _companyCodeController = TextEditingController();
   bool _isLoading = false;
-  late AnimationController _animationController;
-  late Animation<double> _fadeInAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
-      ),
-    );
-    _animationController.forward();
-  }
+  String? _errorMessage;
+  Map<String, dynamic>? _companyData;
 
   @override
   void dispose() {
     _companyCodeController.dispose();
-    _animationController.dispose();
     super.dispose();
   }
 
-  void _validateAndContinue() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _validateCompanyCode() async {
+    if (_companyCodeController.text.trim().isEmpty) {
       setState(() {
-        _isLoading = true;
+        _errorMessage = 'Please enter your company code';
       });
-      
-      // Store the context before the async operation
-      final BuildContext currentContext = context;
-      
-      // Simulate API call to validate company code
-      Future.delayed(const Duration(seconds: 1), () {
-        final companyCode = _companyCodeController.text.trim().toUpperCase();
-        
-        // In a real app, this would be an API call to validate the company code
-        // For demo purposes, we'll just check against a list of valid codes
-        final validCompanyCodes = ['ACME', 'TUTORA', 'DEMO', 'TEST'];
-        
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final companyCode = _companyCodeController.text.trim().toUpperCase();
+
+      // 🚀 SUPABASE SERVICE (Active)
+      final supabaseService = SupabaseService();
+      final company = await supabaseService.getCompanyByCode(companyCode);
+
+      // 🔥 FIREBASE BACKUP CODE (Commented but preserved)
+      /*
+      final firebaseService = FirebaseService();
+      final company = await firebaseService.getCompanyByCode(companyCode);
+      */
+
+      if (company != null) {
         setState(() {
+          _companyData = company;
           _isLoading = false;
         });
-        
-        if (validCompanyCodes.contains(companyCode)) {
-          // Valid company code - proceed to login
-          Navigator.pushReplacement(
-            currentContext,
-            MaterialPageRoute(
-              builder: (context) => LoginScreen(
-                companyCode: companyCode,
-              ),
-            ),
-          );
-        } else {
-          // Invalid company code - show error
-          ScaffoldMessenger.of(currentContext).showSnackBar(
-            const SnackBar(
-              content: Text('Invalid company code. Please try again or contact support.'),
-              backgroundColor: AppTheme.errorColor,
-            ),
-          );
-        }
+
+        // Show success and navigate to login
+        _showSuccessDialog(company);
+      } else {
+        setState(() {
+          _errorMessage = 'Company code not found. Please check and try again.';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage =
+            'Connection error. Please check your internet and try again.';
+        _isLoading = false;
       });
+
+      print('❌ Company lookup error: $e');
     }
+  }
+
+  void _showSuccessDialog(Map<String, dynamic> company) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 28),
+              SizedBox(width: 12),
+              Text('Company Found!'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome to ${company['name']}',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Plan: ${company['plan']?.toString().toUpperCase()}',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'You can now log in with your company email and password.',
+                style: TextStyle(color: Colors.grey[700]),
+              ),
+            ],
+          ),
+          actions: [
+            EnhancedPrimaryButton(
+              text: 'Continue to Login',
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(
+                      companyCode: company['companyCode'] ?? '',
+                      companyName: company['name'],
+                    ),
+                  ),
+                );
+              },
+              variant: ButtonVariant.primary,
+              size: ButtonSize.medium,
+              isFullWidth: false,
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
       body: SafeArea(
-        child: FadeTransition(
-          opacity: _fadeInAnimation,
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Logo section
-                  Center(
-                    child: Container(
-                      width: 150,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: PlaceholderLogo.getLogoWidget(),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Welcome text
-                  Text(
-                    "Welcome to Tutora",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode 
-                          ? AppTheme.darkTextPrimaryColor 
-                          : AppTheme.textPrimaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Enter your company code to continue",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isDarkMode 
-                          ? AppTheme.darkTextSecondaryColor 
-                          : AppTheme.textSecondaryColor,
-                    ),
-                  ),
-                  SizedBox(height: screenSize.height * 0.08),
-                  
-                  // Company code input
-                  CustomTextField(
-                    label: "Company Code",
-                    hintText: "Enter your company code",
-                    controller: _companyCodeController,
-                    prefixIcon: Icons.business,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter a company code";
-                      } else if (value.length < 4) {
-                        return "Company code is too short";
-                      }
-                      return null;
-                    },
-                    onEditingComplete: _validateAndContinue,
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Continue button
-                  PrimaryButton(
-                    text: "Continue",
-                    onPressed: _validateAndContinue,
-                    isLoading: _isLoading,
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Help link
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        // Show help dialog
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text("Need Help?"),
-                            content: const Text(
-                              "Contact your administrator to get your company code. "
-                              "This code is used to access your organization's training materials.",
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                child: const Text("OK"),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        "Need help?",
-                        style: TextStyle(
-                          color: AppTheme.primaryColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Text(
+                'Enter Company Code',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
               ),
-            ),
+              SizedBox(height: 8),
+              Text(
+                'Your company administrator will provide you with a unique company code to access training modules.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 32),
+
+              // Company Code Input
+              Container(
+                child: TextFormField(
+                  controller: _companyCodeController,
+                  textCapitalization: TextCapitalization.characters,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9-]')),
+                  ],
+                  onFieldSubmitted: (_) => _validateCompanyCode(),
+                  decoration: InputDecoration(
+                    labelText: 'Company Code',
+                    hintText: 'e.g., TUT-2024-ABC123',
+                    prefixIcon: Icon(Icons.business),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.blue, width: 2),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Error Message
+              if (_errorMessage != null) ...[
+                SizedBox(height: 16),
+                EnhancedErrorState(
+                  type: ErrorType.validation,
+                  customMessage: _errorMessage,
+                  onDismiss: () {
+                    setState(() {
+                      _errorMessage = null;
+                    });
+                  },
+                  showRetryButton: false,
+                ),
+              ],
+
+              SizedBox(height: 24),
+
+              // Validate Button
+              if (_isLoading)
+                EnhancedLoadingState(
+                  type: LoadingType.processing,
+                  customMessage: 'Validating company code...',
+                )
+              else
+                EnhancedPrimaryButton(
+                  text: 'Validate Code',
+                  onPressed: _validateCompanyCode,
+                  variant: ButtonVariant.primary,
+                  size: ButtonSize.large,
+                  leadingIcon: Icons.verified_user,
+                ),
+
+              Spacer(),
+
+              // Help Section
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.help_outline, color: Colors.blue.shade700),
+                        SizedBox(width: 8),
+                        Text(
+                          'Need Help?',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '• Company codes are provided by your administrator\n'
+                      '• Format: TUT-YEAR-XXXXXX (e.g., TUT-2024-ABC123)\n'
+                      '• Contact your HR department if you don\'t have one',
+                      style: TextStyle(
+                        color: Colors.blue.shade600,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-} 
+}

@@ -5,7 +5,7 @@ class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
   final bool isManager;
-  
+
   const BottomNavBar({
     super.key,
     required this.currentIndex,
@@ -16,13 +16,13 @@ class BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? AppTheme.darkSurfaceColor : Colors.white,
+        color: isDarkMode ? AppTheme.cardColorDark : Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             spreadRadius: 0,
             offset: const Offset(0, -5),
@@ -35,12 +35,26 @@ class BottomNavBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildNavItem(context, 0, Icons.home_outlined, Icons.home, 'Home'),
-              _buildNavItem(context, 1, Icons.book_outlined, Icons.book, 'Modules'),
-              _buildNavItem(context, 2, Icons.leaderboard_outlined, Icons.leaderboard, 'Leaderboard'),
-              _buildNavItem(context, 3, Icons.person_outline, Icons.person, 'Profile'),
-              if (isManager) 
-                _buildNavItem(context, 4, Icons.admin_panel_settings_outlined, Icons.admin_panel_settings, 'Admin'),
+              Expanded(
+                  child: _buildNavItem(
+                      context, 0, Icons.home_outlined, Icons.home, 'Home')),
+              Expanded(
+                  child: _buildNavItem(
+                      context, 1, Icons.book_outlined, Icons.book, 'Modules')),
+              Expanded(
+                  child: _buildNavItem(context, 2, Icons.leaderboard_outlined,
+                      Icons.leaderboard, 'Leaderboard')),
+              Expanded(
+                  child: _buildNavItem(context, 3, Icons.person_outline,
+                      Icons.person, 'Profile')),
+              if (isManager)
+                Expanded(
+                    child: _buildNavItem(
+                        context,
+                        4,
+                        Icons.admin_panel_settings_outlined,
+                        Icons.admin_panel_settings,
+                        'Admin')),
             ],
           ),
         ),
@@ -48,10 +62,11 @@ class BottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, int index, IconData outlinedIcon, IconData filledIcon, String label) {
+  Widget _buildNavItem(BuildContext context, int index, IconData outlinedIcon,
+      IconData filledIcon, String label) {
     final bool isSelected = currentIndex == index;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return InkWell(
       onTap: () => onTap(index),
       borderRadius: BorderRadius.circular(16),
@@ -60,8 +75,8 @@ class BottomNavBar extends StatelessWidget {
         decoration: isSelected
             ? BoxDecoration(
                 color: isDarkMode
-                    ? Colors.grey.shade800.withOpacity(0.3)
-                    : AppTheme.primaryColor.withOpacity(0.1),
+                    ? Colors.grey.shade800.withValues(alpha: 0.3)
+                    : AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(16),
               )
             : null,
@@ -89,10 +104,13 @@ class BottomNavBar extends StatelessWidget {
                         ? AppTheme.darkTextSecondaryColor
                         : AppTheme.textSecondaryColor,
               ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ],
         ),
       ),
     );
   }
-} 
+}

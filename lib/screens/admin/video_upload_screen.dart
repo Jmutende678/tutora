@@ -12,12 +12,12 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   String? _selectedModule;
   String? _selectedDuration;
   bool _isUnskippable = true;
   bool _isUploading = false;
-  
+
   final List<String> _modules = [
     'Customer Service Basics',
     'Sales Techniques',
@@ -25,7 +25,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     'Leadership Skills',
     'Technical Training',
   ];
-  
+
   final List<String> _durations = [
     '5 minutes',
     '10 minutes',
@@ -35,7 +35,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
     '45 minutes',
     '60 minutes',
   ];
-  
+
   final List<Map<String, dynamic>> _uploadedVideos = [
     {
       'title': 'Customer Service Introduction',
@@ -43,7 +43,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
       'duration': '15 minutes',
       'date': 'Jun 10, 2023',
       'views': 127,
-      'thumbnailUrl': 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
     },
     {
       'title': 'Handling Difficult Customers',
@@ -51,7 +52,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
       'duration': '20 minutes',
       'date': 'Jun 12, 2023',
       'views': 85,
-      'thumbnailUrl': 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
     },
     {
       'title': 'Sales Pitch Fundamentals',
@@ -59,7 +61,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
       'duration': '30 minutes',
       'date': 'Jun 15, 2023',
       'views': 112,
-      'thumbnailUrl': 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+      'thumbnailUrl':
+          'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
     },
   ];
 
@@ -75,12 +78,12 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
       setState(() {
         _isUploading = true;
       });
-      
+
       // Simulate network delay
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // In a real app, you would upload the video to a server here
-      
+
       // Add the new video to the list
       setState(() {
         _uploadedVideos.insert(0, {
@@ -89,9 +92,10 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
           'duration': _selectedDuration,
           'date': 'Today',
           'views': 0,
-          'thumbnailUrl': 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+          'thumbnailUrl':
+              'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
         });
-        
+
         // Reset form
         _titleController.clear();
         _descriptionController.clear();
@@ -100,7 +104,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
         _isUnskippable = true;
         _isUploading = false;
       });
-      
+
       // Show success message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -116,7 +120,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Upload Training Video'),
@@ -132,13 +136,11 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: isDarkMode
-                      ? AppTheme.darkSurfaceColor
-                      : Colors.white,
+                  color: isDarkMode ? AppTheme.cardColorDark : Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       offset: const Offset(0, 2),
                       blurRadius: 10,
                     ),
@@ -160,7 +162,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      
+
                       // Video upload area
                       Container(
                         height: 200,
@@ -181,7 +183,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.cloud_upload,
                               size: 48,
                               color: AppTheme.primaryColor,
@@ -224,7 +226,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Title field
                       TextFormField(
                         controller: _titleController,
@@ -240,7 +242,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Description field
                       TextFormField(
                         controller: _descriptionController,
@@ -258,7 +260,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Module dropdown
                       DropdownButtonFormField<String>(
                         decoration: const InputDecoration(
@@ -285,7 +287,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Duration dropdown
                       DropdownButtonFormField<String>(
                         decoration: const InputDecoration(
@@ -312,7 +314,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Unskippable switch
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -338,7 +340,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Help text for unskippable
                       Text(
                         'When enabled, learners must watch the entire video before proceeding.',
@@ -351,7 +353,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Submit button
                       SizedBox(
                         width: double.infinity,
@@ -372,7 +374,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                                         color: Colors.white,
                                       ),
                                     ),
-                                    SizedBox(width: 12),
+                                    const SizedBox(width: 12),
                                     Text('Uploading...'),
                                   ],
                                 )
@@ -383,9 +385,9 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Previously uploaded videos
               Text(
                 'Uploaded Videos',
@@ -398,7 +400,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               // Video list
               ListView.builder(
                 shrinkWrap: true,
@@ -410,13 +412,12 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                     padding: const EdgeInsets.only(bottom: 16),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isDarkMode
-                            ? AppTheme.darkSurfaceColor
-                            : Colors.white,
+                        color:
+                            isDarkMode ? AppTheme.cardColorDark : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             offset: const Offset(0, 2),
                             blurRadius: 5,
                           ),
@@ -431,11 +432,28 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                                   topLeft: Radius.circular(12),
                                   topRight: Radius.circular(12),
                                 ),
-                                child: Image.network(
-                                  video['thumbnailUrl'],
+                                child: Container(
                                   height: 180,
                                   width: double.infinity,
-                                  fit: BoxFit.cover,
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        AppTheme.primaryColor
+                                            .withValues(alpha: 0.3),
+                                        AppTheme.primaryColor
+                                            .withValues(alpha: 0.1),
+                                      ],
+                                    ),
+                                  ),
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.video_library,
+                                      size: 60,
+                                      color: AppTheme.primaryColor,
+                                    ),
+                                  ),
                                 ),
                               ),
                               Positioned(
@@ -447,7 +465,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.7),
+                                    color: Colors.black.withValues(alpha: 0.7),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -464,10 +482,11 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.6),
+                                      color:
+                                          Colors.black.withValues(alpha: 0.6),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.play_arrow,
                                       color: Colors.white,
                                       size: 36,
@@ -501,7 +520,8 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                                         vertical: 4,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.primaryColor.withOpacity(0.1),
+                                        color: AppTheme.primaryColor
+                                            .withValues(alpha: 0.1),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
@@ -557,10 +577,11 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                                     Expanded(
                                       child: OutlinedButton.icon(
                                         onPressed: () {},
-                                        icon: const Icon(Icons.edit),
+                                        icon: Icon(Icons.edit),
                                         label: const Text('Edit'),
                                         style: OutlinedButton.styleFrom(
-                                          foregroundColor: AppTheme.primaryColor,
+                                          foregroundColor:
+                                              AppTheme.primaryColor,
                                         ),
                                       ),
                                     ),
@@ -568,7 +589,7 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
                                     Expanded(
                                       child: OutlinedButton.icon(
                                         onPressed: () {},
-                                        icon: const Icon(Icons.delete),
+                                        icon: Icon(Icons.delete),
                                         label: const Text('Delete'),
                                         style: OutlinedButton.styleFrom(
                                           foregroundColor: AppTheme.errorColor,
@@ -592,4 +613,4 @@ class _VideoUploadScreenState extends State<VideoUploadScreen> {
       ),
     );
   }
-} 
+}

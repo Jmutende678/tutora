@@ -15,6 +15,7 @@ class CustomTextField extends StatelessWidget {
   final FocusNode? focusNode;
   final VoidCallback? onEditingComplete;
   final Function(String)? onChanged;
+  final TextCapitalization textCapitalization;
 
   const CustomTextField({
     super.key,
@@ -31,6 +32,7 @@ class CustomTextField extends StatelessWidget {
     this.focusNode,
     this.onEditingComplete,
     this.onChanged,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -55,6 +57,7 @@ class CustomTextField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          textCapitalization: textCapitalization,
           validator: validator,
           enabled: enabled,
           maxLines: maxLines,

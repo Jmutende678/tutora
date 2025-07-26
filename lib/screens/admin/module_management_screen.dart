@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tutora/theme/app_theme.dart';
 import 'package:tutora/models/module_model.dart';
+import 'package:tutora/utils/app_logo.dart';
+import 'package:tutora/screens/admin/ai_module_builder_screen.dart';
 
 class ModuleManagementScreen extends StatefulWidget {
   const ModuleManagementScreen({super.key});
@@ -9,168 +11,140 @@ class ModuleManagementScreen extends StatefulWidget {
   State<ModuleManagementScreen> createState() => _ModuleManagementScreenState();
 }
 
-class _ModuleManagementScreenState extends State<ModuleManagementScreen> {
-  bool _isLoading = true;
-  late List<ModuleModel> _modules;
+class _ModuleManagementScreenState extends State<ModuleManagementScreen>
+    with TickerProviderStateMixin {
   int _selectedTabIndex = 0;
-  
-  // Form controllers
-  final _formKey = GlobalKey<FormState>();
+  List<ModuleModel> _modules = [];
+  bool _isLoading = false;
+  String _searchQuery = '';
+  String _selectedCategory = 'All';
+  ModuleStatus? _selectedStatus;
+
+  // Create Module Form Controllers
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  String? _selectedDifficulty;
-  String? _selectedCategory;
-  
-  final List<String> _difficulties = ['Beginner', 'Intermediate', 'Advanced'];
+  final _categoryController = TextEditingController();
+  final _pointsController = TextEditingController();
+  final _durationController = TextEditingController();
+
+  // Image upload state
+
+  // Categories
   final List<String> _categories = [
-    'Customer Service',
-    'Sales',
-    'Technical Skills',
-    'Leadership',
+    'All',
+    'Safety',
+    'Service',
     'Compliance',
-    'Product Knowledge'
+    'Soft Skills',
+    'Productivity',
+    'Technology'
   ];
-  
+
   @override
   void initState() {
     super.initState();
     _loadModules();
   }
-  
+
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _categoryController.dispose();
+    _pointsController.dispose();
+    _durationController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _loadModules() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // In a real app, this would be fetched from a backend
-    _modules = ModuleModel.dummyModules();
-    
-    setState(() {
-      _isLoading = false;
-    });
-  }
-  
-  Future<void> _createModule() async {
-    if (_formKey.currentState!.validate()) {
+    if (mounted) {
       setState(() {
         _isLoading = true;
       });
-      
-      // Simulate network delay
-      await Future.delayed(const Duration(seconds: 1));
-      
-      // Create a new module
-      final newModule = ModuleModel(
-        id: 'module${_modules.length + 1}',
-        title: _titleController.text,
-        description: _descriptionController.text,
-        imageUrl: 'https://source.unsplash.com/random/300x200/?business',
-        estimatedMinutes: 30,
-        pointsValue: 100,
-        category: _selectedCategory ?? 'General',
-        status: ModuleStatus.notStarted,
-        progress: 0.0,
-        difficulty: _selectedDifficulty == 'Beginner' 
-            ? DifficultyLevel.beginner 
-            : (_selectedDifficulty == 'Intermediate' 
-                ? DifficultyLevel.intermediate 
-                : DifficultyLevel.advanced),
-        duration: 30,
-        isCompleted: false,
-      );
-      
-      // Add it to the list
+    }
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    if (mounted) {
       setState(() {
-        _modules.add(newModule);
+        _modules = ModuleModel.dummyModules();
         _isLoading = false;
-        _selectedTabIndex = 0; // Switch back to the modules list tab
-        
-        // Reset form
-        _titleController.clear();
-        _descriptionController.clear();
-        _selectedDifficulty = null;
-        _selectedCategory = null;
       });
-      
-      // Show success message
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Module created successfully!'),
-            backgroundColor: AppTheme.successColor,
-          ),
-        );
-      }
     }
   }
-  
-  void _deleteModule(ModuleModel module) {
-    setState(() {
-      _modules.removeWhere((m) => m.id == module.id);
-    });
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Module deleted successfully!'),
-        backgroundColor: AppTheme.errorColor,
-      ),
-    );
+
+  List<ModuleModel> get _filteredModules {
+    return _modules.where((module) {
+      final matchesSearch = module.title
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase()) ||
+          module.description
+              .toLowerCase()
+              .contains(_searchQuery.toLowerCase()) ||
+          module.category.toLowerCase().contains(_searchQuery.toLowerCase());
+
+      final matchesCategory =
+          _selectedCategory == 'All' || module.category == _selectedCategory;
+
+      final matchesStatus =
+          _selectedStatus == null || module.status == _selectedStatus;
+
+      return matchesSearch && matchesCategory && matchesStatus;
+    }).toList();
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Module Management'),
-        centerTitle: true,
+        title: Row(
+          children: [
+            AppLogo.getIconOnly(size: 24),
+            const SizedBox(width: 12),
+            const Text('Module Management'),
+          ],
+        ),
+        centerTitle: false,
+        actions: [
+          // AI Module Builder Button
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: TextButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AIModuleBuilderScreen(),
+                  ),
+                );
+              },
+              icon: Icon(Icons.auto_awesome, size: 20),
+              label: const Text('AI Builder'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.purple,
+                backgroundColor: Colors.purple.withValues(alpha: 0.1),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: _loadModules,
+          ),
+          IconButton(
+            icon: Icon(Icons.upload_file),
+            onPressed: _showBulkUploadDialog,
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // Tab selector
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: SegmentedButton<int>(
-                    segments: const [
-                      ButtonSegment<int>(
-                        value: 0,
-                        label: Text('Modules'),
-                        icon: Icon(Icons.folder),
-                      ),
-                      ButtonSegment<int>(
-                        value: 1,
-                        label: Text('Create Module'),
-                        icon: Icon(Icons.add),
-                      ),
-                    ],
-                    selected: {_selectedTabIndex},
-                    onSelectionChanged: (Set<int> selection) {
-                      setState(() {
-                        _selectedTabIndex = selection.first;
-                      });
-                    },
-                    style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                        (Set<WidgetState> states) {
-                          if (states.contains(WidgetState.selected)) {
-                            return AppTheme.primaryColor;
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-                
+                // Enhanced Tab selector with stats
+                _buildTabSelector(),
+
                 // Tab content
                 Expanded(
                   child: _selectedTabIndex == 0
@@ -179,283 +153,113 @@ class _ModuleManagementScreenState extends State<ModuleManagementScreen> {
                 ),
               ],
             ),
+      floatingActionButton: _selectedTabIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                setState(() {
+                  _selectedTabIndex = 1;
+                });
+              },
+              icon: Icon(Icons.add),
+              label: const Text('New Module'),
+              backgroundColor: AppTheme.primaryColor,
+            )
+          : null,
     );
   }
-  
-  Widget _buildModulesListTab() {
+
+  Widget _buildTabSelector() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    // Module statistics
-    final totalModules = _modules.length;
-    final completedByAllUsers = _modules.where((m) => m.isCompleted).length;
-    final avgModuleCompletion = _modules.isEmpty
-        ? 0.0
-        : _modules.map((m) => m.progress).reduce((a, b) => a + b) / _modules.length;
-    
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDarkMode ? AppTheme.cardColorDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 10,
+          ),
+        ],
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Modules stats
-          Container(
+          // Tab buttons
+          Padding(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatColumn(
-                  context,
-                  'Total Modules',
-                  totalModules.toString(),
-                  Icons.folder_outlined,
+                Expanded(
+                  child: _buildTabButton(
+                      0, 'Modules', Icons.folder, '${_modules.length} Total'),
                 ),
-                _buildStatColumn(
-                  context,
-                  'Completed',
-                  '$completedByAllUsers/$totalModules',
-                  Icons.check_circle_outline,
-                ),
-                _buildStatColumn(
-                  context,
-                  'Avg. Progress',
-                  '${avgModuleCompletion.toStringAsFixed(0)}%',
-                  Icons.trending_up,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTabButton(
+                      1, 'Create', Icons.add_circle, 'Manual Builder'),
                 ),
               ],
             ),
           ),
-          
-          const SizedBox(height: 24),
-          
-          Text(
-            'All Modules',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: isDarkMode
-                  ? AppTheme.darkTextPrimaryColor
-                  : AppTheme.textPrimaryColor,
-            ),
-          ),
-          const SizedBox(height: 16),
-          
-          // Modules list
-          ...List.generate(
-            _modules.length,
-            (index) => _buildModuleItem(context, _modules[index], index),
-          ),
+
+          // Quick stats (only show on modules tab)
+          if (_selectedTabIndex == 0) _buildQuickStats(),
         ],
       ),
     );
   }
-  
-  Widget _buildModuleItem(BuildContext context, ModuleModel module, int index) {
+
+  Widget _buildTabButton(
+      int index, String title, IconData icon, String subtitle) {
+    final isSelected = _selectedTabIndex == index;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    final difficultyText = module.difficulty == DifficultyLevel.beginner 
-        ? 'Beginner'
-        : (module.difficulty == DifficultyLevel.intermediate 
-            ? 'Intermediate' 
-            : 'Advanced');
-    
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Container(
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedTabIndex = index;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDarkMode ? AppTheme.darkSurfaceColor : Colors.white,
+          color: isSelected
+              ? AppTheme.primaryColor
+              : (isDarkMode ? Colors.grey[800] : Colors.grey[100]),
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              offset: const Offset(0, 2),
-              blurRadius: 5,
-            ),
-          ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Module image
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                  child: Image.network(
-                    module.imageUrl ?? 'https://via.placeholder.com/300x200?text=No+Image',
-                    height: 120,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getDifficultyColor(difficultyText).withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      difficultyText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            Icon(
+              icon,
+              color: isSelected ? Colors.white : AppTheme.primaryColor,
+              size: 24,
             ),
-            
-            // Module details
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          module.title,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? AppTheme.darkTextPrimaryColor
-                                : AppTheme.textPrimaryColor,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          module.category,
-                          style: const TextStyle(
-                            color: AppTheme.primaryColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    module.description,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: isDarkMode
-                          ? AppTheme.darkTextSecondaryColor
-                          : AppTheme.textSecondaryColor,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Module stats
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.timer,
-                        size: 16,
-                        color: AppTheme.textSecondaryColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${module.duration} min',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: isDarkMode
-                              ? AppTheme.darkTextSecondaryColor
-                              : AppTheme.textSecondaryColor,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Icon(
-                        Icons.star,
-                        size: 16,
-                        color: Color(0xFFFFD700),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${module.pointsValue} points',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: isDarkMode
-                              ? AppTheme.darkTextSecondaryColor
-                              : AppTheme.textSecondaryColor,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Icon(
-                        Icons.people,
-                        size: 16,
-                        color: AppTheme.textSecondaryColor,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${10 + (index * 5)} users',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: isDarkMode
-                              ? AppTheme.darkTextSecondaryColor
-                              : AppTheme.textSecondaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Module actions
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            // TODO: Navigate to module edit screen
-                          },
-                          icon: const Icon(Icons.edit),
-                          label: const Text('Edit'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppTheme.primaryColor,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _deleteModule(module),
-                          icon: const Icon(Icons.delete),
-                          label: const Text('Delete'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppTheme.errorColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isSelected
+                    ? Colors.white
+                    : (isDarkMode
+                        ? AppTheme.darkTextPrimaryColor
+                        : AppTheme.textPrimaryColor),
+              ),
+            ),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 12,
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.8)
+                    : (isDarkMode
+                        ? AppTheme.darkTextSecondaryColor
+                        : AppTheme.textSecondaryColor),
               ),
             ),
           ],
@@ -463,322 +267,720 @@ class _ModuleManagementScreenState extends State<ModuleManagementScreen> {
       ),
     );
   }
-  
-  Widget _buildCreateModuleTab() {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+
+  Widget _buildQuickStats() {
+    final completedModules =
+        _modules.where((m) => m.status == ModuleStatus.completed).length;
+    final inProgressModules =
+        _modules.where((m) => m.status == ModuleStatus.inProgress).length;
+    final notStartedModules =
+        _modules.where((m) => m.status == ModuleStatus.notStarted).length;
+
+    return Container(
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      child: Row(
         children: [
-          Text(
-            'Create New Module',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: isDarkMode
-                  ? AppTheme.darkTextPrimaryColor
-                  : AppTheme.textPrimaryColor,
+          Expanded(
+              child:
+                  _buildStatChip('Completed', completedModules, Colors.green)),
+          const SizedBox(width: 8),
+          Expanded(
+              child: _buildStatChip(
+                  'In Progress', inProgressModules, Colors.orange)),
+          const SizedBox(width: 8),
+          Expanded(
+              child: _buildStatChip(
+                  'Not Started', notStartedModules, Colors.grey)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatChip(String label, int count, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FittedBox(
+            child: Text(
+              count.toString(),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ),
-          const SizedBox(height: 24),
-          
-          // Module form
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDarkMode ? AppTheme.darkSurfaceColor : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  offset: const Offset(0, 2),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Image upload
-                  Container(
-                    height: 150,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: isDarkMode
-                          ? Colors.grey.shade800
-                          : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDarkMode
-                            ? Colors.grey.shade700
-                            : Colors.grey.shade300,
-                        width: 2,
-                        style: BorderStyle.solid,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.image,
-                          size: 48,
-                          color: AppTheme.primaryColor,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Upload module cover image',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: isDarkMode
-                                ? AppTheme.darkTextPrimaryColor
-                                : AppTheme.textPrimaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
-                          ),
-                          child: const Text('Browse Image'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Title field
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Module Title',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a title';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Description field
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(),
-                      alignLabelWithHint: true,
-                    ),
-                    maxLines: 3,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Category dropdown
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: _selectedCategory,
-                    items: _categories.map((category) {
-                      return DropdownMenuItem<String>(
-                        value: category,
-                        child: Text(category),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategory = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a category';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  // Difficulty dropdown
-                  DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(
-                      labelText: 'Difficulty',
-                      border: OutlineInputBorder(),
-                    ),
-                    value: _selectedDifficulty,
-                    items: _difficulties.map((difficulty) {
-                      return DropdownMenuItem<String>(
-                        value: difficulty,
-                        child: Text(difficulty),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedDifficulty = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a difficulty level';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Points value
-                  Text(
-                    'Points Value',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: isDarkMode
-                          ? AppTheme.darkTextPrimaryColor
-                          : AppTheme.textPrimaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Slider(
-                          value: 100,
-                          min: 50,
-                          max: 300,
-                          divisions: 5,
-                          label: '100 points',
-                          onChanged: (value) {},
-                          activeColor: AppTheme.primaryColor,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              color: Color(0xFFFFD700),
-                              size: 18,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              '100 points',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: AppTheme.primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Submit button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _createModule,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Create Module'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ),
-                ],
+          const SizedBox(height: 1),
+          FittedBox(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 8,
+                color: color,
               ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],
       ),
     );
   }
-  
-  Widget _buildStatColumn(
-    BuildContext context,
-    String label,
-    String value,
-    IconData icon,
-  ) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
+  Widget _buildModulesListTab() {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: isDarkMode ? AppTheme.darkSurfaceColor : Colors.white,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: AppTheme.primaryColor,
-            size: 24,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode
-                ? AppTheme.darkTextPrimaryColor
-                : AppTheme.textPrimaryColor,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: isDarkMode
-                ? AppTheme.darkTextSecondaryColor
-                : AppTheme.textSecondaryColor,
-          ),
+        // Search and filters
+        _buildSearchAndFilters(),
+
+        // Modules list
+        Expanded(
+          child: _filteredModules.isEmpty
+              ? _buildEmptyState()
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _filteredModules.length,
+                  itemBuilder: (context, index) {
+                    return _buildEnhancedModuleCard(_filteredModules[index]);
+                  },
+                ),
         ),
       ],
     );
   }
-  
-  Color _getDifficultyColor(String difficulty) {
-    switch (difficulty) {
-      case 'Beginner':
-        return Colors.green;
-      case 'Intermediate':
-        return Colors.orange;
-      case 'Advanced':
-        return Colors.red;
-      default:
-        return Colors.blue;
-    }
+
+  Widget _buildSearchAndFilters() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDarkMode ? AppTheme.cardColorDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Search bar
+          TextField(
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: 'Search modules...',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              fillColor: isDarkMode ? Colors.grey[800] : Colors.grey[100],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Filters
+          Row(
+            children: [
+              // Category filter
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  decoration: InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  items: _categories.map((category) {
+                    return DropdownMenuItem(
+                      value: category,
+                      child: Text(
+                        category,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCategory = value!;
+                    });
+                  },
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Status filter
+              Expanded(
+                child: DropdownButtonFormField<ModuleStatus?>(
+                  value: _selectedStatus,
+                  decoration: InputDecoration(
+                    labelText: 'Status',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                        value: null,
+                        child: Text('All Status',
+                            overflow: TextOverflow.ellipsis)),
+                    DropdownMenuItem(
+                        value: ModuleStatus.notStarted,
+                        child: Text('Not Started',
+                            overflow: TextOverflow.ellipsis)),
+                    DropdownMenuItem(
+                        value: ModuleStatus.inProgress,
+                        child: Text('In Progress',
+                            overflow: TextOverflow.ellipsis)),
+                    DropdownMenuItem(
+                        value: ModuleStatus.completed,
+                        child:
+                            Text('Completed', overflow: TextOverflow.ellipsis)),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedStatus = value;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
-} 
+
+  Widget _buildEnhancedModuleCard(ModuleModel module) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: isDarkMode ? AppTheme.cardColorDark : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Module image header
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+            child: Stack(
+              children: [
+                SizedBox(
+                  height: 120,
+                  width: double.infinity,
+                  child: _buildPlaceholderImage(),
+                ),
+
+                // Overlay with actions
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Row(
+                    children: [
+                      _buildActionButton(
+                        Icons.edit,
+                        () => _editModule(module),
+                        Colors.blue,
+                      ),
+                      const SizedBox(width: 8),
+                      _buildActionButton(
+                        Icons.delete,
+                        () => _deleteModule(module),
+                        Colors.red,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Status badge
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: _buildStatusBadge(module.status),
+                ),
+              ],
+            ),
+          ),
+
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title and difficulty
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        module.title,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode
+                              ? AppTheme.darkTextPrimaryColor
+                              : AppTheme.textPrimaryColor,
+                        ),
+                      ),
+                    ),
+                    _buildDifficultyBadge(module.difficulty),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                // Description
+                Text(
+                  module.description,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDarkMode
+                        ? AppTheme.darkTextSecondaryColor
+                        : AppTheme.textSecondaryColor,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                const SizedBox(height: 16),
+
+                // Details row
+                Row(
+                  children: [
+                    _buildDetailItem(Icons.category, module.category),
+                    _buildDetailItem(
+                        Icons.timer, '${module.estimatedMinutes}m'),
+                    _buildDetailItem(Icons.star, '${module.pointsValue} pts'),
+                    const Spacer(),
+
+                    // Actions
+                    IconButton(
+                      icon: Icon(Icons.visibility),
+                      onPressed: () => _previewModule(module),
+                      iconSize: 20,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.copy),
+                      onPressed: () => _duplicateModule(module),
+                      iconSize: 20,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailItem(IconData icon, String text) {
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: Colors.grey),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: const TextStyle(fontSize: 12, color: Colors.grey),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+      IconData icon, VoidCallback onPressed, Color color) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white, size: 18),
+        onPressed: onPressed,
+        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        padding: EdgeInsets.zero,
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(ModuleStatus status) {
+    Color color;
+    String text;
+
+    switch (status) {
+      case ModuleStatus.completed:
+        color = Colors.green;
+        text = 'Complete';
+        break;
+      case ModuleStatus.inProgress:
+        color = Colors.orange;
+        text = 'Active';
+        break;
+      case ModuleStatus.notStarted:
+        color = Colors.grey;
+        text = 'Draft';
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDifficultyBadge(DifficultyLevel difficulty) {
+    Color color;
+    String text;
+
+    switch (difficulty) {
+      case DifficultyLevel.beginner:
+        color = Colors.green;
+        text = 'Beginner';
+        break;
+      case DifficultyLevel.intermediate:
+        color = Colors.orange;
+        text = 'Intermediate';
+        break;
+      case DifficultyLevel.advanced:
+        color = Colors.red;
+        text = 'Advanced';
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholderImage() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryColor.withValues(alpha: 0.8),
+            AppTheme.primaryLightColor.withValues(alpha: 0.8),
+          ],
+        ),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.school,
+          size: 32,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.school_outlined,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No modules found',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Create your first module to get started',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[500],
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              setState(() {
+                _selectedTabIndex = 1;
+              });
+            },
+            icon: Icon(Icons.add),
+            label: const Text('Create Module'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Create Module Tab
+  Widget _buildCreateModuleTab() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.construction,
+              size: 64,
+              color: isDarkMode ? Colors.white54 : Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Module Creation',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Coming Soon',
+              style: TextStyle(
+                fontSize: 16,
+                color: isDarkMode ? Colors.white70 : Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Action methods
+  void _editModule(ModuleModel module) {
+    // Pre-fill form with module data
+    _titleController.text = module.title;
+    _descriptionController.text = module.description;
+    _categoryController.text = module.category;
+    _pointsController.text = module.pointsValue.toString();
+    _durationController.text = module.estimatedMinutes.toString();
+
+    setState(() {
+      _selectedTabIndex = 1;
+    });
+  }
+
+  void _deleteModule(ModuleModel module) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Module'),
+        content: Text(
+            'Are you sure you want to delete "${module.title}"? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _modules.removeWhere((m) => m.id == module.id);
+              });
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${module.title} deleted successfully')),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _previewModule(ModuleModel module) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Module Preview',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              if (module.imageUrl != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    module.imageUrl!,
+                    height: 150,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              const SizedBox(height: 16),
+              Text(
+                module.title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(module.description),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Chip(label: Text(module.category)),
+                  const SizedBox(width: 8),
+                  Chip(label: Text('${module.estimatedMinutes}m')),
+                  const SizedBox(width: 8),
+                  Chip(label: Text('${module.pointsValue} pts')),
+                ],
+              ),
+              const Spacer(),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _editModule(module);
+                      },
+                      child: const Text('Edit'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _duplicateModule(ModuleModel module) {
+    final duplicatedModule = ModuleModel(
+      id: 'module_${DateTime.now().millisecondsSinceEpoch}',
+      title: '${module.title} (Copy)',
+      description: module.description,
+      imageUrl: module.imageUrl,
+      estimatedMinutes: module.estimatedMinutes,
+      pointsValue: module.pointsValue,
+      category: module.category,
+      status: ModuleStatus.notStarted,
+      progress: 0.0,
+      difficulty: module.difficulty,
+      duration: module.duration,
+      isCompleted: false,
+    );
+
+    setState(() {
+      _modules.add(duplicatedModule);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${module.title} duplicated successfully')),
+    );
+  }
+
+  void _showBulkUploadDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Bulk Upload'),
+        content: const Text('Import multiple modules from CSV or Excel file.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Bulk upload feature coming soon!')),
+              );
+            },
+            child: const Text('Upload File'),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -1,4 +1,18 @@
-class UserModel {  final String id;  final String name;  final String email;  final String? companyCode;  final String? profileImageUrl;  final int points;  final int? completedModules;  final int? currentStreak;  final bool isManager;  final String? position;  final DateTime? joinDate;  final int? modulesCompleted;  final int? quizzesCompleted;  final DateTime? lastActive;
+class UserModel {
+  final String id;
+  final String name;
+  final String email;
+  final String? companyCode;
+  final String? profileImageUrl;
+  final int points;
+  final int? completedModules;
+  final int? currentStreak;
+  final bool isManager;
+  final String? position;
+  final DateTime? joinDate;
+  final int? modulesCompleted;
+  final int? quizzesCompleted;
+  final DateTime? lastActive;
 
   UserModel({
     required this.id,
@@ -24,7 +38,7 @@ class UserModel {  final String id;  final String name;  final String email;  fi
       name: 'John Doe',
       email: 'john.doe@example.com',
       companyCode: 'ACME',
-      profileImageUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
+      profileImageUrl: null,
       points: 750,
       completedModules: 12,
       currentStreak: 5,
@@ -71,4 +85,4 @@ class UserModel {  final String id;  final String name;  final String email;  fi
       lastActive: lastActive ?? this.lastActive,
     );
   }
-} 
+}

@@ -5,380 +5,315 @@ import 'package:tutora/theme/app_theme.dart';
 class ModuleCard extends StatelessWidget {
   final ModuleModel module;
   final VoidCallback onTap;
-  final bool isCompact;
-  
+
   const ModuleCard({
     super.key,
     required this.module,
     required this.onTap,
-    this.isCompact = false,
   });
-
-  Color _getStatusColor() {
-    switch (module.status) {
-      case ModuleStatus.notStarted:
-        return AppTheme.notStartedColor;
-      case ModuleStatus.inProgress:
-        return AppTheme.inProgressColor;
-      case ModuleStatus.completed:
-        return AppTheme.completedColor;
-    }
-  }
-
-  String _getStatusText() {
-    switch (module.status) {
-      case ModuleStatus.notStarted:
-        return 'Not Started';
-      case ModuleStatus.inProgress:
-        return 'In Progress';
-      case ModuleStatus.completed:
-        return 'Completed';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: isCompact ? _buildCompactCard(context) : _buildFullCard(context),
-      ),
-    );
-  }
-
-  Widget _buildFullCard(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header with title and status
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Module icon or image
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: _getStatusColor().withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Icon(
-                    _getCategoryIcon(),
-                    color: _getStatusColor(),
-                    size: 32,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              
-              // Title and status
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      module.title,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: isDarkMode 
-                            ? AppTheme.darkTextPrimaryColor 
-                            : AppTheme.textPrimaryColor,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    
-                    // Category and time row
-                    Row(
-                      children: [
-                        _buildChip(module.category, Icons.category_outlined),
-                        const SizedBox(width: 8),
-                        _buildChip('${module.estimatedMinutes} min', Icons.timer_outlined),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Description
-          Text(
-            module.description,
-            style: TextStyle(
-              fontSize: 14,
-              color: isDarkMode 
-                  ? AppTheme.darkTextSecondaryColor 
-                  : AppTheme.textSecondaryColor,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Points and progress
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Points badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.star_rounded,
-                      color: AppTheme.primaryColor,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${module.pointsValue} pts',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              
-              // Status badge
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _getStatusColor().withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _getStatusIcon(),
-                      color: _getStatusColor(),
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _getStatusText(),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: _getStatusColor(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          
-          // Progress bar (only show for in progress modules)
-          if (module.status == ModuleStatus.inProgress) ...[
-            const SizedBox(height: 16),
-            LinearProgressIndicator(
-              value: module.progress,
-              backgroundColor: isDarkMode 
-                  ? Colors.grey.shade800 
-                  : Colors.grey.shade200,
-              valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor()),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${(module.progress * 100).toInt()}% Complete',
-              style: TextStyle(
-                fontSize: 13,
-                color: isDarkMode 
-                    ? AppTheme.darkTextSecondaryColor 
-                    : AppTheme.textSecondaryColor,
-              ),
-              textAlign: TextAlign.right,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
 
-  Widget _buildCompactCard(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: Row(
-        children: [
-          // Module icon
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: _getStatusColor().withOpacity(0.2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: Icon(
-                _getCategoryIcon(),
-                color: _getStatusColor(),
-                size: 28,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          
-          // Title and status
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  module.title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode 
-                        ? AppTheme.darkTextPrimaryColor 
-                        : AppTheme.textPrimaryColor,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                
-                // Category and time
-                Text(
-                  '${module.category} · ${module.estimatedMinutes} min',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: isDarkMode 
-                        ? AppTheme.darkTextSecondaryColor 
-                        : AppTheme.textSecondaryColor,
-                  ),
-                ),
-                
-                // Progress bar (only for in progress)
-                if (module.status == ModuleStatus.inProgress) ...[
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: module.progress,
-                    backgroundColor: isDarkMode 
-                        ? Colors.grey.shade800 
-                        : Colors.grey.shade200,
-                    valueColor: AlwaysStoppedAnimation<Color>(_getStatusColor()),
-                    borderRadius: BorderRadius.circular(4),
-                    minHeight: 4,
-                  ),
-                ],
-              ],
-            ),
-          ),
-          
-          const SizedBox(width: 8),
-          
-          // Status indicator
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: _getStatusColor().withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _getStatusIcon(),
-                  color: _getStatusColor(),
-                  size: 14,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  _getStatusText(),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: _getStatusColor(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip(String label, IconData icon) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      height: 240, // Increased from 200 to 240
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 14,
-            color: Colors.grey.shade600,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
+        color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Column(
+            children: [
+              // Image section - 140px (more space for image)
+              Container(
+                height: 140,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      _getCategoryColor(module.category).withValues(alpha: 0.3),
+                      _getCategoryColor(module.category).withValues(alpha: 0.1),
+                    ],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      child: Image.network(
+                        _getCategoryImageUrl(module.category),
+                        width: double.infinity,
+                        height: 140,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: _getCategoryColor(module.category)
+                                .withValues(alpha: 0.2),
+                            child: Icon(
+                              _getCategoryIcon(module.category),
+                              size: 30,
+                              color: _getCategoryColor(module.category),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      height: 140,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.3),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (module.status != ModuleStatus.notStarted)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _getStatusColor(module.status),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 2,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            _getStatusText(module.status),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+              // Progress bar section - Full width between image and content
+              if (module.status == ModuleStatus.inProgress &&
+                  module.progress > 0)
+                Container(
+                  height: 6, // Height for the progress bar
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: isDarkMode ? Colors.grey[700] : Colors.grey[300],
+                  ),
+                  child: FractionallySizedBox(
+                    alignment: Alignment.centerLeft,
+                    widthFactor: module.progress,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: _getCategoryColor(module.category),
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Content section - Flexible to fit remaining space
+              Expanded(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Title section
+                      Flexible(
+                        flex: 2,
+                        child: Text(
+                          module.title,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: isDarkMode ? Colors.white : Colors.grey[800],
+                            height: 1.1,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      // Description section
+                      Flexible(
+                        flex: 2,
+                        child: Text(
+                          module.description,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDarkMode
+                                ? Colors.grey[400]
+                                : Colors.grey[600],
+                            height: 1.2,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      // Status section
+                      if (module.status == ModuleStatus.inProgress &&
+                          module.progress > 0)
+                        // Show progress percentage
+                        Text(
+                          '${(module.progress * 100).toInt()}% Complete',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: _getCategoryColor(module.category),
+                          ),
+                          textAlign: TextAlign.center,
+                        )
+                      else
+                        // Show status for other states
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getStatusIcon(module.status),
+                              size: 12,
+                              color: _getStatusColor(module.status),
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                _getStatusText(module.status),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: _getStatusColor(module.status),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  IconData _getStatusIcon() {
-    switch (module.status) {
-      case ModuleStatus.notStarted:
-        return Icons.play_circle_outline;
-      case ModuleStatus.inProgress:
-        return Icons.directions_run;
-      case ModuleStatus.completed:
-        return Icons.check_circle_outline;
+  String _getCategoryImageUrl(String category) {
+    switch (category.toLowerCase()) {
+      case 'safety':
+        return 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=250&fit=crop';
+      case 'service':
+        return 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=250&fit=crop';
+      case 'compliance':
+        return 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&h=250&fit=crop';
+      case 'leadership':
+        return 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400&h=250&fit=crop';
+      case 'technology':
+        return 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=250&fit=crop';
+      default:
+        return 'https://images.unsplash.com/photo-1553028826-f4804a6dfd3f?w=400&h=250&fit=crop';
     }
   }
 
-  IconData _getCategoryIcon() {
-    switch (module.category.toLowerCase()) {
+  Color _getCategoryColor(String category) {
+    switch (category.toLowerCase()) {
       case 'safety':
-        return Icons.health_and_safety_outlined;
+        return const Color(0xFFE53E3E);
       case 'service':
-        return Icons.support_agent_outlined;
+        return const Color(0xFF38A169);
       case 'compliance':
-        return Icons.gavel_outlined;
-      case 'soft skills':
-        return Icons.people_outlined;
-      case 'productivity':
-        return Icons.trending_up_outlined;
+        return const Color(0xFF3182CE);
+      case 'leadership':
+        return const Color(0xFF805AD5);
+      case 'technology':
+        return const Color(0xFFD69E2E);
       default:
-        return Icons.menu_book_outlined;
+        return AppTheme.primaryColor;
     }
   }
-} 
+
+  IconData _getCategoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'safety':
+        return Icons.security;
+      case 'service':
+        return Icons.support_agent;
+      case 'compliance':
+        return Icons.rule;
+      case 'leadership':
+        return Icons.groups;
+      case 'technology':
+        return Icons.computer;
+      default:
+        return Icons.school;
+    }
+  }
+
+  Color _getStatusColor(ModuleStatus status) {
+    switch (status) {
+      case ModuleStatus.completed:
+        return const Color(0xFF38A169);
+      case ModuleStatus.inProgress:
+        return const Color(0xFFD69E2E);
+      case ModuleStatus.notStarted:
+        return const Color(0xFF718096);
+    }
+  }
+
+  IconData _getStatusIcon(ModuleStatus status) {
+    switch (status) {
+      case ModuleStatus.completed:
+        return Icons.check_circle;
+      case ModuleStatus.inProgress:
+        return Icons.play_circle;
+      case ModuleStatus.notStarted:
+        return Icons.circle_outlined;
+    }
+  }
+
+  String _getStatusText(ModuleStatus status) {
+    switch (status) {
+      case ModuleStatus.completed:
+        return 'Completed';
+      case ModuleStatus.inProgress:
+        return 'In Progress';
+      case ModuleStatus.notStarted:
+        return 'Not Started';
+    }
+  }
+}

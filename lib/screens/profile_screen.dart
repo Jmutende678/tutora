@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:tutora/models/user_model.dart';
+import 'package:provider/provider.dart';
+import 'package:tutora/screens/certificate_screen.dart';
+import 'package:tutora/screens/icon_preview_screen.dart';
 import 'package:tutora/theme/app_theme.dart';
+import 'package:tutora/utils/theme_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -10,367 +13,591 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late UserModel _user;
-  final bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _user = UserModel.dummyUser();
-  }
+  bool _notificationsEnabled = true;
 
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Profile'),
-        centerTitle: true,
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Profile header with avatar
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color:
-                          isDarkMode ? AppTheme.darkSurfaceColor : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          offset: const Offset(0, 2),
-                          blurRadius: 10,
+      backgroundColor: isDarkMode
+          ? AppTheme.scaffoldBackgroundColorDark
+          : AppTheme.scaffoldBackgroundColorLight,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header Profile Section
+            // Profile Header Card
+            Container(
+              margin: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDarkMode ? AppTheme.cardColorDark : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    // Profile Avatar
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                          width: 2,
                         ),
-                      ],
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        size: 40,
+                        color: AppTheme.primaryColor,
+                      ),
                     ),
-                    child: Column(
-                      children: [
-                        // Profile image
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundColor: AppTheme.primaryColor,
-                          child: _user.profileImageUrl != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(50),
-                                  child: Image.network(
-                                    _user.profileImageUrl!,
-                                    width: 100,
-                                    height: 100,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : Text(
-                                  _user.name[0],
-                                  style: const TextStyle(
-                                    fontSize: 40,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
-                        const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                        // Name and position
-                        Text(
-                          _user.name,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? AppTheme.darkTextPrimaryColor
-                                : AppTheme.textPrimaryColor,
-                          ),
+                    // User Name
+                    Text(
+                      'John Doe',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode
+                            ? AppTheme.darkTextPrimaryColor
+                            : AppTheme.textPrimaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // User Email
+                    Text(
+                      'john.doe@company.com',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: isDarkMode
+                            ? AppTheme.darkTextSecondaryColor
+                            : AppTheme.textSecondaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // User Role
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.2),
                         ),
-                        if (_user.position != null) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            _user.position!,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isDarkMode
-                                  ? AppTheme.darkTextSecondaryColor
-                                  : AppTheme.textSecondaryColor,
+                      ),
+                      child: Text(
+                        'Learning Specialist',
+                        style: TextStyle(
+                          color: AppTheme.primaryColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Stats Grid
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 2,
+                        childAspectRatio: 5.0,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                        children: [
+                          _buildStatCard(
+                            'Courses\nCompleted',
+                            '12',
+                            Icons.school,
+                            isDarkMode,
+                          ),
+                          _buildStatCard(
+                            'Total\nPoints',
+                            '2,150',
+                            Icons.star,
+                            isDarkMode,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const CertificateScreen(),
+                                ),
+                              );
+                            },
+                            child: _buildStatCard(
+                              'Certificates\nEarned',
+                              '8',
+                              Icons.military_tech,
+                              isDarkMode,
                             ),
+                          ),
+                          _buildStatCard(
+                            'Current\nStreak',
+                            '15 days',
+                            Icons.local_fire_department,
+                            isDarkMode,
                           ),
                         ],
-
-                        const SizedBox(height: 16),
-
-                        // Points and badges
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.star,
-                                    color: AppTheme.primaryColor,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${_user.points} Points',
-                                    style: const TextStyle(
-                                      color: AppTheme.primaryColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppTheme.secondaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.local_fire_department,
-                                    color: AppTheme.secondaryColor,
-                                    size: 18,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    '${_user.currentStreak} Day Streak',
-                                    style: const TextStyle(
-                                      color: AppTheme.secondaryColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 24),
 
-                  // User details section
+                  // Settings Section
+                  Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDarkMode ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Settings Options
                   Container(
-                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color:
-                          isDarkMode ? AppTheme.darkSurfaceColor : Colors.white,
+                          isDarkMode ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          offset: const Offset(0, 2),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildDetailItem(context, 'Email', _user.email),
-                        if (_user.companyCode != null)
-                          _buildDetailItem(
-                              context, 'Company Code', _user.companyCode!),
-                        if (_user.joinDate != null)
-                          _buildDetailItem(
-                              context, 'Joined', _formatDate(_user.joinDate!)),
+                        _buildSettingsTile(
+                          'Notifications',
+                          'Receive learning reminders',
+                          Icons.notifications,
+                          trailing: Switch(
+                            value: _notificationsEnabled,
+                            onChanged: (value) {
+                              setState(() {
+                                _notificationsEnabled = value;
+                              });
+                            },
+                            activeColor: AppTheme.primaryColor,
+                          ),
+                          isDarkMode: isDarkMode,
+                        ),
+                        _buildDivider(isDarkMode),
+                        _buildSettingsTile(
+                          'Dark Mode',
+                          'Switch to dark theme',
+                          Icons.dark_mode,
+                          trailing: Switch(
+                            value: themeProvider.isDarkMode,
+                            onChanged: (value) {
+                              themeProvider.toggleTheme(value);
+                            },
+                            activeColor: AppTheme.primaryColor,
+                          ),
+                          isDarkMode: isDarkMode,
+                        ),
+                        _buildDivider(isDarkMode),
+                        _buildSettingsTile(
+                          'Preview App Icons',
+                          'View new gradient app icons',
+                          Icons.palette,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const IconPreviewScreen(),
+                              ),
+                            );
+                          },
+                          isDarkMode: isDarkMode,
+                        ),
+                        _buildDivider(isDarkMode),
+                        _buildSettingsTile(
+                          'Change Password',
+                          'Update your password',
+                          Icons.lock,
+                          onTap: () {
+                            _showChangePasswordDialog(context);
+                          },
+                          isDarkMode: isDarkMode,
+                        ),
+                        _buildDivider(isDarkMode),
+                        _buildSettingsTile(
+                          'Privacy Settings',
+                          'Manage your privacy',
+                          Icons.privacy_tip,
+                          onTap: () {
+                            _showPrivacySettingsDialog(context);
+                          },
+                          isDarkMode: isDarkMode,
+                        ),
+                        _buildDivider(isDarkMode),
+                        _buildSettingsTile(
+                          'Help & Support',
+                          'Get help and contact support',
+                          Icons.help,
+                          onTap: () {
+                            _showHelpSupportDialog(context);
+                          },
+                          isDarkMode: isDarkMode,
+                        ),
+                        _buildDivider(isDarkMode),
+                        _buildSettingsTile(
+                          'Logout',
+                          'Sign out of your account',
+                          Icons.logout,
+                          onTap: () {
+                            _showLogoutDialog(context);
+                          },
+                          textColor: Colors.red,
+                          isDarkMode: isDarkMode,
+                        ),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                  // Statistics section
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color:
-                          isDarkMode ? AppTheme.darkSurfaceColor : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          offset: const Offset(0, 2),
-                          blurRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Learning Statistics',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode
-                                ? AppTheme.darkTextPrimaryColor
-                                : AppTheme.textPrimaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildStatisticItem(
-                                context,
-                                Icons.book,
-                                '${_user.modulesCompleted ?? 0}',
-                                'Modules\nCompleted',
-                              ),
-                            ),
-                            Expanded(
-                              child: _buildStatisticItem(
-                                context,
-                                Icons.quiz,
-                                '${_user.quizzesCompleted ?? 0}',
-                                'Quizzes\nCompleted',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Sign out button
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // In a real app, this would sign the user out
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content:
-                                Text('Sign out functionality would go here'),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.logout),
-                      label: const Text('Sign Out'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        foregroundColor: AppTheme.errorColor,
-                        side: const BorderSide(color: AppTheme.errorColor),
-                      ),
+                  // App Version
+                  Text(
+                    'Tutora v1.0.0',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isDarkMode ? Colors.grey[500] : Colors.grey[600],
                     ),
                   ),
                 ],
               ),
             ),
+          ],
+        ),
+      ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    final months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
-  }
-
-  Widget _buildDetailItem(BuildContext context, String label, String value) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: isDarkMode
-                    ? AppTheme.darkTextSecondaryColor
-                    : AppTheme.textSecondaryColor,
-              ),
-            ),
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    bool isDarkMode,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                color: isDarkMode
-                    ? AppTheme.darkTextPrimaryColor
-                    : AppTheme.textPrimaryColor,
-              ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: AppTheme.primaryColor, size: 14),
+          const SizedBox(height: 1),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: isDarkMode ? Colors.white : Colors.black87,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 7,
+              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatisticItem(
-      BuildContext context, IconData icon, String value, String label) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildSettingsTile(
+    String title,
+    String subtitle,
+    IconData icon, {
+    Widget? trailing,
+    VoidCallback? onTap,
+    Color? textColor,
+    required bool isDarkMode,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: textColor ?? AppTheme.primaryColor, size: 20),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: textColor ?? (isDarkMode ? Colors.white : Colors.black87),
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: TextStyle(
+          fontSize: 14,
+          color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+        ),
+      ),
+      trailing: trailing ??
+          (onTap != null
+              ? Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                )
+              : null),
+      onTap: onTap,
+    );
+  }
 
-    return Column(
-      children: [
-        Icon(
-          icon,
-          color: AppTheme.primaryColor,
-          size: 28,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: isDarkMode
-                ? AppTheme.darkTextPrimaryColor
-                : AppTheme.textPrimaryColor,
+  Widget _buildDivider(bool isDarkMode) {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: isDarkMode ? Colors.grey[700] : Colors.grey[200],
+    );
+  }
+
+  void _showPrivacySettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Privacy Settings'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SwitchListTile(
+                title: const Text('Share Analytics'),
+                subtitle: const Text('Help improve the app'),
+                value: true,
+                onChanged: (value) {},
+              ),
+              SwitchListTile(
+                title: const Text('Marketing Emails'),
+                subtitle: const Text('Receive updates and offers'),
+                value: false,
+                onChanged: (value) {},
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 12,
-            color: isDarkMode
-                ? AppTheme.darkTextSecondaryColor
-                : AppTheme.textSecondaryColor,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showHelpSupportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Help & Support'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.article),
+                title: const Text('User Guide'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Opening user guide...')),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.email),
+                title: const Text('Contact Support'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Opening support chat...')),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.bug_report),
+                title: const Text('Report Bug'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Opening bug report...')),
+                  );
+                },
+              ),
+            ],
           ),
-        ),
-      ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showChangePasswordDialog(BuildContext context) {
+    final _currentPasswordController = TextEditingController();
+    final _newPasswordController = TextEditingController();
+    final _confirmPasswordController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Change Password'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _currentPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Current Password',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _newPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'New Password',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Confirm New Password',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Password changed successfully!'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              child: const Text('Change Password'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Logout'),
+          content: const Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate back to company code screen (login flow)
+                Navigator.of(
+                  context,
+                ).pushNamedAndRemoveUntil('/', (route) => false);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

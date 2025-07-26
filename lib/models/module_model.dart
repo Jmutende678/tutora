@@ -4,11 +4,7 @@ enum ModuleStatus {
   completed,
 }
 
-enum DifficultyLevel {
-  beginner,
-  intermediate,
-  advanced
-}
+enum DifficultyLevel { beginner, intermediate, advanced }
 
 class ModuleModel {
   final String id;
@@ -45,8 +41,10 @@ class ModuleModel {
       ModuleModel(
         id: 'module1',
         title: 'Workplace Safety Fundamentals',
-        description: 'Learn the basics of workplace safety protocols and how to prevent common accidents.',
-        imageUrl: null,
+        description:
+            'Learn the basics of workplace safety protocols and how to prevent common accidents in the workplace.',
+        imageUrl:
+            'https://images.unsplash.com/photo-1584735174965-52bbd47a2717?w=400&h=250&fit=crop',
         estimatedMinutes: 30,
         pointsValue: 100,
         category: 'Safety',
@@ -59,8 +57,10 @@ class ModuleModel {
       ModuleModel(
         id: 'module2',
         title: 'Customer Service Excellence',
-        description: 'Master the art of providing exceptional customer service and handling difficult situations.',
-        imageUrl: null,
+        description:
+            'Master the art of providing exceptional customer service and handling difficult situations.',
+        imageUrl:
+            'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=250&fit=crop',
         estimatedMinutes: 45,
         pointsValue: 150,
         category: 'Service',
@@ -73,8 +73,10 @@ class ModuleModel {
       ModuleModel(
         id: 'module3',
         title: 'Data Security Basics',
-        description: 'Understand the importance of data security and learn best practices to protect sensitive information.',
-        imageUrl: null,
+        description:
+            'Understand the importance of data security and learn best practices to protect sensitive information.',
+        imageUrl:
+            'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=250&fit=crop',
         estimatedMinutes: 25,
         pointsValue: 75,
         category: 'Compliance',
@@ -87,8 +89,10 @@ class ModuleModel {
       ModuleModel(
         id: 'module4',
         title: 'Effective Communication',
-        description: 'Improve your communication skills for better workplace collaboration and customer interactions.',
-        imageUrl: null,
+        description:
+            'Improve your communication skills for better workplace collaboration and customer interactions.',
+        imageUrl:
+            'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=400&h=250&fit=crop',
         estimatedMinutes: 40,
         pointsValue: 120,
         category: 'Soft Skills',
@@ -101,8 +105,10 @@ class ModuleModel {
       ModuleModel(
         id: 'module5',
         title: 'Time Management Strategies',
-        description: 'Learn effective techniques to manage your time and increase productivity in the workplace.',
-        imageUrl: null,
+        description:
+            'Learn effective techniques to manage your time and increase productivity in the workplace.',
+        imageUrl:
+            'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=250&fit=crop',
         estimatedMinutes: 35,
         pointsValue: 100,
         category: 'Productivity',
@@ -145,4 +151,4 @@ class ModuleModel {
       isCompleted: isCompleted ?? this.isCompleted,
     );
   }
-} 
+}
