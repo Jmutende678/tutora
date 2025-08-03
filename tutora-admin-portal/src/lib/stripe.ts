@@ -281,6 +281,10 @@ export class StripeService {
   }
 
   async getSubscription(subscriptionId: string) {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured - please set STRIPE_SECRET_KEY environment variable')
+    }
+    
     try {
     return await this.stripe.subscriptions.retrieve(subscriptionId)
     } catch (error: any) {
