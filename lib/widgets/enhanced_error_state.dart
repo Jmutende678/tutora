@@ -171,7 +171,7 @@ class EnhancedErrorState extends StatelessWidget {
       case ErrorType.notFound:
         return Icons.search_off;
       case ErrorType.serverError:
-        return Icons.server_error;
+        return Icons.error;
       case ErrorType.timeout:
         return Icons.access_time;
       case ErrorType.unknown:

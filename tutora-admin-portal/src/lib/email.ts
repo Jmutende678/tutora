@@ -1,5 +1,20 @@
 import nodemailer from 'nodemailer'
-import { Company } from './firebase'
+
+// Supabase-based Company interface
+interface Company {
+  id: string
+  company_code: string
+  name: string
+  plan: 'basic' | 'premium' | 'enterprise'
+  admin_user_email: string
+  admin_user_name: string
+  billing_email: string
+  email: string
+  adminUser: {
+    email: string
+    name: string
+  }
+}
 
 interface EmailTemplate {
   subject: string
@@ -27,7 +42,7 @@ export class EmailService {
 
   async sendWelcomeEmail(company: Company): Promise<void> {
     console.log('Sending welcome email to:', company.email)
-    console.log('Company code:', company.companyCode)
+    console.log('Company code:', company.company_code)
     
     // Check if SMTP is configured
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -73,7 +88,7 @@ export class EmailService {
       
       Thank you for your payment of $${amount/100} for ${company.plan} plan.
       Company: ${company.name}
-      Company Code: ${company.companyCode}
+      Company Code: ${company.company_code}
     `
     
     console.log('Payment confirmation email:', emailContent)
@@ -83,7 +98,7 @@ export class EmailService {
     const template = this.getCompanyCodeTemplate(company)
     
     await this.sendEmail({
-      to: recipientEmail || company.adminUser.email,
+      to: recipientEmail || company.admin_user_email,
       subject: template.subject,
       html: template.html,
       text: template.text
@@ -94,7 +109,7 @@ export class EmailService {
     const template = this.getPaymentSuccessTemplate(company, amount)
     
     await this.sendEmail({
-      to: company.adminUser.email,
+      to: company.admin_user_email,
       subject: template.subject,
       html: template.html,
       text: template.text
@@ -105,7 +120,7 @@ export class EmailService {
     const template = this.getPaymentFailedTemplate(company, amount)
     
     await this.sendEmail({
-      to: company.adminUser.email,
+      to: company.admin_user_email,
       subject: template.subject,
       html: template.html,
       text: template.text
@@ -127,8 +142,8 @@ export class EmailService {
     const template = this.getSupportTemplate(fromEmail, subject, message)
     
     await this.sendEmail({
-      to: process.env.ADMIN_EMAIL!,
-      subject: `[Tutora Support] ${subject}`,
+      to: process.env.SUPPORT_EMAIL || 'support@tutoralearn.com',
+      subject: template.subject,
       html: template.html,
       text: template.text,
       replyTo: fromEmail
@@ -142,31 +157,44 @@ export class EmailService {
     text: string
     replyTo?: string
   }): Promise<void> {
+    // Check if SMTP is configured
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      console.log('SMTP not configured, logging email instead:', options)
+      return
+    }
+    
     try {
-      // In production, you would uncomment the nodemailer code below:
-      /*
-      const transporter = nodemailer.createTransporter(config)
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      })
 
       await transporter.sendMail({
-        from: `"Tutora Platform" <${process.env.SMTP_USER}>`,
+        from: `"Tutora" <${process.env.SMTP_USER}>`,
         to: options.to,
         subject: options.subject,
         html: options.html,
         text: options.text,
-        replyTo: options.replyTo
+        replyTo: options.replyTo,
       })
-      */
+      
+      console.log('✅ Email sent successfully to:', options.to)
     } catch (error) {
-      console.error('Email sending failed:', error)
+      console.error('❌ Failed to send email:', error)
       throw error
     }
   }
 
   private getWelcomeTemplate(company: Company): EmailTemplate {
-    const appDomain = process.env.APP_DOMAIN || 'tutora.com'
+    const appDomain = process.env.NEXT_PUBLIC_APP_URL || 'https://tutora.vercel.app'
     
     return {
-      subject: `Welcome to Tutora! Your company code: ${company.companyCode}`,
+      subject: `Welcome to Tutora! Your company code: ${company.company_code}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -194,97 +222,76 @@ export class EmailService {
             </div>
             
             <div class="content">
-              <h2>Hello ${company.adminUser.name},</h2>
+              <h2>Hello ${company.admin_user_name},</h2>
               
               <p>Congratulations! Your Tutora learning platform has been successfully set up for <strong>${company.name}</strong>.</p>
               
               <div class="code-box">
                 <h3>Your Company Code</h3>
-                <div class="code">${company.companyCode}</div>
-                <p><small>Share this code with your team members to give them access to your training platform.</small></p>
+                <div class="code">${company.company_code}</div>
+                <p>Share this code with your team members to join your organization.</p>
               </div>
               
-              <h3>What's included in your ${company.plan} plan:</h3>
+              <h3>What's Next?</h3>
               <div class="feature-list">
-                ${company.plan === 'starter' ? `
-                  <div class="feature-item">Up to 25 users</div>
-                  <div class="feature-item">5 AI-generated modules per month</div>
-                  <div class="feature-item">Basic analytics & reporting</div>
-                  <div class="feature-item">Email support</div>
-                  <div class="feature-item">Mobile app access</div>
-                ` : company.plan === 'professional' ? `
-                  <div class="feature-item">Up to 100 users</div>
-                  <div class="feature-item">Unlimited AI-generated modules</div>
-                  <div class="feature-item">Advanced analytics & insights</div>
-                  <div class="feature-item">Priority support</div>
-                  <div class="feature-item">Custom branding</div>
-                  <div class="feature-item">Advanced quiz & certification</div>
-                ` : `
-                  <div class="feature-item">Unlimited users</div>
-                  <div class="feature-item">Unlimited AI-generated modules</div>
-                  <div class="feature-item">Advanced AI features & customization</div>
-                  <div class="feature-item">White-label solution</div>
-                  <div class="feature-item">24/7 dedicated support</div>
-                  <div class="feature-item">Custom integrations</div>
-                  <div class="feature-item">SLA guarantee</div>
-                `}
+                <div class="feature-item">Upload training videos and documents</div>
+                <div class="feature-item">Create AI-powered learning modules</div>
+                <div class="feature-item">Invite team members using your company code</div>
+                <div class="feature-item">Track progress and engagement</div>
+                <div class="feature-item">Access analytics and insights</div>
               </div>
               
-              <h3>Getting Started:</h3>
-              <ol>
-                <li>Download the Tutora app from your app store</li>
-                <li>Use your company code: <strong>${company.companyCode}</strong></li>
-                <li>Login with your email: <strong>${company.adminUser.email}</strong></li>
-                <li>Start inviting team members and creating training content</li>
-              </ol>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${appDomain}/admin/dashboard" class="button">Access Your Dashboard</a>
+              </div>
               
-              <p style="text-align: center; margin: 30px 0;">
-                <a href="https://admin.${appDomain}" class="button">Access Admin Portal</a>
-              </p>
-              
-              <p>If you have any questions, our support team is here to help. Just reply to this email!</p>
+              <p style="margin-top: 30px;">Welcome to the future of training!</p>
               
               <p>Best regards,<br>The Tutora Team</p>
             </div>
             
             <div class="footer">
-              <p>&copy; 2024 Tutora. All rights reserved.</p>
-              <p>Need help? Contact us at support@${appDomain}</p>
+              <p>© 2024 Tutora. All rights reserved.</p>
+              <p>Need help? Contact us at support@tutoralearn.com</p>
             </div>
           </div>
         </body>
         </html>
       `,
       text: `
-        Welcome to Tutora!
+Welcome to Tutora! 🚀
         
-        Hello ${company.adminUser.name},
+Hello ${company.admin_user_name},
         
         Congratulations! Your Tutora learning platform has been successfully set up for ${company.name}.
         
-        Your Company Code: ${company.companyCode}
+Your Company Code: ${company.company_code}
         
-        Share this code with your team members to give them access to your training platform.
-        
-        Getting Started:
-        1. Download the Tutora app from your app store
-        2. Use your company code: ${company.companyCode}
-        3. Login with your email: ${company.adminUser.email}
-        4. Start inviting team members and creating training content
-        
-        Admin Portal: https://admin.${appDomain}
-        
-        If you have any questions, our support team is here to help. Just reply to this email!
+Share this code with your team members to join your organization.
+
+What's Next?
+✓ Upload training videos and documents
+✓ Create AI-powered learning modules
+✓ Invite team members using your company code
+✓ Track progress and engagement
+✓ Access analytics and insights
+
+Access your dashboard: ${appDomain}/admin/dashboard
+
+Welcome to the future of training!
         
         Best regards,
         The Tutora Team
+
+© 2024 Tutora. All rights reserved.
+Need help? Contact us at support@tutoralearn.com
       `
     }
   }
 
   private getCompanyCodeTemplate(company: Company): EmailTemplate {
     return {
-      subject: `Your Tutora Company Code: ${company.companyCode}`,
+      subject: `Your Tutora Company Code: ${company.company_code}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -312,7 +319,7 @@ export class EmailService {
               <p>Here's your company code for accessing the Tutora learning platform:</p>
               
               <div class="code-box">
-                <div class="code">${company.companyCode}</div>
+                <div class="code">${company.company_code}</div>
                 <p><small>Company: ${company.name}</small></p>
               </div>
               
@@ -335,7 +342,7 @@ export class EmailService {
         
         Here's your company code for accessing the Tutora learning platform:
         
-        Company Code: ${company.companyCode}
+        Company Code: ${company.company_code}
         Company: ${company.name}
         
         Use this code when logging into the Tutora app to access your company's training content.
@@ -370,7 +377,7 @@ export class EmailService {
             </div>
             
             <div class="content">
-              <h2>Hello ${company.adminUser.name},</h2>
+              <h2>Hello ${company.admin_user_name},</h2>
               
               <p>Your payment has been successfully processed!</p>
               
@@ -393,7 +400,7 @@ export class EmailService {
       text: `
         Payment Successful
         
-        Hello ${company.adminUser.name},
+        Hello ${company.admin_user_name},
         
         Your payment has been successfully processed!
         
@@ -433,7 +440,7 @@ export class EmailService {
             </div>
             
             <div class="content">
-              <h2>Hello ${company.adminUser.name},</h2>
+              <h2>Hello ${company.admin_user_name},</h2>
               
               <p>We encountered an issue processing your payment.</p>
               
@@ -459,7 +466,7 @@ export class EmailService {
       text: `
         Payment Failed - Action Required
         
-        Hello ${company.adminUser.name},
+        Hello ${company.admin_user_name},
         
         We encountered an issue processing your payment.
         

@@ -85,9 +85,9 @@ if [ ! -f ".env.local" ]; then
         cp production.env .env.local
         print_warning "Please edit .env.local with your actual production values before continuing."
         print_warning "Required variables:"
-        echo "  - FIREBASE_PROJECT_ID"
-        echo "  - FIREBASE_CLIENT_EMAIL" 
-        echo "  - FIREBASE_PRIVATE_KEY"
+        echo "  - NEXT_PUBLIC_SUPABASE_URL"
+        echo "  - NEXT_PUBLIC_SUPABASE_ANON_KEY"
+        echo "  - SUPABASE_SERVICE_ROLE_KEY"
         echo "  - STRIPE_SECRET_KEY"
         echo "  - STRIPE_PUBLISHABLE_KEY"
         echo "  - OPENAI_API_KEY"
@@ -108,7 +108,7 @@ fi
 # Validate critical environment variables
 source .env.local
 
-critical_vars=("FIREBASE_PROJECT_ID" "STRIPE_SECRET_KEY" "OPENAI_API_KEY")
+critical_vars=("NEXT_PUBLIC_SUPABASE_URL" "STRIPE_SECRET_KEY" "OPENAI_API_KEY")
 for var in "${critical_vars[@]}"; do
     if [ -z "${!var}" ] || [ "${!var}" = "YOUR_ACTUAL_VALUE_HERE" ] || [[ "${!var}" == *"ABCDEF"* ]]; then
         print_error "Environment variable $var is not properly configured in .env.local"
@@ -201,9 +201,9 @@ if [ "$DEPLOY_METHOD" = "vercel" ]; then
 {
   "env": {
     "NODE_ENV": "production",
-    "FIREBASE_PROJECT_ID": "$FIREBASE_PROJECT_ID",
-    "FIREBASE_CLIENT_EMAIL": "$FIREBASE_CLIENT_EMAIL",
-    "FIREBASE_PRIVATE_KEY": "$FIREBASE_PRIVATE_KEY",
+    "NEXT_PUBLIC_SUPABASE_URL": "$NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "$NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY": "$SUPABASE_SERVICE_ROLE_KEY",
     "STRIPE_SECRET_KEY": "$STRIPE_SECRET_KEY",
     "STRIPE_PUBLISHABLE_KEY": "$STRIPE_PUBLISHABLE_KEY",
     "STRIPE_WEBHOOK_SECRET": "$STRIPE_WEBHOOK_SECRET",
@@ -383,7 +383,7 @@ echo "  5. Configure CDN (if needed)"
 echo ""
 echo "🔧 Production Checklist:"
 echo "  ✅ Environment variables configured"
-echo "  ✅ Firebase connected"
+echo "  ✅ Supabase connected"
 echo "  ✅ Stripe payment processing"
 echo "  ✅ Email service configured"
 echo "  ✅ Support ticket system"

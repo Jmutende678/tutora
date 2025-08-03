@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tutora/config/supabase_config.dart';
-// FIREBASE BACKUP - Commented out but kept for future migration
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:tutora/firebase_options.dart';
 import 'package:tutora/screens/onboarding_screen.dart';
 import 'package:tutora/theme/app_theme.dart';
 import 'package:tutora/utils/theme_provider.dart';
@@ -11,7 +8,7 @@ import 'package:tutora/utils/theme_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🚀 SUPABASE INITIALIZATION (PRODUCTION)
+  // Initialize Supabase
   try {
     await SupabaseConfig.initialize();
 
@@ -26,18 +23,6 @@ void main() async {
     print('❌ Supabase initialization error: $e');
     print('⚠️ Running in offline mode - some features may not work');
   }
-
-  // 🔥 FIREBASE BACKUP CODE (Preserved for future migration)
-  /*
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    print('✅ Firebase initialized successfully');
-  } catch (e) {
-    print('❌ Firebase initialization error: $e');
-  }
-  */
 
   runApp(const MyApp());
 }

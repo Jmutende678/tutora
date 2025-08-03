@@ -56,10 +56,8 @@ ENABLE_REQUEST_LOGGING=true
 ENABLE_EMAIL_NOTIFICATIONS=true
 ENABLE_PUSH_NOTIFICATIONS=false
 
-# 🔥 FIREBASE CONFIGURATION (BACKUP - Kept for future migration)
-# FIREBASE_PROJECT_ID=your-firebase-project-id
-# FIREBASE_CLIENT_EMAIL=your-firebase-service-account-email
-# FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nyour-private-key-here\n-----END PRIVATE KEY-----"
+# 🔥 FIREBASE CONFIGURATION (REMOVED - No longer needed)
+# Firebase configuration has been removed as the project now uses Supabase
 
 # 🤖 OPENAI CONFIGURATION (Optional - for AI features)
 # OPENAI_API_KEY=sk-proj-your-openai-api-key-here

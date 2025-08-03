@@ -4,9 +4,7 @@ import 'package:tutora/widgets/custom_text_field.dart';
 import 'package:tutora/widgets/enhanced_primary_button.dart';
 import 'package:tutora/widgets/enhanced_loading_state.dart';
 import 'package:tutora/widgets/enhanced_error_state.dart';
-import 'package:tutora/services/supabase_service.dart'; // NEW: Supabase service
-// FIREBASE BACKUP - Commented but preserved for future migration
-// import 'package:tutora/services/firebase_service.dart';
+import 'package:tutora/services/supabase_service.dart';
 import 'package:tutora/screens/login_screen.dart';
 
 class CompanyCodeScreen extends StatefulWidget {
@@ -44,15 +42,9 @@ class _CompanyCodeScreenState extends State<CompanyCodeScreen> {
     try {
       final companyCode = _companyCodeController.text.trim().toUpperCase();
 
-      // 🚀 SUPABASE SERVICE (Active)
+      // Use Supabase service
       final supabaseService = SupabaseService();
       final company = await supabaseService.getCompanyByCode(companyCode);
-
-      // 🔥 FIREBASE BACKUP CODE (Commented but preserved)
-      /*
-      final firebaseService = FirebaseService();
-      final company = await firebaseService.getCompanyByCode(companyCode);
-      */
 
       if (company != null) {
         setState(() {

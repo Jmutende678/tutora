@@ -1209,13 +1209,13 @@ PODS:
     - FirebaseFirestore (~> 11.13.0)
   - firebase_auth (5.6.0):
     - Firebase/Auth (~> 11.13.0)
-    - Firebase/CoreOnly (~> 11.13.0)
+    - base/CoreOnly (~> 11.13.0)
     - firebase_core
     - FlutterMacOS
   - firebase_core (3.14.0):
     - Firebase/CoreOnly (~> 11.13.0)
     - FlutterMacOS
-  - FirebaseAppCheckInterop (11.14.0)
+  - baseAppCheckInterop (11.14.0)
   - FirebaseAuth (11.13.0):
     - FirebaseAppCheckInterop (~> 11.0)
     - FirebaseAuthInterop (~> 11.0)

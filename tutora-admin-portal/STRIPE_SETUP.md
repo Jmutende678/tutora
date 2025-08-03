@@ -101,7 +101,7 @@ Use these test cards in TEST MODE:
 5. Complete Stripe checkout with test card
 6. Verify:
    - User receives welcome email
-   - Company gets created in Firebase
+   - Company gets created in Supabase
    - Company code is generated
    - Payment appears in Stripe dashboard
 

@@ -10,12 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  # Supabase packages (NEW - Active backend)
+  # Supabase packages (Active backend)
   supabase_flutter: ^2.0.0
-  # Firebase packages (BACKUP - kept for future migration)
-  firebase_core: ^3.14.0
-  firebase_auth: ^5.6.0
-  cloud_firestore: ^5.6.9
   provider: ^6.0.5
   google_fonts: ^6.1.0
   flutter_svg: ^2.0.7

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { mobileSyncService, type MobileSyncData } from '@/lib/mobile-sync'
-import { firebaseAdminService } from '@/lib/firebase-admin'
+import { supabaseAdmin } from '@/lib/supabase'
 
 // GET /api/mobile/sync - Get sync data for mobile app
 export async function GET(request: NextRequest) {
@@ -100,47 +100,40 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// POST /api/mobile/sync/auth - Authenticate mobile app with company code
+// PUT /api/mobile/sync - Force sync for specific user
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { companyCode, userEmail } = body
+    const { userId, companyId, forceSync } = body
 
-    if (!companyCode || !userEmail) {
+    if (!userId || !companyId) {
       return NextResponse.json(
-        { error: 'companyCode and userEmail are required' },
+        { error: 'userId and companyId are required' },
         { status: 400 }
       )
     }
 
-    // Authenticate user with company code
-    const authResult = await mobileSyncService.authenticateWithCompanyCode(companyCode, userEmail)
-
-    if (!authResult.success) {
+    // Force sync if requested
+    if (forceSync) {
+      const syncResult = await mobileSyncService.forceSync(userId, companyId)
+      if (!syncResult) {
       return NextResponse.json(
-        { error: authResult.error },
-        { status: 401 }
+          { error: 'Failed to force sync' },
+          { status: 500 }
       )
     }
-
-    // Get initial sync data
-    const syncData = await mobileSyncService.getSyncDataForUser(
-      authResult.user!.id, 
-      authResult.company!.id
-    )
+    }
 
     return NextResponse.json({
       success: true,
-      user: authResult.user,
-      company: authResult.company,
-      syncData,
-      message: 'Authentication successful'
+      message: 'Sync completed successfully',
+      timestamp: new Date().toISOString()
     })
 
   } catch (error) {
-    console.error('❌ Error in mobile auth:', error)
+    console.error('❌ Error in mobile sync PUT:', error)
     return NextResponse.json(
-      { error: 'Authentication failed' },
+      { error: 'Failed to sync' },
       { status: 500 }
     )
   }

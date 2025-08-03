@@ -83,7 +83,7 @@ export default function AdminDashboard() {
   const loadDashboardData = async () => {
     setIsLoading(true)
     try {
-      // Simulate API calls - in production these would be real Firebase/Stripe calls
+      // Simulate API calls - in production these would be real Supabase/Stripe calls
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       // Mock real-time data
