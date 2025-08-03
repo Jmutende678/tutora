@@ -1,49 +1,49 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import {
-  Home,
-  Users,
-  Building2,
-  Settings,
-  BarChart3,
-  CreditCard,
-  HelpCircle,
+import { useState, useEffect } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { 
+  Home, 
+  Users, 
+  Building2, 
+  BarChart3, 
+  Globe, 
+  CreditCard, 
+  Settings, 
+  HelpCircle, 
+  Menu, 
+  X, 
   LogOut,
-  Menu,
-  X,
-  ChevronDown,
-  Bell,
-  Search,
-  Brain,
-  Globe,
-  Target,
-  BookOpen
+  User,
+  Trophy,
+  UserCog,
+  Shield
 } from 'lucide-react'
 import Link from 'next/link'
 
-interface DashboardLayoutProps {
-  children: React.ReactNode
-}
-
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [userRole, setUserRole] = useState<'ceo' | 'manager' | null>(null)
+const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   useEffect(() => {
-    const role = localStorage.getItem('admin_role') as 'ceo' | 'manager' | null
+    const role = localStorage.getItem('admin_role')
     setUserRole(role)
   }, [])
 
+  const handleLogout = () => {
+    localStorage.removeItem('admin_authenticated')
+    localStorage.removeItem('admin_role')
+    router.push('/')
+  }
+
+  // Navigation items based on role
   const ceoNavigation = [
     { name: 'Dashboard', href: '/admin/ceo-dashboard', icon: Home },
     { name: 'Companies', href: '/companies', icon: Building2 },
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-    { name: 'Global Reach', href: '/analytics', icon: Globe },
+    { name: 'Global Reach', href: '/global-reach', icon: Globe },
     { name: 'Financials', href: '/payments', icon: CreditCard },
     { name: 'Business Settings', href: '/settings', icon: Settings },
     { name: 'Support', href: '/support', icon: HelpCircle },
@@ -51,164 +51,129 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const managerNavigation = [
     { name: 'Dashboard', href: '/admin/manager-dashboard', icon: Home },
-    { name: 'Team', href: '/users', icon: Users },
-    { name: 'Courses', href: '/analytics', icon: BookOpen },
-    { name: 'Performance', href: '/analytics', icon: Target },
-    { name: 'AI Builder', href: '/analytics', icon: Brain },
-    { name: 'Team Settings', href: '/settings', icon: Settings },
+    { name: 'Team Management', href: '/admin/user-management', icon: Users },
+    { name: 'Module Builder', href: '/admin/module-builder', icon: UserCog },
+    { name: 'Performance', href: '/admin/performance', icon: Trophy },
+    { name: 'Billing & Payments', href: '/admin/payments', icon: CreditCard },
+    { name: 'Settings', href: '/admin/settings', icon: Settings },
+    { name: 'Security', href: '/admin/security', icon: Shield },
     { name: 'Support', href: '/support', icon: HelpCircle },
   ]
 
   const navigation = userRole === 'ceo' ? ceoNavigation : managerNavigation
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_authenticated')
-    localStorage.removeItem('admin_role')
-    router.push('/admin/login')
-  }
-
-  const getUserInfo = () => {
-    if (userRole === 'ceo') {
-      return {
-        name: 'CEO',
-        email: 'ceo@tutora.com',
-        gradientFrom: 'from-blue-500',
-        gradientTo: 'to-blue-600'
-      }
-    }
-    return {
-      name: 'Manager',
-      email: 'manager@tutora.com',
-      gradientFrom: 'from-purple-500',
-      gradientTo: 'to-purple-600'
-    }
-  }
-
-  const userInfo = getUserInfo()
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <div className="flex-shrink-0 flex items-center">
-                <Link href="/">
-                  <Image
-                    src="/images/tutora_logo.png"
-                    alt="Tutora"
-                    width={40}
-                    height={40}
-                    className="object-contain"
-                  />
-                </Link>
-              </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
+        </div>
+      )}
+
+      {/* Sidebar */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center">
+            <img 
+              src="/tutora_logo.png" 
+              alt="Tutora" 
+              className="w-8 h-8 object-contain"
+            />
+            <span className="ml-2 text-xl font-bold text-gray-900">Tutora</span>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-500"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <nav className="mt-6 px-3">
+          <div className="space-y-1">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href
+              return (
                 <Link
-                  href="/analytics"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSidebarOpen(false)}
                 >
-                  Analytics
+                  <item.icon className={`mr-3 h-5 w-5 ${isActive ? 'text-blue-700' : 'text-gray-400'}`} />
+                  {item.name}
                 </Link>
-                <Link
-                  href="/companies"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Companies
-                </Link>
-                <Link
-                  href="/users"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Users
-                </Link>
-                <Link
-                  href="/payments"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Payments
-                </Link>
-                <Link
-                  href="/support"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Support
-                </Link>
-              </div>
+              )
+            })}
+          </div>
+        </nav>
+
+        {/* User info and logout */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+          <div className="flex items-center mb-3">
+            <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center">
+              <img 
+                src="/tutora_logo.png" 
+                alt="User" 
+                className="w-5 h-5 object-contain"
+              />
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:items-center">
-              <Link
-                href="/settings"
-                className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none"
-              >
-                Settings
-              </Link>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-900">
+                {userRole === 'ceo' ? 'CEO Admin' : 'Manager'}
+              </p>
+              <p className="text-xs text-gray-500">admin@company.com</p>
             </div>
-            <div className="-mr-2 flex items-center sm:hidden">
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
-              >
-                <span className="sr-only">Open main menu</span>
-                {isMenuOpen ? (
-                  <X className="block h-6 w-6" aria-hidden="true" />
-                ) : (
-                  <Menu className="block h-6 w-6" aria-hidden="true" />
-                )}
-              </button>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <LogOut className="mr-3 h-4 w-4" />
+            Sign out
+          </button>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col lg:ml-0">
+        {/* Top bar */}
+        <div className="bg-white shadow-sm border-b border-gray-200 h-16 flex items-center justify-between px-6 lg:px-8">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+          
+          <div className="flex items-center space-x-4">
+            <div className="hidden sm:block">
+              <span className="text-sm font-medium text-gray-900">
+                {userRole === 'ceo' ? 'CEO Dashboard' : 'Manager Dashboard'}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Mobile menu */}
-        <div className={`${isMenuOpen ? 'block' : 'hidden'} sm:hidden`}>
-          <div className="pt-2 pb-3 space-y-1">
-            <Link
-              href="/analytics"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-            >
-              Analytics
-            </Link>
-            <Link
-              href="/companies"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-            >
-              Companies
-            </Link>
-            <Link
-              href="/users"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-            >
-              Users
-            </Link>
-            <Link
-              href="/payments"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-            >
-              Payments
-            </Link>
-            <Link
-              href="/support"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-            >
-              Support
-            </Link>
-            <Link
-              href="/settings"
-              className="block pl-3 pr-4 py-2 border-l-4 text-base font-medium border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-            >
-              Settings
-            </Link>
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 lg:p-8">
+            {children}
           </div>
-        </div>
-      </nav>
-
-      <main className="py-10">
-        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-          {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   )
-} 
+}
+
+export default DashboardLayout 

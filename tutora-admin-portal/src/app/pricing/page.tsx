@@ -247,7 +247,7 @@ export default function PricingPage() {
 
           {/* Enterprise Section - Separate Premium Design */}
           <div className="bg-gradient-to-r from-purple-900 via-blue-900 to-indigo-900 rounded-3xl p-12 text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('/api/placeholder/1200/400')] opacity-10"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-800/20 to-blue-800/20"></div>
             <div className="relative z-10">
               <div className="max-w-4xl mx-auto text-center">
                 <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 mb-6">

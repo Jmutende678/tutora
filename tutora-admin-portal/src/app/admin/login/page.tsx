@@ -45,9 +45,11 @@ export default function AdminLoginPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <Link href="/" className="inline-block">
-            <div className="h-12 w-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <Lock className="h-6 w-6 text-white" />
-            </div>
+            <img 
+              src="/tutora_logo.png" 
+              alt="Tutora" 
+              className="h-12 w-12 object-contain mx-auto"
+            />
           </Link>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
             Admin Login
