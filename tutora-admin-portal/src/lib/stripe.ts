@@ -310,6 +310,10 @@ export class StripeService {
   }
 
   async cancelSubscription(subscriptionId: string) {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured - please set STRIPE_SECRET_KEY environment variable')
+    }
+    
     try {
     return await this.stripe.subscriptions.cancel(subscriptionId)
     } catch (error: any) {
@@ -319,6 +323,10 @@ export class StripeService {
   }
 
   async getCustomer(customerId: string) {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured - please set STRIPE_SECRET_KEY environment variable')
+    }
+    
     try {
     return await this.stripe.customers.retrieve(customerId)
     } catch (error: any) {
@@ -328,6 +336,10 @@ export class StripeService {
   }
 
   async constructWebhookEvent(body: string, signature: string) {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured - please set STRIPE_SECRET_KEY environment variable')
+    }
+    
     try {
       return this.stripe.webhooks.constructEvent(
         body,
