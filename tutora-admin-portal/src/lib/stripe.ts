@@ -242,9 +242,13 @@ export class StripeService {
     }
   }
 
-  async createCustomer(email: string, name: string, companyName: string) {
+    async createCustomer(email: string, name: string, companyName: string) {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured - please set STRIPE_SECRET_KEY environment variable')
+    }
+    
     try {
-    const customer = await this.stripe.customers.create({
+      const customer = await this.stripe.customers.create({
       email,
       name,
       metadata: {
@@ -259,9 +263,13 @@ export class StripeService {
     }
   }
 
-  async createPortalSession(customerId: string, returnUrl: string) {
+    async createPortalSession(customerId: string, returnUrl: string) {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured - please set STRIPE_SECRET_KEY environment variable')
+    }
+    
     try {
-    const session = await this.stripe.billingPortal.sessions.create({
+      const session = await this.stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: returnUrl,
     })
