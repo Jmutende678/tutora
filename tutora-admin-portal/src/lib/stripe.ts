@@ -1,17 +1,21 @@
 import Stripe from 'stripe'
 
 // Initialize Stripe with real API key
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-if (!stripeSecretKey) {
-  throw new Error('STRIPE_SECRET_KEY is required in environment variables')
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_build'
+
+// Only create Stripe instance if we have a real key
+const stripe = stripeSecretKey !== 'sk_test_dummy_key_for_build' 
+  ? new Stripe(stripeSecretKey, {
+      apiVersion: '2023-10-16',
+      typescript: true,
+    })
+  : null
+
+if (stripeSecretKey !== 'sk_test_dummy_key_for_build') {
+  console.log('✅ Stripe configured successfully with live keys')
+} else {
+  console.log('⚠️ Stripe using dummy key for build - configure STRIPE_SECRET_KEY for production')
 }
-
-const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2023-10-16',
-  typescript: true,
-})
-
-console.log('✅ Stripe configured successfully with live keys')
 
 export interface PricingPlan {
   id: string
@@ -135,7 +139,7 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
 }
 
 export class StripeService {
-  private stripe: Stripe
+  private stripe: Stripe | null
 
   constructor() {
     this.stripe = stripe
@@ -149,6 +153,10 @@ export class StripeService {
     metadata?: Record<string, string>,
     userCount?: number
   ) {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured - please set STRIPE_SECRET_KEY environment variable')
+    }
+
     const plan = PRICING_PLANS[planId]
     if (!plan) {
       throw new Error('Invalid plan ID')
