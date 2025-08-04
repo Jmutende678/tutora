@@ -294,6 +294,10 @@ export class StripeService {
   }
 
   async updateSubscription(subscriptionId: string, planId: string) {
+    if (!this.stripe) {
+      throw new Error('Stripe not configured - please set STRIPE_SECRET_KEY environment variable')
+    }
+    
     try {
     const plan = PRICING_PLANS[planId]
     if (!plan) {
