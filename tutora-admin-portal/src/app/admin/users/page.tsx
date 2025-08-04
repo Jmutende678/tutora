@@ -186,16 +186,13 @@ export default function UserManagementPage() {
   }
 
   const handleEditUser = async () => {
+    if (!selectedUser) return
+
     try {
       setError(null)
 
-      if (!selectedUser) {
-        setError('No user selected for editing')
-        return
-      }
-
       // Validate form
-      if (!formData.name || !formData.email || !formData.company_id) {
+      if (!formData.name || !formData.email) {
         setError('Please fill in all required fields')
         return
       }
