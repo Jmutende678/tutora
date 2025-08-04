@@ -186,16 +186,21 @@ export default function UserManagementPage() {
   }
 
   const handleEditUser = async () => {
-    if (!selectedUser) return
-
     try {
       setError(null)
 
+      if (!selectedUser) {
+        setError('No user selected for editing')
+        return
+      }
+
       // Validate form
-      if (!formData.name || !formData.email) {
+      if (!formData.name || !formData.email || !formData.company_id) {
         setError('Please fill in all required fields')
         return
       }
+
+      const supabase = getSupabaseClient()
 
       // Update user
       const { error } = await supabase
@@ -232,6 +237,8 @@ export default function UserManagementPage() {
     try {
       setError(null)
 
+      const supabase = getSupabaseClient()
+
       const { error } = await supabase
         .from('users')
         .delete()
@@ -251,6 +258,8 @@ export default function UserManagementPage() {
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
       setError(null)
+
+      const supabase = getSupabaseClient()
 
       const { error } = await supabase
         .from('users')
