@@ -235,6 +235,8 @@ export default function ModuleManagementPage() {
         return
       }
 
+      const supabase = getSupabaseClient()
+
       // Update module
       const { error } = await supabase
         .from('modules')
