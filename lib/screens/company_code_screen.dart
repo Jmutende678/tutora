@@ -143,7 +143,7 @@ class _CompanyCodeScreenState extends State<CompanyCodeScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,7 +224,7 @@ class _CompanyCodeScreenState extends State<CompanyCodeScreen> {
                   leadingIcon: Icons.verified_user,
                 ),
 
-              Spacer(),
+              SizedBox(height: 32),
 
               // Help Section
               Container(

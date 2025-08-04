@@ -100,14 +100,14 @@ class _DashboardScreenState extends State<DashboardScreen>
                     elevation: 0,
                     flexibleSpace: FlexibleSpaceBar(
                       background: Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              const Color(0xFF6366F1),
-                              const Color(0xFF8B5CF6),
-                              const Color(0xFFA855F7),
+                              Color(0xFF6366F1),
+                              Color(0xFF8B5CF6),
+                              Color(0xFFA855F7),
                             ],
                           ),
                         ),
@@ -123,10 +123,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     Container(
                                       padding: const EdgeInsets.all(12),
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.2),
+                                        color: Colors.white.withOpacity(0.2),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: Icon(
+                                      child: const Icon(
                                         Icons.dashboard_rounded,
                                         color: Colors.white,
                                         size: 24,
@@ -135,14 +135,14 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     const Spacer(),
                                     IconButton(
                                       onPressed: () {},
-                                      icon: Icon(
+                                      icon: const Icon(
                                         Icons.notifications_outlined,
                                         color: Colors.white,
                                       ),
                                     ),
                                     IconButton(
                                       onPressed: () {},
-                                      icon: Icon(
+                                      icon: const Icon(
                                         Icons.settings_outlined,
                                         color: Colors.white,
                                       ),
@@ -163,7 +163,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   'Real-time insights and analytics for your learning platform',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.white.withValues(alpha: 0.9),
+                                    color: Colors.white.withOpacity(0.9),
                                   ),
                                 ),
                               ],
@@ -343,12 +343,12 @@ class _DashboardScreenState extends State<DashboardScreen>
                     color: isDarkMode ? const Color(0xFF1E293B) : Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: color.withValues(alpha: 0.1),
+                      color: color.withOpacity(0.1),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
+                        color: Colors.black.withOpacity(0.05),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
@@ -363,7 +363,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                           Container(
                             padding: EdgeInsets.all(isSmall ? 8 : 10),
                             decoration: BoxDecoration(
-                              color: color.withValues(alpha: 0.1),
+                              color: color.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Icon(
@@ -381,8 +381,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                               ),
                               decoration: BoxDecoration(
                                 color: isPositive
-                                    ? const Color(0xFF10B981).withValues(alpha: 0.1)
-                                    : const Color(0xFFEF4444).withValues(alpha: 0.1),
+                                    ? const Color(0xFF10B981).withOpacity(0.1)
+                                    : const Color(0xFFEF4444).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Row(
@@ -480,7 +480,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -517,7 +517,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       vertical: isSmallScreen ? 4 : 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                      color: const Color(0xFF10B981).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -528,13 +528,13 @@ class _DashboardScreenState extends State<DashboardScreen>
                           size: isSmallScreen ? 12 : 14,
                           color: const Color(0xFF10B981),
                         ),
-                        const SizedBox(width: isSmallScreen ? 2 : 4),
+                        SizedBox(width: isSmallScreen ? 2 : 4),
                         Text(
                           'Optimal',
                           style: TextStyle(
                             fontSize: isSmallScreen ? 9 : 11,
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF10B981),
+                            color: Color(0xFF10B981),
                           ),
                         ),
                       ],
@@ -554,7 +554,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   'Engagement Score',
                   '${_analytics['engagementScore']}%',
                   0.94,
-                  const Color(0xFF6366F1),
+                  Color(0xFF6366F1),
                   isDarkMode,
                 ),
               ),
@@ -564,7 +564,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   'Module Completion',
                   '${_analytics['avgCompletionRate']}%',
                   0.89,
-                  const Color(0xFF10B981),
+                  Color(0xFF10B981),
                   isDarkMode,
                 ),
               ),
@@ -574,7 +574,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                   'User Satisfaction',
                   '4.8/5.0',
                   0.96,
-                  const Color(0xFFF59E0B),
+                  Color(0xFFF59E0B),
                   isDarkMode,
                 ),
               ),
@@ -635,7 +635,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 Container(
                   height: isSmall ? 6 : 8,
                   decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.1),
+                    color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: FractionallySizedBox(
@@ -665,7 +665,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -732,10 +732,10 @@ class _DashboardScreenState extends State<DashboardScreen>
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: color.withValues(alpha: 0.2),
+            color: color.withOpacity(0.2),
             width: 1,
           ),
         ),
@@ -810,7 +810,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -857,15 +857,13 @@ class _DashboardScreenState extends State<DashboardScreen>
             },
           ),
           const SizedBox(height: 16),
-          ...activities
-              .map((activity) => _buildActivityItem(
-                    activity['title'] as String,
-                    activity['time'] as String,
-                    activity['icon'] as IconData,
-                    activity['color'] as Color,
-                    isDarkMode,
-                  ))
-              .toList(),
+          ...activities.map((activity) => _buildActivityItem(
+                activity['title'] as String,
+                activity['time'] as String,
+                activity['icon'] as IconData,
+                activity['color'] as Color,
+                isDarkMode,
+              )),
         ],
       ),
     );
@@ -885,7 +883,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -933,7 +931,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -1002,10 +1000,10 @@ class _DashboardScreenState extends State<DashboardScreen>
         return Container(
           padding: EdgeInsets.all(isSmall ? 12 : 16),
           decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
+            color: color.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: color.withValues(alpha: 0.2),
+              color: color.withOpacity(0.2),
               width: 1,
             ),
           ),

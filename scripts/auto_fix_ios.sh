@@ -70,7 +70,7 @@ post_install do |installer|
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
       config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'
       # Fix the specific linker error
-      config.build_settings['OTHER_LDFLAGS'] = '$(inherited) -framework "FirebaseCore"'
+      config.build_settings['OTHER_LDFLAGS'] = '$(inherited)'
       config.build_settings['VALID_ARCHS'] = 'x86_64'
       config.build_settings['ARCHS'] = 'x86_64'
     end
@@ -117,8 +117,8 @@ EOF
     timeout 300 flutter run -d "EBA9EE5A-6328-4C13-9177-EA0DF1361BF4" --no-hot || {
         echo "Build #2 failed, trying Fix 3..."
         
-        # Fix 3: Update to latest Firebase versions
-        echo "🔧 Fix 3: Updating to latest Firebase versions..."
+        # Fix 3: Update to latest Supabase versions
+        echo "🔧 Fix 3: Updating to latest Supabase versions..."
         cat > pubspec.yaml << 'EOF'
 name: tutora
 description: A training platform for small businesses
@@ -132,9 +132,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  firebase_core: ^3.6.0
-  firebase_auth: ^5.3.1
-  cloud_firestore: ^5.4.3
+  supabase_flutter: ^2.0.0
   provider: ^6.0.5
   google_fonts: ^6.1.0
   flutter_svg: ^2.0.7
@@ -159,9 +157,9 @@ EOF
         
         echo "🚀 Attempting build #3..."
         timeout 300 flutter run -d "EBA9EE5A-6328-4C13-9177-EA0DF1361BF4" --no-hot || {
-            echo "🔧 Fix 4: Trying without Firebase (minimal build)..."
+            echo "🔧 Fix 4: Trying minimal build without external dependencies..."
             
-            # Fix 4: Minimal build without Firebase
+            # Fix 4: Minimal build without external dependencies
             cat > pubspec.yaml << 'EOF'
 name: tutora
 description: A training platform for small businesses

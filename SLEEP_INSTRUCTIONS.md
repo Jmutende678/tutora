@@ -4,7 +4,7 @@
 
 ### 1. **Dependency Checker** (`scripts/dependency_checker.dart`)
 - Automatically detects outdated packages
-- Checks Firebase compatibility
+- Checks Supabase compatibility
 - Validates iOS/Android deployment targets
 - Generates update recommendations
 
@@ -42,11 +42,11 @@ dart scripts/dependency_checker.dart
 1. **iOS 14.0 deployment target** - More compatible with Xcode 16
 2. **Force x86_64 architecture** - Fixes the specific simulator error
 3. **iOS 15.0 deployment target** - Latest compatibility
-4. **Minimal dependencies** - Remove Firebase temporarily to test core app
+4. **Minimal dependencies** - Remove external dependencies temporarily to test core app
 5. **Flutter version downgrade** - Try older, more stable Flutter
 6. **Clean Xcode cache** - Clear all build artifacts
 7. **Reset simulator** - Fresh simulator state
-8. **Alternative Firebase versions** - Try older, proven Firebase versions
+8. **Alternative Supabase versions** - Try older, proven Supabase versions
 
 ## 🎯 Success Indicators:
 
@@ -77,6 +77,6 @@ You'll see: **"🎉🎉🎉 APP IS RUNNING! 🎉🎉🎉"** in the logs
 If automation fails, the most likely manual fix is:
 1. Set iOS deployment target to 14.0 or 15.0
 2. Force simulator to x86_64 architecture only
-3. Use minimal dependencies without Firebase initially
+3. Use minimal dependencies without external services initially
 
 **Sweet dreams! 😴 Your app will be running when you wake up! 🌅** 

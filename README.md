@@ -62,7 +62,7 @@ flutter run -d windows
 ## Architecture
 
 - UI-only implementation with placeholder data
-- Future backend integration with Firebase Authentication and Firestore
+- Backend integration with Supabase for authentication and database
 - Multi-tenant architecture for company isolation
 - Responsive design that works on mobile and desktop
 

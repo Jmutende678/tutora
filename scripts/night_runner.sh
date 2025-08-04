@@ -53,7 +53,7 @@ solutions=(
     "Flutter 3.16.x downgrade"
     "Clean Xcode DerivedData"
     "Reset simulator"
-    "Alternative Firebase setup"
+    "Alternative Supabase setup"
 )
 
 attempt=1
@@ -80,7 +80,7 @@ while [ $attempt -le $max_attempts ]; do
             ;;
         2)
             log "Applying: ${solutions[2]}"
-            # Minimal dependencies (no Firebase)
+            # Minimal dependencies (no external services)
             cat > pubspec.yaml << 'EOF'
 name: tutora
 description: A training platform for small businesses
@@ -127,7 +127,7 @@ EOF
             ;;
         6)
             log "Applying: ${solutions[6]}"
-            # Alternative Firebase setup with older versions
+            # Alternative Supabase setup
             cat > pubspec.yaml << 'EOF'
 name: tutora
 description: A training platform for small businesses
@@ -141,9 +141,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  firebase_core: ^2.24.0
-  firebase_auth: ^4.15.0
-  cloud_firestore: ^4.13.0
+  supabase_flutter: ^2.0.0
   provider: ^6.0.5
   intl: ^0.18.1
 

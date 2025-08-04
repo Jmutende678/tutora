@@ -83,7 +83,7 @@ Added comprehensive new sections making the page feel much more substantial:
 
 ## ASSUMPTIONS REQUIRING VALIDATION
 
-1. **Firebase credentials** need to be properly configured for production
+1. **Supabase credentials** need to be properly configured for production
 2. **Stripe webhooks** endpoint needs live validation
 3. **Email delivery** system needs testing across all canonical addresses
 4. **AI processing costs** need monitoring with real usage
