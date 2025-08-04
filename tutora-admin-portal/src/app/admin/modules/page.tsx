@@ -276,6 +276,8 @@ export default function ModuleManagementPage() {
     try {
       setError(null)
 
+      const supabase = getSupabaseClient()
+
       const { error } = await supabase
         .from('modules')
         .delete()
@@ -296,6 +298,8 @@ export default function ModuleManagementPage() {
     try {
       setUploadingFile(true)
       setError(null)
+
+      const supabase = getSupabaseClient()
 
       const fileExt = file.name.split('.').pop()
       const fileName = `${Math.random()}.${fileExt}`
