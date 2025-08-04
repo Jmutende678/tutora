@@ -25,11 +25,12 @@ import {
 } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+// Initialize Supabase client - moved inside component to avoid build-time execution
+const getSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co'
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key'
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 interface Module {
   id: string
@@ -106,6 +107,8 @@ export default function ModuleManagementPage() {
       setIsLoading(true)
       setError(null)
 
+      const supabase = getSupabaseClient()
+
       // Load companies
       const { data: companiesData, error: companiesError } = await supabase
         .from('companies')
@@ -169,6 +172,8 @@ export default function ModuleManagementPage() {
   const handleCreateModule = async () => {
     try {
       setError(null)
+
+      const supabase = getSupabaseClient()
 
       // Validate form
       if (!formData.title || !formData.description || !formData.company_id) {
