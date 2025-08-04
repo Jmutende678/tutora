@@ -143,6 +143,8 @@ export default function UserManagementPage() {
         return
       }
 
+      const supabase = getSupabaseClient()
+
       // Check if user already exists
       const { data: existingUser } = await supabase
         .from('users')
