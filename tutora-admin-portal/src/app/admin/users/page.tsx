@@ -24,11 +24,12 @@ import {
 } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+// Initialize Supabase client - moved inside component to avoid build-time execution
+const getSupabaseClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co'
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key'
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 interface User {
   id: string
@@ -85,6 +86,8 @@ export default function UserManagementPage() {
     try {
       setIsLoading(true)
       setError(null)
+
+      const supabase = getSupabaseClient()
 
       // Load companies
       const { data: companiesData, error: companiesError } = await supabase
