@@ -24,7 +24,7 @@ CREATE TABLE companies (
   admin_user_name TEXT NOT NULL,
   billing_email TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 );
 
 -- Users table (extends auth.users)
