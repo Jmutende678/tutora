@@ -126,32 +126,10 @@ export default function AdminLoginPage() {
             </form>
 
             <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">
-                    Demo Credentials
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-4 text-sm text-gray-600">
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium">CEO Access</p>
-                    <p>Email: ceo@tutora.com</p>
-                    <p>Password: demo123</p>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium">Manager Access</p>
-                    <p>Email: manager@tutora.com</p>
-                    <p>Password: demo123</p>
-                  </div>
-                </div>
+              <div className="text-center">
+                <Link href="/" className="text-sm text-blue-600 hover:text-blue-500">
+                  ← Back to website
+                </Link>
               </div>
             </div>
           </div>
