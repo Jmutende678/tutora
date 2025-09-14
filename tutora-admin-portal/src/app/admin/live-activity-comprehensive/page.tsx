@@ -398,11 +398,7 @@ export default function ComprehensiveLiveActivityDashboard() {
                                   'Send personalized demo',
                                   'Schedule discovery call'
                                 ],
-                                estimatedValue: activity.lead_score?.score >= 90 ? 10000 : 
-                                               activity.lead_score?.score >= 80 ? 7500 :
-                                               activity.lead_score?.score >= 70 ? 5000 : 
-                                               activity.lead_score?.score >= 60 ? 3000 :
-                                               activity.lead_score?.score >= 40 ? 1500 : 750
+                                estimatedValue: 0 // No fake values - only show real data
                               }
                             })
                           }
@@ -478,45 +474,53 @@ export default function ComprehensiveLiveActivityDashboard() {
                             )}
 
                             {/* Display rich form data */}
-                            {activity.data && (
-                              <div className="mt-2 space-y-1">
-                                {activity.data.plan_name && (
-                                  <p className="text-xs text-blue-600 font-medium">
-                                    📋 Plan: {activity.data.plan_name} ({activity.data.billing_cycle}) - {activity.data.price}
-                                  </p>
-                                )}
-                                {activity.data.team_size && (
-                                  <p className="text-xs text-gray-600">
-                                    👥 Team Size: {activity.data.team_size}
-                                  </p>
-                                )}
-                                {activity.data.industry && (
-                                  <p className="text-xs text-gray-600">
-                                    🏢 Industry: {activity.data.industry}
-                                  </p>
-                                )}
-                                {activity.data.urgency && (
-                                  <p className="text-xs text-orange-600 font-medium">
-                                    ⏰ Urgency: {activity.data.urgency}
-                                  </p>
-                                )}
-                                {activity.data.primary_goal && (
-                                  <p className="text-xs text-gray-600">
-                                    🎯 Goal: {activity.data.primary_goal}
-                                  </p>
-                                )}
-                                {activity.data.job_title && (
-                                  <p className="text-xs text-gray-600">
-                                    💼 Role: {activity.data.job_title}
-                                  </p>
-                                )}
-                                {activity.inquiry_type && (
-                                  <p className="text-xs text-purple-600 font-medium">
-                                    📝 Inquiry: {activity.inquiry_type}
-                                  </p>
-                                )}
-                              </div>
-                            )}
+                            <div className="mt-2 space-y-1">
+                              {/* Plan information */}
+                              {activity.data?.plan_name && (
+                                <p className="text-xs text-blue-600 font-medium">
+                                  📋 Plan: {activity.data.plan_name} ({activity.data.billing_cycle}) - {activity.data.price}
+                                </p>
+                              )}
+                              
+                              {/* Registration form data */}
+                              {activity.data?.team_size && (
+                                <p className="text-xs text-gray-600">
+                                  👥 Team Size: {activity.data.team_size}
+                                </p>
+                              )}
+                              {activity.data?.industry && (
+                                <p className="text-xs text-gray-600">
+                                  🏢 Industry: {activity.data.industry}
+                                </p>
+                              )}
+                              {activity.data?.job_title && (
+                                <p className="text-xs text-gray-600">
+                                  💼 Role: {activity.data.job_title}
+                                </p>
+                              )}
+                              {activity.data?.primary_goal && (
+                                <p className="text-xs text-gray-600">
+                                  🎯 Goal: {activity.data.primary_goal}
+                                </p>
+                              )}
+                              {activity.data?.urgency && (
+                                <p className="text-xs text-orange-600 font-medium">
+                                  ⏰ Urgency: {activity.data.urgency}
+                                </p>
+                              )}
+                              {activity.data?.recommended_plan && (
+                                <p className="text-xs text-green-600 font-medium">
+                                  🎯 Recommended Plan: {activity.data.recommended_plan}
+                                </p>
+                              )}
+                              
+                              {/* Contact form inquiry type */}
+                              {activity.inquiry_type && (
+                                <p className="text-xs text-purple-600 font-medium">
+                                  📝 Inquiry: {activity.inquiry_type}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                         
@@ -572,7 +576,53 @@ export default function ComprehensiveLiveActivityDashboard() {
                     <div className="space-y-2 text-sm">
                       <p><strong>Company:</strong> {selectedLead.lead.company}</p>
                       <p><strong>Email:</strong> {selectedLead.lead.user_email}</p>
-                      <p><strong>Subject:</strong> {selectedLead.lead.subject}</p>
+                      {selectedLead.lead.phone && <p><strong>Phone:</strong> {selectedLead.lead.phone}</p>}
+                      {selectedLead.lead.subject && <p><strong>Subject:</strong> {selectedLead.lead.subject}</p>}
+                      <p><strong>Source:</strong> {selectedLead.lead.source}</p>
+                      <p><strong>Time:</strong> {new Date(selectedLead.lead.timestamp).toLocaleString()}</p>
+                      
+                      {/* Rich form data display */}
+                      {selectedLead.lead.data && Object.keys(selectedLead.lead.data).length > 0 && (
+                        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                          <h5 className="font-medium text-gray-900 mb-2">📋 Form Data Collected:</h5>
+                          <div className="grid grid-cols-1 gap-1 text-xs">
+                            {selectedLead.lead.data.team_size && (
+                              <p><strong>👥 Team Size:</strong> {selectedLead.lead.data.team_size}</p>
+                            )}
+                            {selectedLead.lead.data.industry && (
+                              <p><strong>🏢 Industry:</strong> {selectedLead.lead.data.industry}</p>
+                            )}
+                            {selectedLead.lead.data.job_title && (
+                              <p><strong>💼 Job Title:</strong> {selectedLead.lead.data.job_title}</p>
+                            )}
+                            {selectedLead.lead.data.urgency && (
+                              <p><strong>⏰ Urgency:</strong> {selectedLead.lead.data.urgency}</p>
+                            )}
+                            {selectedLead.lead.data.primary_goal && (
+                              <p><strong>🎯 Primary Goal:</strong> {selectedLead.lead.data.primary_goal}</p>
+                            )}
+                            {selectedLead.lead.data.recommended_plan && (
+                              <p><strong>🎯 Recommended Plan:</strong> {selectedLead.lead.data.recommended_plan}</p>
+                            )}
+                            {selectedLead.lead.data.plan_name && (
+                              <p><strong>📋 Plan Interest:</strong> {selectedLead.lead.data.plan_name} - {selectedLead.lead.data.price}</p>
+                            )}
+                            {selectedLead.lead.data.billing_cycle && (
+                              <p><strong>💳 Billing:</strong> {selectedLead.lead.data.billing_cycle}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {selectedLead.lead.inquiry_type && (
+                        <p><strong>📝 Inquiry Type:</strong> {selectedLead.lead.inquiry_type}</p>
+                      )}
+                      {selectedLead.lead.message && (
+                        <div className="mt-3">
+                          <p><strong>💬 Message:</strong></p>
+                          <p className="text-gray-600 italic bg-gray-50 p-2 rounded mt-1 text-xs">{selectedLead.lead.message}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -582,12 +632,7 @@ export default function ComprehensiveLiveActivityDashboard() {
                       {selectedLead.aiAnalysis.summary}
                     </p>
                     
-                    <div className="mb-3">
-                      <span className="text-sm font-medium text-gray-700">Estimated Value: </span>
-                      <span className="text-lg font-bold text-green-600">
-                        ${selectedLead.aiAnalysis.estimatedValue.toLocaleString()}
-                      </span>
-                    </div>
+                    {/* Estimated value removed - no fake data */}
                     
                     <div className="mb-4">
                       <span className="text-sm font-medium text-gray-700">Urgency: </span>
