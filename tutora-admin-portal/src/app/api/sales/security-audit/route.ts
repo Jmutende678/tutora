@@ -27,6 +27,47 @@ export async function POST(request: Request) {
     })
     */
 
+    // Track security audit request in database
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/analytics/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'security_audit_form_submission',
+          session_id: `audit_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          source: '/features/enterprise-security',
+          metadata: {
+            location: { country: 'Unknown', city: 'Unknown' },
+            device: { type: 'unknown' }
+          },
+          data: {
+            company: formData.companyName,
+            email: formData.email,
+            phone: formData.phone,
+            message: formData.message,
+            urgency: formData.urgency
+          },
+          user_name: formData.companyName,
+          user_email: formData.email,
+          company: formData.companyName,
+          lead_score: {
+            score: formData.urgency === 'urgent' ? 90 : formData.urgency === 'high' ? 75 : 60,
+            category: formData.urgency === 'urgent' ? 'hot' : formData.urgency === 'high' ? 'warm' : 'cold',
+            reasons: [
+              'Security audit request',
+              `Urgency: ${formData.urgency}`,
+              'Enterprise security interest',
+              'High-value lead potential'
+            ]
+          }
+        })
+      })
+      console.log('✅ Security audit request tracked in database')
+    } catch (trackingError) {
+      console.error('❌ Failed to track security audit request:', trackingError)
+    }
+
     if (emailSent) {
       console.log('🔥 SECURITY AUDIT REQUEST - Email sent to sales@tutoralearn.com')
       console.log('Company:', formData.companyName)

@@ -124,6 +124,47 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Track account registration in database
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/analytics/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'account_registration_completed',
+          session_id: `account_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          source: '/auth/register',
+          metadata: {
+            location: { country: 'Unknown', city: 'Unknown' },
+            device: { type: 'unknown' }
+          },
+          data: {
+            company: companyName,
+            email: email,
+            name: `${firstName} ${lastName}`,
+            company_code: finalCompanyCode,
+            plan: 'basic'
+          },
+          user_name: `${firstName} ${lastName}`,
+          user_email: email,
+          company: companyName,
+          lead_score: {
+            score: 95, // Account creation is the highest intent
+            category: 'hot',
+            reasons: [
+              'Completed full account registration',
+              'Created company profile',
+              'Ready to use platform',
+              'Highest conversion intent'
+            ]
+          }
+        })
+      })
+      console.log('✅ Account registration tracked in database')
+    } catch (trackingError) {
+      console.error('❌ Failed to track account registration:', trackingError)
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Account created successfully',
