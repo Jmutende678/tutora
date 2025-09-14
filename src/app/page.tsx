@@ -1,201 +1,189 @@
-'use client';
+import Link from 'next/link';
+import Image from 'next/image';
 
-import { useState, useEffect } from 'react';
-
-interface ActivityData {
-  id: string;
-  type: string;
-  user: string;
-  timestamp: Date;
-  details: string;
-}
-
-export default function LiveActivityDashboard() {
-  const [activities, setActivities] = useState<ActivityData[]>([]);
-  const [stats, setStats] = useState({
-    totalUsers: 1247,
-    activeNow: 89,
-    todayLogins: 234,
-    newSignups: 12
-  });
-
-  // Simulate real-time activity updates
-  useEffect(() => {
-    const generateActivity = (): ActivityData => {
-      const types = ['login', 'signup', 'course_complete', 'module_start', 'quiz_submit'];
-      const users = ['John D.', 'Sarah M.', 'Mike R.', 'Lisa K.', 'Tom W.', 'Emma S.'];
-      const type = types[Math.floor(Math.random() * types.length)];
-      
-      return {
-        id: Math.random().toString(36).substr(2, 9),
-        type,
-        user: users[Math.floor(Math.random() * users.length)],
-        timestamp: new Date(),
-        details: getActivityDetails(type)
-      };
-    };
-
-    const getActivityDetails = (type: string): string => {
-      switch (type) {
-        case 'login': return 'Logged into dashboard';
-        case 'signup': return 'Created new account';
-        case 'course_complete': return 'Completed "Advanced Sales Training"';
-        case 'module_start': return 'Started "Customer Service Module"';
-        case 'quiz_submit': return 'Submitted quiz with 95% score';
-        default: return 'Activity recorded';
-      }
-    };
-
-    // Add initial activities
-    const initialActivities = Array.from({ length: 8 }, generateActivity);
-    setActivities(initialActivities);
-
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      const newActivity = generateActivity();
-      setActivities(prev => [newActivity, ...prev.slice(0, 9)]);
-      
-      // Update stats occasionally
-      if (Math.random() > 0.7) {
-        setStats(prev => ({
-          ...prev,
-          activeNow: prev.activeNow + (Math.random() > 0.5 ? 1 : -1),
-          todayLogins: prev.todayLogins + 1
-        }));
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'login': return '🔐';
-      case 'signup': return '✨';
-      case 'course_complete': return '🎓';
-      case 'module_start': return '📚';
-      case 'quiz_submit': return '✅';
-      default: return '📊';
-    }
-  };
-
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case 'login': return 'bg-blue-100 text-blue-800';
-      case 'signup': return 'bg-green-100 text-green-800';
-      case 'course_complete': return 'bg-purple-100 text-purple-800';
-      case 'module_start': return 'bg-yellow-100 text-yellow-800';
-      case 'quiz_submit': return 'bg-indigo-100 text-indigo-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            🚀 Tutora Live Activity Dashboard
-          </h1>
-          <p className="text-gray-600">Real-time user activity and engagement metrics</p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <span className="text-2xl">👥</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalUsers.toLocaleString()}</p>
-              </div>
+              <Link href="/" className="text-2xl font-bold text-blue-600">
+                Tutora
+              </Link>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <span className="text-2xl">🟢</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Active Now</p>
-                <p className="text-2xl font-bold text-green-600">{stats.activeNow}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <span className="text-2xl">📈</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">Today&apos;s Logins</p>
-                <p className="text-2xl font-bold text-purple-600">{stats.todayLogins}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <span className="text-2xl">⭐</span>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm text-gray-600">New Signups</p>
-                <p className="text-2xl font-bold text-yellow-600">{stats.newSignups}</p>
+            <div className="hidden md:block">
+              <div className="ml-10 flex items-baseline space-x-4">
+                <Link href="/features" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+                  Features
+                </Link>
+                <Link href="/pricing" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+                  Pricing
+                </Link>
+                <Link href="/about" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+                  About
+                </Link>
+                <Link href="/contact" className="text-gray-600 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+                  Contact
+                </Link>
+                <Link href="/admin/login" className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+                  Admin Portal
+                </Link>
               </div>
             </div>
           </div>
         </div>
+      </nav>
 
-        {/* Live Activity Feed */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">
-                🔴 Live Activity Feed
-              </h2>
-              <div className="flex items-center text-sm text-green-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                Live Updates
-              </div>
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Transform Your Team with
+              <span className="block text-yellow-300">AI-Powered Training</span>
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
+              Create, deploy, and track custom training modules with our intelligent platform. 
+              Boost productivity, engagement, and results across your organization.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/demo/ai-module-builder" className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-300 transition-colors">
+                🚀 Try AI Course Builder
+              </Link>
+              <Link href="/pricing" className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                View Pricing
+              </Link>
             </div>
           </div>
-
-          <div className="divide-y divide-gray-200">
-            {activities.map((activity) => (
-              <div key={activity.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{getActivityIcon(activity.type)}</span>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium text-gray-900">{activity.user}</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getActivityColor(activity.type)}`}>
-                          {activity.type.replace('_', ' ')}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">{activity.details}</p>
-                    </div>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {activity.timestamp.toLocaleTimeString()}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 text-center text-gray-500">
-          <p>🎯 Tutora CEO Dashboard - Real-time Business Intelligence</p>
         </div>
       </div>
+
+      {/* Features Section */}
+      <div className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Choose Tutora?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Everything you need to create, manage, and optimize your training programs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-xl shadow-lg">
+              <div className="text-4xl mb-4">🤖</div>
+              <h3 className="text-xl font-bold mb-4">AI Course Creation</h3>
+              <p className="text-gray-600">
+                Generate comprehensive training modules in minutes using our advanced AI technology.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-lg">
+              <div className="text-4xl mb-4">📊</div>
+              <h3 className="text-xl font-bold mb-4">Real-time Analytics</h3>
+              <p className="text-gray-600">
+                Track progress, engagement, and performance with detailed insights and reporting.
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-xl shadow-lg">
+              <div className="text-4xl mb-4">👥</div>
+              <h3 className="text-xl font-bold mb-4">Team Management</h3>
+              <p className="text-gray-600">
+                Organize teams, assign courses, and monitor completion rates across your organization.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Section */}
+      <div className="py-16 bg-blue-600 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-4xl font-bold mb-2">10,000+</div>
+              <div className="text-blue-200">Active Users</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">500+</div>
+              <div className="text-blue-200">Companies</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">1M+</div>
+              <div className="text-blue-200">Courses Completed</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">98%</div>
+              <div className="text-blue-200">Satisfaction Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            Ready to Transform Your Training?
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">
+            Join thousands of companies already using Tutora to boost their team performance
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/pricing" className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors">
+              Get Started Today
+            </Link>
+            <Link href="/demo/ai-module-builder" className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors">
+              Watch Demo
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="text-2xl font-bold mb-4">Tutora</div>
+              <p className="text-gray-400">
+                AI-powered training platform for modern teams
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Product</h3>
+              <div className="space-y-2">
+                <Link href="/features" className="block text-gray-400 hover:text-white">Features</Link>
+                <Link href="/pricing" className="block text-gray-400 hover:text-white">Pricing</Link>
+                <Link href="/demo/ai-module-builder" className="block text-gray-400 hover:text-white">Demo</Link>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Company</h3>
+              <div className="space-y-2">
+                <Link href="/about" className="block text-gray-400 hover:text-white">About</Link>
+                <Link href="/contact" className="block text-gray-400 hover:text-white">Contact</Link>
+                <Link href="/careers" className="block text-gray-400 hover:text-white">Careers</Link>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Legal</h3>
+              <div className="space-y-2">
+                <Link href="/privacy" className="block text-gray-400 hover:text-white">Privacy</Link>
+                <Link href="/terms" className="block text-gray-400 hover:text-white">Terms</Link>
+                <Link href="/security" className="block text-gray-400 hover:text-white">Security</Link>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 Tutora. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
