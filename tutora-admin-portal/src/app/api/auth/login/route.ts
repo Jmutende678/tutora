@@ -12,12 +12,38 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if Supabase is configured
+    // Check if Supabase is configured, fallback to demo credentials
     if (!isSupabaseConfigured() || !supabaseAdmin) {
-      return NextResponse.json(
-        { error: 'Authentication service not configured' },
-        { status: 503 }
-      )
+      console.log('Using fallback authentication for demo')
+      
+      // Demo credentials for testing
+      const demoCredentials = {
+        'admin@tutora.com': { password: 'ceo123', role: 'ceo', name: 'CEO Admin' },
+        'manager@tutora.com': { password: 'manager123', role: 'manager', name: 'Manager Admin' },
+        'demo@tutora.com': { password: 'demo123', role: 'ceo', name: 'Demo User' }
+      }
+      
+      const userCreds = demoCredentials[email as keyof typeof demoCredentials]
+      
+      if (!userCreds || userCreds.password !== password) {
+        return NextResponse.json(
+          { error: 'Invalid email or password' },
+          { status: 401 }
+        )
+      }
+      
+      return NextResponse.json({
+        success: true,
+        user: {
+          id: 'demo-user-' + Date.now(),
+          email: email,
+          role: userCreds.role,
+          company_id: 'demo-company',
+          name: userCreds.name
+        },
+        token: 'demo-token-' + Date.now(),
+        demo: true
+      })
     }
 
     // Authenticate with Supabase

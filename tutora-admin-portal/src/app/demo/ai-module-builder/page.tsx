@@ -55,19 +55,73 @@ interface GeneratedModule {
 }
 
 export default function AIModuleBuilder() {
-  const [currentStage, setCurrentStage] = useState<'welcome' | 'upload' | 'generating' | 'dashboard'>('welcome')
+  const [currentStage, setCurrentStage] = useState<'welcome' | 'contact' | 'upload' | 'generating' | 'dashboard'>('welcome')
   const [file, setFile] = useState<File | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [generationProgress, setGenerationProgress] = useState(0)
   const [generatedModule, setGeneratedModule] = useState<GeneratedModule | null>(null)
-  const [userName, setUserName] = useState('Demo User')
-  const [businessName, setBusinessName] = useState('Your Business')
+  const [userName, setUserName] = useState('')
+  const [businessName, setBusinessName] = useState('')
+  const [userEmail, setUserEmail] = useState('')
+  const [userPhone, setUserPhone] = useState('')
+  const [companySize, setCompanySize] = useState('')
+  const [industry, setIndustry] = useState('')
+  const [useCase, setUseCase] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [showSignupPrompt, setShowSignupPrompt] = useState(false)
+  const [isSubmittingContact, setIsSubmittingContact] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+
+  // Handle contact form submission
+  const handleContactSubmit = async () => {
+    if (!userName.trim() || !userEmail.trim() || !businessName.trim()) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    setIsSubmittingContact(true)
+    
+    try {
+      // Submit contact data to activity tracking
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: userName,
+          email: userEmail,
+          company: businessName,
+          phone: userPhone,
+          subject: 'AI Module Builder Demo Request',
+          message: `Demo request details:
+- Company Size: ${companySize || 'Not specified'}
+- Industry: ${industry || 'Not specified'}
+- Use Case: ${useCase || 'Not specified'}
+- Source: AI Module Builder Demo`,
+          inquiryType: 'demo',
+          timestamp: new Date().toISOString(),
+          source: 'ai_module_builder_demo'
+        })
+      })
+
+      if (response.ok) {
+        console.log('✅ Contact data submitted successfully')
+        setCurrentStage('upload')
+      } else {
+        console.error('❌ Failed to submit contact data')
+        // Continue anyway for demo purposes
+        setCurrentStage('upload')
+      }
+    } catch (error) {
+      console.error('Contact submission error:', error)
+      // Continue anyway for demo purposes
+      setCurrentStage('upload')
+    } finally {
+      setIsSubmittingContact(false)
+    }
+  }
 
   // Simulate AI analysis and module generation
   const analyzeAndGenerate = async (uploadedFile: File) => {
@@ -257,12 +311,185 @@ export default function AIModuleBuilder() {
           {/* CTA */}
           <div className="text-center">
             <button
-              onClick={() => setCurrentStage('upload')}
+              onClick={() => setCurrentStage('contact')}
               className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
             >
               Start Creating <ChevronRight className="h-5 w-5 ml-2 inline" />
             </button>
-            <p className="text-sm text-gray-500 mt-4">No signup required for demo</p>
+            <p className="text-sm text-gray-500 mt-4">Quick demo - just takes your info first</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Contact Form Stage
+  if (currentStage === 'contact') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="container mx-auto px-6 py-12">
+          <div className="max-w-2xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-6">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">Tell Us About Yourself</h1>
+              <p className="text-gray-600">Help us personalize your AI module creation experience</p>
+            </div>
+
+            {/* Contact Form */}
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="space-y-6">
+                {/* Name & Email */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={userName}
+                      onChange={(e) => setUserName(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="John Smith"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Work Email *
+                    </label>
+                    <input
+                      type="email"
+                      value={userEmail}
+                      onChange={(e) => setUserEmail(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="john@company.com"
+                    />
+                  </div>
+                </div>
+
+                {/* Company & Phone */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Company Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="Acme Corp"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      value={userPhone}
+                      onChange={(e) => setUserPhone(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
+                </div>
+
+                {/* Company Size & Industry */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Company Size
+                    </label>
+                    <select
+                      value={companySize}
+                      onChange={(e) => setCompanySize(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select size</option>
+                      <option value="1-10">1-10 employees</option>
+                      <option value="11-50">11-50 employees</option>
+                      <option value="51-200">51-200 employees</option>
+                      <option value="201-1000">201-1000 employees</option>
+                      <option value="1000+">1000+ employees</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Industry
+                    </label>
+                    <select
+                      value={industry}
+                      onChange={(e) => setIndustry(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select industry</option>
+                      <option value="Technology">Technology</option>
+                      <option value="Healthcare">Healthcare</option>
+                      <option value="Finance">Finance</option>
+                      <option value="Retail">Retail</option>
+                      <option value="Manufacturing">Manufacturing</option>
+                      <option value="Education">Education</option>
+                      <option value="Hospitality">Hospitality</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Use Case */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    What type of training are you looking to create?
+                  </label>
+                  <select
+                    value={useCase}
+                    onChange={(e) => setUseCase(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  >
+                    <option value="">Select use case</option>
+                    <option value="Employee Onboarding">Employee Onboarding</option>
+                    <option value="Compliance Training">Compliance Training</option>
+                    <option value="Skills Development">Skills Development</option>
+                    <option value="Product Training">Product Training</option>
+                    <option value="Safety Training">Safety Training</option>
+                    <option value="Sales Training">Sales Training</option>
+                    <option value="Customer Service">Customer Service</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                {/* Submit Button */}
+                <div className="pt-4">
+                  <button
+                    onClick={handleContactSubmit}
+                    disabled={isSubmittingContact || !userName.trim() || !userEmail.trim() || !businessName.trim()}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {isSubmittingContact ? 'Submitting...' : 'Continue to Demo'} 
+                    {!isSubmittingContact && <ChevronRight className="h-5 w-5 ml-2 inline" />}
+                  </button>
+                  
+                  <p className="text-sm text-gray-500 mt-4 text-center">
+                    We'll use this info to personalize your demo experience and follow up with relevant training solutions.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Back Button */}
+            <div className="text-center mt-6">
+              <button
+                onClick={() => setCurrentStage('welcome')}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                ← Back to welcome
+              </button>
+            </div>
           </div>
         </div>
       </div>
