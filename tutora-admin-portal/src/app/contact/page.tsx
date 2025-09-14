@@ -74,7 +74,7 @@ export default function ContactPage() {
         body: JSON.stringify({
           ...formData,
           timestamp: new Date().toISOString(),
-          source: 'website_contact_form'
+          source: '/contact'
         })
       })
       

@@ -42,12 +42,12 @@ export async function GET(request: NextRequest) {
       
       console.log('🔍 Querying from:', startTime.toISOString(), 'to now')
       
-      // Fetch ONLY real website visitor activity (public pages only)
+      // Fetch ONLY real website visitor activity (public pages + form submissions + interactions)
       const { data: activities, error } = await supabase
         .from('website_activity')
         .select('*')
         .gte('timestamp', startTime.toISOString())
-        .in('source', ['/', '/about', '/contact', '/pricing', '/features', '/register', '/demo/ai-module-builder', '/solutions', '/testimonials', '/blog', '/careers', '/faq'])
+        .or(`source.in.(/, /about, /contact, /pricing, /features, /register, /demo/ai-module-builder, /solutions, /testimonials, /blog, /careers, /faq),type.in.(contact_form_submission, registration_form_submission, price_button_click, ai_module_generation_started, ai_module_generation_completed)`)
         .order('timestamp', { ascending: false })
         .limit(100)
       
