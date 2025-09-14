@@ -86,18 +86,28 @@ export default function ActivityTracker({ userId, enableTracking = true }: Activ
       return { type: deviceType, os, browser }
     }
 
-    // Get location data (approximate)
+    // Get location data (approximate) - using a different service
     const getLocationData = async () => {
       try {
-        const response = await fetch('https://ipapi.co/json/')
-        const data = await response.json()
+        // Use a more reliable location service or skip it for now
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+        const locale = navigator.language || 'en-US'
+        
         return {
-          country: data.country_name,
-          city: data.city,
-          region: data.region
+          country: locale.split('-')[1] || 'Unknown',
+          city: timezone.split('/')[1] || 'Unknown',
+          region: timezone.split('/')[0] || 'Unknown',
+          timezone: timezone,
+          locale: locale
         }
       } catch (error) {
-        return { country: 'Unknown', city: 'Unknown', region: 'Unknown' }
+        return { 
+          country: 'Unknown', 
+          city: 'Unknown', 
+          region: 'Unknown',
+          timezone: 'Unknown',
+          locale: 'Unknown'
+        }
       }
     }
 
