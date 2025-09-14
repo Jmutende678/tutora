@@ -2,15 +2,10 @@
   "name": "tutora-railway-deploy",
   "version": "1.0.0",
   "scripts": {
-    "build": "cd tutora-admin-portal && npm ci && npm run build",
-    "start": "cd tutora-admin-portal && npm start",
-    "dev": "cd tutora-admin-portal && npm run dev",
-    "postinstall": "cd tutora-admin-portal && npm ci"
+    "build": "cd tutora-admin-portal && npm run build",
+    "start": "cd tutora-admin-portal && npm start"
   },
   "engines": {
     "node": "20"
-  },
-  "dependencies": {
-    "next": "^14.0.0"
   }
 }
