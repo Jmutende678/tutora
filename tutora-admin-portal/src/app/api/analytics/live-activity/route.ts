@@ -27,12 +27,20 @@ export async function GET(request: NextRequest) {
     }
     
     try {
+      console.log('🔍 Dashboard API: Connecting to Supabase...')
+      console.log('📊 Supabase URL exists:', !!process.env.NEXT_PUBLIC_SUPABASE_URL)
+      console.log('🔑 Service key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
+      
       // Connect to Supabase
       const { createClient } = await import('@supabase/supabase-js')
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
+      
+      console.log('✅ Supabase client created')
+      
+      console.log('🔍 Querying from:', startTime.toISOString(), 'to now')
       
       // Fetch website activity data
       const { data: activities, error } = await supabase
@@ -41,6 +49,9 @@ export async function GET(request: NextRequest) {
         .gte('timestamp', startTime.toISOString())
         .order('timestamp', { ascending: false })
         .limit(100)
+      
+      console.log('📊 Query result - Activities count:', activities?.length || 0)
+      console.log('❌ Query error:', error)
       
       if (error) {
         console.error('Supabase query error:', error)
@@ -63,6 +74,8 @@ export async function GET(request: NextRequest) {
           }
         })
       }
+      
+      console.log('✅ Query successful! Found activities:', activities?.length || 0)
       
       // Process and enrich activity data
       const enrichedActivities = activities?.map(activity => ({
@@ -104,7 +117,8 @@ export async function GET(request: NextRequest) {
       })
       
     } catch (dbError) {
-      console.error('Database connection error:', dbError)
+      console.error('❌ Database connection error in dashboard API:', dbError)
+      console.error('❌ Error details:', JSON.stringify(dbError, null, 2))
       
       // Return empty data instead of mock data
       return NextResponse.json({
