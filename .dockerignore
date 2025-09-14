@@ -1,0 +1,34 @@
+# Ignore Flutter/Dart files
+pubspec.yaml
+pubspec.lock
+.metadata
+analysis_options.yaml
+lib/
+android/
+ios/
+macos/
+linux/
+windows/
+web/
+test/
+
+# Ignore documentation
+*.md
+docs/
+scripts/
+
+# Ignore git
+.git
+.gitignore
+
+# Ignore IDE files
+.vscode/
+.idea/
+
+# Node modules will be installed fresh
+node_modules/
+.next/
+.env.local
+
+# Keep only tutora-admin-portal
+!tutora-admin-portal/
