@@ -9,7 +9,7 @@ export async function POST() {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
     }
     
-    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2023-10-16' })
+    const stripe = new Stripe(stripeSecretKey, { apiVersion: '2025-08-27.basil' })
     
     console.log('Creating simple checkout session...')
     

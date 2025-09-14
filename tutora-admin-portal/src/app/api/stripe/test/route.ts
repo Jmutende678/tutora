@@ -23,7 +23,7 @@ export async function GET() {
 
     // Initialize Stripe
     const stripe = new Stripe(secretKey, {
-      apiVersion: '2023-10-16',
+      apiVersion: '2025-08-27.basil',
     })
 
     // Test Stripe connection by listing products
@@ -39,7 +39,7 @@ export async function GET() {
       productsCount: products.data.length,
       stripeAccount: {
         connected: true,
-        apiVersion: '2023-10-16'
+        apiVersion: '2025-08-27.basil'
       }
     })
     

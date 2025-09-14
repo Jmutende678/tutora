@@ -6,7 +6,7 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_
 // Only create Stripe instance if we have a real key
 const stripe = stripeSecretKey !== 'sk_test_dummy_key_for_build' 
   ? new Stripe(stripeSecretKey, {
-      apiVersion: '2023-10-16',
+      apiVersion: '2025-08-27.basil',
       typescript: true,
     })
   : null

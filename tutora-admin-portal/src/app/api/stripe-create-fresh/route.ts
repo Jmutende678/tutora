@@ -4,7 +4,7 @@ import Stripe from 'stripe'
 export async function POST() {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2023-10-16',
+      apiVersion: '2025-08-27.basil',
     })
     
     // Create a fresh product and price to avoid any ID issues
