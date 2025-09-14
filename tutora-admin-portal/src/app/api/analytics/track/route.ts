@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
+  console.log('🚨 API ROUTE HIT: /api/analytics/track')
   try {
     console.log('🔥 ACTIVITY TRACKING API CALLED!')
-    const activityData = await request.json()
+    
+    const rawBody = await request.text()
+    console.log('📝 Raw request body:', rawBody)
+    
+    const activityData = JSON.parse(rawBody)
+    console.log('📊 Parsed activity data:', activityData)
     
     console.log('📊 REAL Activity Tracked:', {
       type: activityData.type,
