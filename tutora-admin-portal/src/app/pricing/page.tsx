@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import { CheckCircle, ArrowRight, Zap, Shield, Users, BarChart3, Star, Crown, Info } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/EnhancedButton'
@@ -277,6 +277,12 @@ export default function PricingPage() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
               Bundle pricing that scales with your team. No hidden fees, predictable costs, with low-cost user overflows when you grow.
             </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto mb-8">
+              <p className="text-sm text-blue-800">
+                <strong>Australian Pricing:</strong> All prices shown in AUD. GST (10%) will be added at checkout for Australian customers. 
+                International customers may be subject to local taxes.
+              </p>
+            </div>
             
             <div className="flex items-center justify-center gap-4 mb-8">
               <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>Monthly</span>
@@ -322,14 +328,14 @@ export default function PricingPage() {
                   
                   <div className="mb-4">
                     <span className="text-4xl font-bold text-gray-900">
-                      ${billingCycle === 'annual' ? plan.annualPrice : plan.monthlyPrice}
+                      AUD ${billingCycle === 'annual' ? plan.annualPrice : plan.monthlyPrice}
                     </span>
                     <span className="text-gray-600">/{billingCycle === 'annual' ? 'year' : 'month'}</span>
                   </div>
                   
                   <div className="text-sm text-gray-600 mb-6">
                     <p className="font-medium">{plan.baseUsers} users included</p>
-                    <p>Additional users: ${plan.additionalUserPrice}/{billingCycle === 'annual' ? 'year' : 'month'}</p>
+                    <p>Additional users: AUD ${plan.additionalUserPrice}/{billingCycle === 'annual' ? 'year' : 'month'}</p>
                   </div>
 
                   <button
@@ -376,11 +382,11 @@ export default function PricingPage() {
                   <div className="text-left">
                     <div className="mb-8">
                       <span className="text-5xl font-bold">
-                        ${billingCycle === 'annual' ? enterprisePlan.annualPrice : enterprisePlan.monthlyPrice}
+                        AUD ${billingCycle === 'annual' ? enterprisePlan.annualPrice : enterprisePlan.monthlyPrice}
                       </span>
                       <span className="text-2xl text-blue-200">/{billingCycle === 'annual' ? 'year' : 'month'}</span>
                       <p className="text-blue-200 mt-2">
-                        {enterprisePlan.baseUsers} users included • Additional: ${enterprisePlan.additionalUserPrice}/user
+                        {enterprisePlan.baseUsers} users included • Additional: AUD ${enterprisePlan.additionalUserPrice}/user
                       </p>
                     </div>
 
