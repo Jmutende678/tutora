@@ -209,7 +209,7 @@ Want to help transform how the world learns? We're always looking for passionate
 ## 📞 **Get in Touch**
 
 ### **Contact Information:**
-- **Email:** hello@tutora.com
+- **Email:** hello@tutoralearn.com
 - **Phone:** +1 (555) 123-TUTOR
 - **Address:** San Francisco, CA (HQ) | Global Remote Team
 

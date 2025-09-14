@@ -22,11 +22,11 @@ export default function AdminLoginPage() {
       await new Promise(resolve => setTimeout(resolve, 1000))
 
       // Demo credentials
-      if (email === 'ceo@tutora.com' && password === 'demo123') {
+      if (email === 'ceo@tutoralearn.com' && password === 'demo123') {
         localStorage.setItem('admin_authenticated', 'true')
         localStorage.setItem('admin_role', 'ceo')
         router.push('/admin/ceo-dashboard')
-      } else if (email === 'manager@tutora.com' && password === 'demo123') {
+      } else if (email === 'manager@tutoralearn.com' && password === 'demo123') {
         localStorage.setItem('admin_authenticated', 'true')
         localStorage.setItem('admin_role', 'manager')
         router.push('/admin/manager-dashboard')
