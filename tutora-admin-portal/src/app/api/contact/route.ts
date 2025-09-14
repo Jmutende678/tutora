@@ -12,6 +12,87 @@ interface ContactFormData {
   source: string
 }
 
+// AI-powered lead scoring function
+function calculateLeadScore(data: ContactFormData): { score: number; category: 'hot' | 'warm' | 'cold'; reasons: string[] } {
+  let score = 0
+  const reasons: string[] = []
+  
+  // Company size indicators
+  if (data.company.toLowerCase().includes('enterprise') || data.company.toLowerCase().includes('corp')) {
+    score += 25
+    reasons.push('Enterprise company indicator')
+  }
+  
+  // Email domain scoring
+  const emailDomain = data.email.split('@')[1]?.toLowerCase()
+  if (emailDomain && !['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'].includes(emailDomain)) {
+    score += 20
+    reasons.push('Business email domain')
+  }
+  
+  // Inquiry type scoring
+  switch (data.inquiryType) {
+    case 'demo':
+      score += 35
+      reasons.push('Requested product demo')
+      break
+    case 'sales':
+      score += 30
+      reasons.push('Sales inquiry')
+      break
+    case 'support':
+      score += 15
+      reasons.push('Support inquiry (existing interest)')
+      break
+    case 'general':
+      score += 10
+      reasons.push('General inquiry')
+      break
+  }
+  
+  // Phone number provided
+  if (data.phone && data.phone.trim()) {
+    score += 15
+    reasons.push('Provided phone number')
+  }
+  
+  // Message quality and urgency indicators
+  const message = data.message.toLowerCase()
+  if (message.includes('urgent') || message.includes('asap') || message.includes('immediately')) {
+    score += 20
+    reasons.push('Urgent language detected')
+  }
+  
+  if (message.includes('budget') || message.includes('pricing') || message.includes('cost')) {
+    score += 15
+    reasons.push('Budget/pricing discussion')
+  }
+  
+  if (message.includes('team') && /\d+/.test(message)) {
+    score += 10
+    reasons.push('Mentioned team size')
+  }
+  
+  // Subject line indicators
+  const subject = data.subject.toLowerCase()
+  if (subject.includes('partnership') || subject.includes('integration')) {
+    score += 25
+    reasons.push('Partnership/integration interest')
+  }
+  
+  // Determine category
+  let category: 'hot' | 'warm' | 'cold'
+  if (score >= 70) {
+    category = 'hot'
+  } else if (score >= 40) {
+    category = 'warm'
+  } else {
+    category = 'cold'
+  }
+  
+  return { score, category, reasons }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const data: ContactFormData = await request.json()
@@ -127,98 +208,45 @@ ${data.phone ? `Call: ${data.phone}` : ''}
       `
     }
     
-    // Send email using your email service
+    // Store contact form submission in activity tracking system
     try {
-      // Use your existing email service
-      const emailService = await import('@/lib/email-service')
+      // Save to activity tracking for CEO dashboard
+      const activityData = {
+        type: 'contact_form_submission',
+        user_email: data.email,
+        user_name: data.name,
+        company: data.company,
+        phone: data.phone,
+        inquiry_type: data.inquiryType,
+        subject: data.subject,
+        message: data.message,
+        lead_score: calculateLeadScore(data),
+        timestamp: data.timestamp,
+        source: data.source,
+        metadata: {
+          form_data: data,
+          user_agent: request.headers.get('user-agent'),
+          ip_address: request.headers.get('x-forwarded-for') || 'unknown',
+          referrer: request.headers.get('referer')
+        }
+      }
       
-      await emailService.default.sendEmail({
-        to: inquiryInfo.team,
-        subject: emailContent.subject,
-        html: emailContent.html,
-        text: emailContent.text
-      })
+      // Save to Supabase for CEO dashboard tracking
+      const { createClient } = await import('@supabase/supabase-js')
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
       
-      console.log(`✅ Contact form email sent to ${inquiryInfo.team} for ${data.inquiryType} inquiry from ${data.company}`)
+      await supabase
+        .from('website_activity')
+        .insert([activityData])
       
-    } catch (emailError) {
-      console.error('❌ Email sending failed:', emailError)
-      // Continue with success response even if email fails - we have the data logged
-    }
-    
-    // Send auto-reply to user
-    try {
-      const emailService = await import('@/lib/email-service')
+      console.log(`✅ Contact form submission saved to activity tracking for CEO dashboard`)
       
-      const autoReplyContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); padding: 30px; border-radius: 8px; text-align: center; margin-bottom: 30px;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">Thank You for Contacting Tutora!</h1>
-          </div>
-          
-          <div style="background: #f8fafc; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
-            <h2 style="color: #1f2937; margin-top: 0;">Hi ${data.name},</h2>
-            <p style="color: #374151; line-height: 1.6; font-size: 16px;">
-              Thank you for reaching out to us! We've received your ${data.inquiryType} inquiry and our team will get back to you within <strong>24 hours</strong>.
-            </p>
-            
-            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; margin: 20px 0;">
-              <h3 style="color: #1f2937; margin-top: 0;">Your Message Summary:</h3>
-              <p style="color: #6b7280; margin: 5px 0;"><strong>Subject:</strong> ${data.subject}</p>
-              <p style="color: #6b7280; margin: 5px 0;"><strong>Company:</strong> ${data.company}</p>
-              <p style="color: #6b7280; margin: 5px 0;"><strong>Inquiry Type:</strong> ${data.inquiryType.charAt(0).toUpperCase() + data.inquiryType.slice(1)}</p>
-            </div>
-            
-            <p style="color: #374151; line-height: 1.6;">
-              In the meantime, feel free to explore our platform:
-            </p>
-            
-            <div style="text-align: center; margin: 25px 0;">
-              <a href="https://tutora-production.up.railway.app/demo/ai-module-builder" 
-                 style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 0 10px;">
-                Try AI Demo
-              </a>
-              <a href="https://tutora-production.up.railway.app/pricing" 
-                 style="display: inline-block; background: white; color: #3b82f6; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; border: 2px solid #3b82f6; margin: 0 10px;">
-                View Pricing
-              </a>
-            </div>
-          </div>
-          
-          <div style="text-align: center; color: #6b7280; font-size: 14px;">
-            <p>Best regards,<br><strong>The Tutora Team</strong></p>
-            <p>
-              <a href="mailto:hello@tutoralearn.com" style="color: #3b82f6;">hello@tutoralearn.com</a> | 
-              <a href="tel:+15551234567" style="color: #3b82f6;">+1 (555) 123-4567</a>
-            </p>
-          </div>
-        </div>
-      `
-      
-      await emailService.default.sendEmail({
-        to: data.email,
-        subject: `Thank you for contacting Tutora - We'll be in touch soon!`,
-        html: autoReplyContent,
-        text: `Hi ${data.name},
-
-Thank you for reaching out to us! We've received your ${data.inquiryType} inquiry and our team will get back to you within 24 hours.
-
-Your Message Summary:
-- Subject: ${data.subject}
-- Company: ${data.company}
-- Inquiry Type: ${data.inquiryType}
-
-In the meantime, feel free to explore our platform at https://tutora-production.up.railway.app
-
-Best regards,
-The Tutora Team
-hello@tutoralearn.com | +1 (555) 123-4567`
-      })
-      
-      console.log(`✅ Auto-reply sent to ${data.email}`)
-      
-    } catch (autoReplyError) {
-      console.error('❌ Auto-reply failed:', autoReplyError)
+    } catch (trackingError) {
+      console.error('❌ Activity tracking failed:', trackingError)
+      // Continue even if tracking fails
     }
     
     // Log the successful contact form submission

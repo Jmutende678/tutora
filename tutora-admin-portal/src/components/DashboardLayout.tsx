@@ -41,6 +41,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   // Navigation items based on role
   const ceoNavigation = [
     { name: 'Dashboard', href: '/admin/ceo-dashboard', icon: Home },
+    { name: '🔥 Live Intelligence', href: '/admin/live-activity-comprehensive', icon: BarChart3 },
     { name: 'Companies', href: '/companies', icon: Building2 },
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
     { name: 'Global Reach', href: '/global-reach', icon: Globe },
