@@ -11,10 +11,50 @@ export default function ActivityTracker({ userId, enableTracking = true }: Activ
   useEffect(() => {
     if (!enableTracking || typeof window === 'undefined') return
 
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    // CRITICAL: ONLY track actual public website visitor pages
+    const currentPath = window.location.pathname
+    
+    // Define what counts as a real visitor page (whitelist approach)
+    const publicPages = [
+      '/',           // Homepage
+      '/about',      // About page
+      '/contact',    // Contact page
+      '/pricing',    // Pricing page
+      '/features',   // Features
+      '/register',   // Registration
+      '/demo',       // Demo pages
+      '/solutions',  // Solutions
+      '/testimonials', // Testimonials
+      '/blog',       // Blog
+      '/careers',    // Careers
+      '/faq'         // FAQ
+    ]
+
+    const isPublicPage = publicPages.some(page => 
+      currentPath === page || 
+      currentPath.startsWith(page + '/') ||
+      (page === '/demo' && currentPath.includes('/demo/'))
+    )
+
+    if (!isPublicPage) {
+      console.log('🚫 NON-PUBLIC PAGE - Skipping visitor tracking for:', currentPath)
+      return
+    }
+
+    // Get or create persistent session ID
+    let sessionId = localStorage.getItem('tutora_session_id')
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      localStorage.setItem('tutora_session_id', sessionId)
+    }
+
+    // Track visited pages to avoid duplicates
+    const visitedPages = JSON.parse(localStorage.getItem('tutora_visited_pages') || '[]')
+    const currentPage = window.location.pathname
+    
     const startTime = Date.now()
 
-    console.log('🎯 REAL ACTIVITY TRACKING STARTED - Session:', sessionId)
+    console.log('🎯 WEBSITE VISITOR TRACKING STARTED - Session:', sessionId, 'Page:', currentPage)
 
     // Real-time activity tracking function
     const trackActivity = async (activityData: any) => {

@@ -43,6 +43,51 @@ export async function POST(request: Request) {
     })
     */
 
+    // Track registration in database
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/analytics/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'registration_form_submission',
+          session_id: `reg_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          source: '/register',
+          metadata: {
+            location: { country: 'Unknown', city: 'Unknown' },
+            device: { type: 'unknown' }
+          },
+          data: {
+            company: userData.companyName,
+            email: userData.email,
+            name: userData.name,
+            team_size: userData.teamSize,
+            recommended_plan: userData.plan,
+            job_title: userData.jobTitle,
+            industry: userData.industry,
+            primary_goal: userData.primaryGoal,
+            urgency: userData.urgency
+          },
+          user_name: userData.name,
+          user_email: userData.email,
+          company: userData.companyName,
+          lead_score: {
+            score: userData.urgency === 'immediately' ? 85 : userData.urgency === 'next-month' ? 65 : 45,
+            category: userData.urgency === 'immediately' ? 'hot' : userData.urgency === 'next-month' ? 'warm' : 'cold',
+            reasons: [
+              'Registration form completed',
+              `Team size: ${userData.teamSize}`,
+              `Urgency: ${userData.urgency}`,
+              userData.plan ? `Recommended plan: ${userData.plan}` : 'Plan recommendation generated'
+            ]
+          }
+        })
+      })
+      console.log('✅ Registration tracked in database')
+    } catch (trackingError) {
+      console.error('❌ Failed to track registration:', trackingError)
+    }
+
     if (emailSent) {
       console.log('🔥 NEW USER REGISTRATION - Email sent to sales@tutoralearn.com')
       console.log('Company:', userData.companyName)

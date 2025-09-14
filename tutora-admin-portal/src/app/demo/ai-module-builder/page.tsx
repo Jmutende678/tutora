@@ -125,6 +125,38 @@ export default function AIModuleBuilder() {
 
   // Simulate AI analysis and module generation
   const analyzeAndGenerate = async (uploadedFile: File) => {
+    // Track AI module generation start
+    try {
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'ai_module_generation_started',
+          session_id: `session_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          source: '/demo/ai-module-builder',
+          metadata: {
+            location: { country: 'Unknown', city: 'Unknown' },
+            device: { type: 'unknown' }
+          },
+          data: {
+            file_name: uploadedFile.name,
+            file_type: uploadedFile.type,
+            file_size: uploadedFile.size,
+            user_name: userName,
+            business_name: businessName,
+            company_size: companySize
+          },
+          user_name: userName,
+          user_email: userEmail,
+          company: businessName
+        })
+      })
+      console.log('✅ AI module generation start tracked')
+    } catch (trackingError) {
+      console.error('❌ Failed to track AI module generation:', trackingError)
+    }
+
     setIsGenerating(true)
     setCurrentStage('generating')
     setGenerationProgress(0)
@@ -210,6 +242,40 @@ export default function AIModuleBuilder() {
     }
 
     setGeneratedModule(newModule)
+    
+    // Track AI module generation completion
+    try {
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'ai_module_generation_completed',
+          session_id: `session_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          source: '/demo/ai-module-builder',
+          metadata: {
+            location: { country: 'Unknown', city: 'Unknown' },
+            device: { type: 'unknown' }
+          },
+          data: {
+            module_id: newModule.id,
+            module_title: newModule.title,
+            industry: newModule.industry,
+            total_components: newModule.totalComponents,
+            estimated_duration: newModule.estimatedDuration,
+            user_name: userName,
+            business_name: businessName
+          },
+          user_name: userName,
+          user_email: userEmail,
+          company: businessName
+        })
+      })
+      console.log('✅ AI module generation completion tracked')
+    } catch (trackingError) {
+      console.error('❌ Failed to track AI module completion:', trackingError)
+    }
+
     setIsGenerating(false)
     setCurrentStage('dashboard')
   }

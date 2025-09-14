@@ -151,6 +151,33 @@ export default function PricingPage() {
   const handleStartTrial = async (planId: string) => {
     setIsLoading(planId)
     
+    // Track price button click
+    try {
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'price_button_click',
+          session_id: `session_${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          source: '/pricing',
+          metadata: {
+            location: { country: 'Unknown', city: 'Unknown' },
+            device: { type: 'unknown' }
+          },
+          data: {
+            plan_id: planId,
+            billing_cycle: billingCycle,
+            button_text: 'Get Started',
+            page: 'pricing'
+          }
+        })
+      })
+      console.log(`✅ Price button click tracked: ${planId}`)
+    } catch (trackingError) {
+      console.error('❌ Failed to track price button click:', trackingError)
+    }
+    
     try {
       // For enterprise, redirect to contact page
       if (planId === 'enterprise') {
