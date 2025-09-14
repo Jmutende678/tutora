@@ -167,9 +167,23 @@ export default function PricingPage() {
           },
           data: {
             plan_id: planId,
+            plan_name: planId === 'basic' ? 'Basic Plan' : planId === 'pro' ? 'Pro Plan' : planId === 'enterprise' ? 'Enterprise Plan' : 'Unknown Plan',
             billing_cycle: billingCycle,
             button_text: 'Get Started',
-            page: 'pricing'
+            page: 'pricing',
+            price: planId === 'basic' ? (billingCycle === 'monthly' ? '$29' : '$290') : 
+                   planId === 'pro' ? (billingCycle === 'monthly' ? '$99' : '$990') : 
+                   planId === 'enterprise' ? 'Custom' : 'Unknown'
+          },
+          lead_score: {
+            score: planId === 'enterprise' ? 90 : planId === 'pro' ? 75 : 60,
+            category: planId === 'enterprise' ? 'hot' : planId === 'pro' ? 'warm' : 'cold',
+            reasons: [
+              `Clicked ${planId} plan pricing`,
+              `Billing cycle: ${billingCycle}`,
+              planId === 'enterprise' ? 'High-value enterprise interest' : 
+              planId === 'pro' ? 'Professional plan interest' : 'Basic plan interest'
+            ]
           }
         })
       })

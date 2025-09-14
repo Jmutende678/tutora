@@ -58,6 +58,14 @@ export async function GET(request: NextRequest) {
       console.log('📊 Query result - Activities count:', activities?.length || 0)
       console.log('❌ Query error:', error)
       
+      if (activities && activities.length > 0) {
+        console.log('🔍 Sample activity data:', JSON.stringify(activities[0], null, 2))
+        console.log('🎯 Activities with lead scores:', activities.filter(a => a.lead_score).length)
+        console.log('🔥 Hot leads:', activities.filter(a => a.lead_score?.category === 'hot').length)
+        console.log('🌡️ Warm leads:', activities.filter(a => a.lead_score?.category === 'warm').length)
+        console.log('❄️ Cold leads:', activities.filter(a => a.lead_score?.category === 'cold').length)
+      }
+      
       if (error) {
         console.error('Supabase query error:', error)
         // Return empty data instead of mock data

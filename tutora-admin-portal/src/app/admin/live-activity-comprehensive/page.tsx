@@ -357,6 +357,22 @@ export default function ComprehensiveLiveActivityDashboard() {
                           const insight = leadInsights.find(li => li.lead.id === activity.id)
                           if (insight) {
                             setSelectedLead(insight)
+                          } else {
+                            // Create a basic insight for activities without AI analysis
+                            setSelectedLead({
+                              lead: activity,
+                              aiAnalysis: {
+                                urgency: activity.lead_score?.score >= 70 ? 'high' : activity.lead_score?.score >= 40 ? 'medium' : 'low',
+                                summary: `${activity.type.replace(/_/g, ' ')} from ${activity.source}`,
+                                recommendedResponse: `Thank you for your interest in Tutora! We'll be in touch soon to discuss your ${activity.type.replace(/_/g, ' ')} needs.`,
+                                nextSteps: [
+                                  'Follow up within 24 hours',
+                                  'Send personalized demo',
+                                  'Schedule discovery call'
+                                ],
+                                estimatedValue: activity.lead_score?.score >= 70 ? 5000 : activity.lead_score?.score >= 40 ? 2000 : 500
+                              }
+                            })
                           }
                         }
                       }}
