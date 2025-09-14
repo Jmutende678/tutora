@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import { CheckCircle, ArrowRight, Users, Zap } from 'lucide-react'
 import Link from 'next/link'
 

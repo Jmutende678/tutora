@@ -26,7 +26,7 @@ import {
   Smartphone,
   Globe
 } from 'lucide-react'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import TrialPopup from '@/components/TrialPopup'
 import { Button, Card, Badge, IconContainer, Section, typography, spacing } from '@/components/ui/DesignSystem'
 import { cn, animations, shadows, radius } from '@/lib/utils'

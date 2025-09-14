@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import { Button, Card, Section, typography } from '@/components/ui/DesignSystem'
 import { cn } from '@/lib/utils'
 import { 

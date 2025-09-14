@@ -16,7 +16,7 @@ import {
   Smartphone
 } from 'lucide-react'
 import Link from 'next/link'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 
 export default function RegisterPage() {
   const router = useRouter()

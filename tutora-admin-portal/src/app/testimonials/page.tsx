@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import { Star, Quote, ArrowRight, Brain } from 'lucide-react'
 
 export default function TestimonialsPage() {

@@ -1,6 +1,6 @@
 'use client'
 
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import Link from 'next/link'
 import { 
   Users, 

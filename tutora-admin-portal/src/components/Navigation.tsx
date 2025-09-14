@@ -1,9 +1,11 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
 import { ChevronDown, BarChart3, Users, Brain, Shield, Laptop, BookOpen, Award } from 'lucide-react'
 
-export default function Navigation() {
+export function Navigation() {
   const [featuresOpen, setFeaturesOpen] = useState(false)
   const [solutionsOpen, setSolutionsOpen] = useState(false)
 
