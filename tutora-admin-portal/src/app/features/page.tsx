@@ -421,7 +421,7 @@ export default function FeaturesPage() {
         <div className="max-w-4xl mx-auto text-center px-6 lg:px-8">
           <h2 className="text-4xl font-bold mb-6">Ready to revolutionize your employee training?</h2>
           <p className="text-xl opacity-90 mb-8">
-            Join 500+ companies already saving 60% on training costs with Tutora's AI-powered platform.
+            Join growing companies already saving time on training costs with Tutora's AI-powered platform.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">

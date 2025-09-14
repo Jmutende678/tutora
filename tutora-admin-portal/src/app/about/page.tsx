@@ -329,7 +329,7 @@ export default function AboutPage() {
               </div>
               <div className="text-center">
                 <Shield className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                <div className="font-semibold text-gray-900">SOC 2 Type II Certified</div>
+                <div className="font-semibold text-gray-900">Enterprise Security Standards</div>
                 <div className="text-sm text-gray-600">Enterprise security</div>
               </div>
             </div>
@@ -399,7 +399,7 @@ export default function AboutPage() {
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4" />
-                    <span><strong>SOC 2 Type II</strong> security certification</span>
+                    <span><strong>Enterprise-grade</strong> security standards</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4" />
@@ -685,7 +685,7 @@ export default function AboutPage() {
           </Link>
 
           <p className="text-sm opacity-75 mt-6">
-            Start Your Free Trial Today and see why 500+ companies trust Tutora for their employee training.
+            Start Your Free Trial Today and see why growing companies trust Tutora for their employee training.
           </p>
         </div>
       </div>

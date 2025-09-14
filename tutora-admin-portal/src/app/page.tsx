@@ -28,6 +28,8 @@ import {
 } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 import TrialPopup from '@/components/TrialPopup'
+import { Button, Card, Badge, IconContainer, Section, typography, spacing } from '@/components/ui/DesignSystem'
+import { cn, animations, shadows, radius } from '@/lib/utils'
 
 export default function HomePage() {
   const [visibleStats, setVisibleStats] = useState<Set<number>>(new Set())
@@ -163,7 +165,7 @@ export default function HomePage() {
   const securityFeatures = [
     {
       icon: Shield,
-      title: 'SOC2 Type II',
+      title: 'Enterprise Security',
       description: 'Certified security controls and annual audits',
       color: 'blue'
     },
@@ -186,7 +188,7 @@ export default function HomePage() {
     'Regular security audits & pen testing',
     'Data residency options (US, EU, AU)',
     'Two-factor authentication (2FA)',
-    '99.99% uptime SLA guarantee',
+    'High availability infrastructure',
     'Complete audit logs & compliance reporting'
   ]
 
@@ -262,7 +264,7 @@ export default function HomePage() {
               </span>
             </h1>
             <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Transform any video or document into engaging training modules automatically. Join 500+ companies revolutionizing their workforce development.
+              Transform any video or document into engaging training modules automatically. Join growing companies revolutionizing their workforce development.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
               <Link
@@ -450,7 +452,7 @@ export default function HomePage() {
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold mb-4 text-gray-900">Enterprise Security</h3>
-                <p className="text-gray-600">SOC2 Type II certified, GDPR compliant, and SSO enabled. Your data is protected by bank-grade security measures.</p>
+                <p className="text-gray-600">Enterprise-grade security, GDPR compliant, and SSO enabled. Your data is protected by industry-standard security measures.</p>
               </div>
             </div>
           </div>

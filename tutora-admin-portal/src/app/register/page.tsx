@@ -541,7 +541,7 @@ export default function RegisterPage() {
             <div className="flex justify-center items-center space-x-8 text-sm text-gray-500">
               <div className="flex items-center space-x-2">
                 <Shield className="h-4 w-4" />
-                <span>SOC2 Certified</span>
+                <span>Enterprise Security</span>
               </div>
               <div className="flex items-center space-x-2">
                 <CheckCircle className="h-4 w-4" />
