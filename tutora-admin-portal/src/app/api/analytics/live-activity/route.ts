@@ -42,16 +42,15 @@ export async function GET(request: NextRequest) {
       
       console.log('🔍 Querying from:', startTime.toISOString(), 'to now')
       
-      // Fetch ONLY real website visitor activity (public pages + form submissions + interactions)
+      // Fetch ALL real website visitor activity (page views + form submissions + interactions)
       const publicPages = ['/', '/about', '/contact', '/pricing', '/features', '/register', '/demo/ai-module-builder', '/solutions', '/testimonials', '/blog', '/careers', '/faq', '/features/enterprise-security', '/auth/register', '/company/setup', '/dashboard', '/admin/module-builder']
-      const formTypes = ['contact_form_submission', 'registration_form_submission', 'price_button_click', 'ai_module_generation_started', 'ai_module_generation_completed', 'security_audit_form_submission', 'account_registration_completed', 'company_setup_completed', 'user_profile_updated', 'training_module_created', 'training_module_published', 'training_module_deleted']
+      const formTypes = ['contact_form_submission', 'registration_form_submission', 'price_button_click', 'ai_module_generation_started', 'ai_module_generation_completed', 'security_audit_form_submission', 'account_registration_completed', 'company_setup_completed', 'user_profile_updated', 'training_module_created', 'training_module_published', 'training_module_deleted', 'page_view']
       
       const { data: activities, error } = await supabase
         .from('website_activity')
         .select('*')
         .gte('timestamp', startTime.toISOString())
-        .in('source', publicPages)
-        .or(`type.in.(${formTypes.join(',')})`)
+        .or(`source.in.(${publicPages.join(',')}),type.in.(${formTypes.join(',')})`)
         .order('timestamp', { ascending: false })
         .limit(100)
       

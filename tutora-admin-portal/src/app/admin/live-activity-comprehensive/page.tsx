@@ -99,7 +99,7 @@ export default function ComprehensiveLiveActivityDashboard() {
         
         // Generate AI insights for high-value leads
         const highValueLeads = result.data.activities?.filter((activity: ActivityEvent) => 
-          activity.type === 'contact_form_submission' && 
+          activity.type !== 'page_view' && 
           activity.lead_score && 
           activity.lead_score.score >= 40
         ) || []
@@ -181,12 +181,12 @@ export default function ComprehensiveLiveActivityDashboard() {
 
   const stats = {
     totalVisitors: activities.filter(a => a.type === 'page_view').length,
-    totalLeads: activities.filter(a => a.type === 'contact_form_submission').length,
+    totalLeads: activities.filter(a => a.type !== 'page_view' && a.lead_score).length, // All non-page-view activities with lead scores
     hotLeads: activities.filter(a => a.lead_score?.category === 'hot').length,
     warmLeads: activities.filter(a => a.lead_score?.category === 'warm').length,
     coldLeads: activities.filter(a => a.lead_score?.category === 'cold').length,
-    conversionRate: activities.length > 0 
-      ? ((activities.filter(a => a.type === 'contact_form_submission').length / activities.length) * 100).toFixed(1)
+    conversionRate: activities.filter(a => a.type === 'page_view').length > 0 
+      ? ((activities.filter(a => a.type !== 'page_view' && a.lead_score).length / activities.filter(a => a.type === 'page_view').length) * 100).toFixed(1)
       : '0'
   }
 
@@ -337,7 +337,7 @@ export default function ComprehensiveLiveActivityDashboard() {
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {filteredActivities.map((activity) => {
                   const Icon = getActivityIcon(activity.type)
-                  const isLead = activity.type === 'contact_form_submission'
+                  const isLead = activity.type !== 'page_view' // All activities except page views are leads
                   
                   return (
                     <div
