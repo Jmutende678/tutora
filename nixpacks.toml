@@ -1,11 +1,27 @@
+# Force Node.js detection and ignore Flutter files
 [variables]
 NODE_VERSION = "20"
 
+# Override auto-detection to force Node.js
+[providers]
+node = true
+
+[phases.setup]
+nixPkgs = ['nodejs_20']
+
 [phases.install]
-cmds = ['cd tutora-admin-portal && npm ci']
+cmds = [
+  'ls -la',
+  'cd tutora-admin-portal',
+  'ls -la',
+  'npm ci'
+]
 
 [phases.build]
-cmds = ['cd tutora-admin-portal && npm run build']
+cmds = [
+  'cd tutora-admin-portal',
+  'npm run build'
+]
 
 [start]
 cmd = 'cd tutora-admin-portal && npm start'

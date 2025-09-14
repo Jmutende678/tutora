@@ -1,0 +1,28 @@
+# Ignore Flutter/Dart files to prevent auto-detection confusion
+pubspec.yaml
+pubspec.lock
+.metadata
+analysis_options.yaml
+lib/
+android/
+ios/
+macos/
+linux/
+windows/
+web/
+test/
+
+# Ignore other project files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+
+# Ignore documentation and config files
+*.md
+docs/
+scripts/
+assets/
+
+# Keep only Next.js admin portal
+!tutora-admin-portal/
