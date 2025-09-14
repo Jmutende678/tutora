@@ -26,7 +26,7 @@ import {
   Building
 } from 'lucide-react'
 
-export default function AboutPage() {
+function AboutPage() {
   const achievements = [
     {
       icon: Users,
@@ -691,4 +691,6 @@ export default function AboutPage() {
       </div>
     </div>
   )
-} 
+}
+
+export default AboutPage 
