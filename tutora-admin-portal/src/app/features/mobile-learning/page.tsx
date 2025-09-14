@@ -1,6 +1,6 @@
 'use client'
 
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { 
@@ -34,20 +34,24 @@ export default function MobileLearningPage() {
                   Native iOS and Android apps with offline support, cross-device sync, and push notifications. Your team can learn on the go, even without internet connection.
                 </p>
                 <div className="flex space-x-4 mb-8">
-                  <Image
-                    src="/images/appstore.svg"
-                    alt="Download on App Store"
-                    width={140}
-                    height={45}
-                    className="hover:opacity-80 transition-opacity"
-                  />
-                  <Image
-                    src="/images/playstore.svg"
-                    alt="Get it on Google Play"
-                    width={140}
-                    height={45}
-                    className="hover:opacity-80 transition-opacity"
-                  />
+                  <Link href="/mobile-app-coming-soon">
+                    <Image
+                      src="/images/appstore.svg"
+                      alt="Download on App Store - Coming Soon"
+                      width={140}
+                      height={45}
+                      className="hover:opacity-80 transition-opacity cursor-pointer"
+                    />
+                  </Link>
+                  <Link href="/mobile-app-coming-soon">
+                    <Image
+                      src="/images/playstore.svg"
+                      alt="Get it on Google Play - Coming Soon"
+                      width={140}
+                      height={45}
+                      className="hover:opacity-80 transition-opacity cursor-pointer"
+                    />
+                  </Link>
                 </div>
                 <Link 
                   href="/register"
@@ -160,20 +164,24 @@ export default function MobileLearningPage() {
               Join thousands of learners who train on the go with our mobile app.
             </p>
             <div className="flex justify-center space-x-4">
-              <Image
-                src="/images/appstore.svg"
-                alt="Download on App Store"
-                width={160}
-                height={55}
-                className="hover:opacity-80 transition-opacity cursor-pointer"
-              />
-              <Image
-                src="/images/playstore.svg"
-                alt="Get it on Google Play"
-                width={160}
-                height={55}
-                className="hover:opacity-80 transition-opacity cursor-pointer"
-              />
+              <Link href="/mobile-app-coming-soon">
+                <Image
+                  src="/images/appstore.svg"
+                  alt="Download on App Store - Coming Soon"
+                  width={160}
+                  height={55}
+                  className="hover:opacity-80 transition-opacity cursor-pointer"
+                />
+              </Link>
+              <Link href="/mobile-app-coming-soon">
+                <Image
+                  src="/images/playstore.svg"
+                  alt="Get it on Google Play - Coming Soon"
+                  width={160}
+                  height={55}
+                  className="hover:opacity-80 transition-opacity cursor-pointer"
+                />
+              </Link>
             </div>
           </div>
         </section>

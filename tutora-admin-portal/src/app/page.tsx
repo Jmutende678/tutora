@@ -862,17 +862,17 @@ export default function HomePage() {
                   AI-powered training platform that helps teams learn faster and work better.
                 </p>
                 <div className="flex space-x-4">
-                  <Link href="https://apps.apple.com" className="block">
+                  <Link href="/mobile-app-coming-soon" className="block hover:opacity-80 transition-opacity">
                     <Image
-                      alt="Download on App Store"
+                      alt="Download on App Store - Coming Soon"
                       width={120}
                       height={40}
                       src="/images/appstore.svg"
                     />
                   </Link>
-                  <Link href="https://play.google.com" className="block">
+                  <Link href="/mobile-app-coming-soon" className="block hover:opacity-80 transition-opacity">
                     <Image
-                      alt="Get it on Google Play"
+                      alt="Get it on Google Play - Coming Soon"
                       width={120}
                       height={40}
                       src="/images/playstore.svg"
