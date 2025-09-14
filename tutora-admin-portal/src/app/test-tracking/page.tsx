@@ -60,6 +60,28 @@ export default function TestTrackingPage() {
     }
   }
 
+  const testDashboardAPI = async () => {
+    addLog('📊 Testing dashboard API...')
+    try {
+      const response = await fetch('/api/analytics/live-activity?timeRange=24h')
+
+      if (response.ok) {
+        const data = await response.json()
+        addLog('✅ Dashboard API Response: ' + JSON.stringify(data))
+        
+        if (data.data && data.data.activities) {
+          addLog(`📈 Found ${data.data.activities.length} activities in database`)
+        } else {
+          addLog('📈 No activities found in database')
+        }
+      } else {
+        addLog('❌ Dashboard API Failed: ' + response.status)
+      }
+    } catch (error) {
+      addLog('❌ Dashboard API Error: ' + error)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
@@ -80,6 +102,13 @@ export default function TestTrackingPage() {
               className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 ml-4"
             >
               Test Health Check
+            </button>
+            
+            <button
+              onClick={testDashboardAPI}
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 ml-4"
+            >
+              Test Dashboard API
             </button>
           </div>
           
