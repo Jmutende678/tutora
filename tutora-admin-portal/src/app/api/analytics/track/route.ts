@@ -27,16 +27,16 @@ export async function POST(request: NextRequest) {
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
       
-      const { error } = await supabase
-        .from('website_activity')
-        .insert([{
-          type: activityData.type,
-          user_id: activityData.user_id,
+      // Save to activities table
+      const activityRecord = {
+        activity_type: activityData.type,
+        details: `Activity: ${activityData.type} from ${activityData.source}`,
+        metadata: {
+          ...activityData.metadata,
           session_id: activityData.session_id,
           timestamp: activityData.timestamp,
           source: activityData.source,
-          metadata: activityData.metadata || {},
-          data: activityData.data || {},
+          data: activityData.data,
           user_name: activityData.user_name,
           user_email: activityData.user_email,
           company: activityData.company,
@@ -45,7 +45,14 @@ export async function POST(request: NextRequest) {
           subject: activityData.subject,
           message: activityData.message,
           lead_score: activityData.lead_score
-        }])
+        },
+        ip_address: activityData.metadata?.ip_address || 'unknown',
+        user_agent: activityData.metadata?.user_agent || 'unknown'
+      }
+      
+      const { error } = await supabase
+        .from('activities')
+        .insert([activityRecord])
       
       if (error) {
         console.error('Supabase insert error:', error)
@@ -53,6 +60,29 @@ export async function POST(request: NextRequest) {
         console.log('💾 Activity logged to console (DB unavailable):', activityData)
       } else {
         console.log('✅ Activity saved to database')
+      }
+      
+      // If it's a contact form submission, also save to contact_submissions table
+      if (activityData.type === 'contact_form_submission' && activityData.user_email) {
+        const contactRecord = {
+          name: activityData.user_name || 'Unknown',
+          email: activityData.user_email,
+          company: activityData.company,
+          subject: activityData.subject || 'Contact Form Submission',
+          message: activityData.message || 'No message provided',
+          status: 'new',
+          source: activityData.source || 'website'
+        }
+        
+        const { error: contactError } = await supabase
+          .from('contact_submissions')
+          .insert([contactRecord])
+        
+        if (contactError) {
+          console.error('Contact submission insert error:', contactError)
+        } else {
+          console.log('✅ Contact submission saved to database')
+        }
       }
       
     } catch (dbError) {

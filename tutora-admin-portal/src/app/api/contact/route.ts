@@ -208,44 +208,70 @@ ${data.phone ? `Call: ${data.phone}` : ''}
       `
     }
     
-    // Store contact form submission in activity tracking system
+    // Store contact form submission in database
     try {
-      // Save to activity tracking for CEO dashboard
-      const activityData = {
-        type: 'contact_form_submission',
-        user_email: data.email,
-        user_name: data.name,
-        company: data.company,
-        phone: data.phone,
-        inquiry_type: data.inquiryType,
-        subject: data.subject,
-        message: data.message,
-        lead_score: calculateLeadScore(data),
-        timestamp: data.timestamp,
-        source: data.source,
-        metadata: {
-          form_data: data,
-          user_agent: request.headers.get('user-agent'),
-          ip_address: request.headers.get('x-forwarded-for') || 'unknown',
-          referrer: request.headers.get('referer')
-        }
-      }
-      
-      // Save to Supabase for CEO dashboard tracking
+      // Save to contact_submissions table
       const { createClient } = await import('@supabase/supabase-js')
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
       
-      await supabase
-        .from('website_activity')
+      const contactData = {
+        name: data.name,
+        email: data.email,
+        company: data.company,
+        subject: data.subject,
+        message: data.message,
+        status: 'new',
+        source: data.source || 'website'
+      }
+      
+      const { error: contactError } = await supabase
+        .from('contact_submissions')
+        .insert([contactData])
+      
+      if (contactError) {
+        console.error('❌ Failed to save contact submission:', contactError)
+      } else {
+        console.log(`✅ Contact form submission saved to database`)
+      }
+      
+      // Also save to activities table for tracking
+      const activityData = {
+        activity_type: 'contact_form_submission',
+        details: `Contact form submission from ${data.name} (${data.email})`,
+        metadata: {
+          email: data.email,
+          name: data.name,
+          company: data.company,
+          phone: data.phone,
+          inquiry_type: data.inquiryType,
+          subject: data.subject,
+          message: data.message,
+          source: data.source,
+          lead_score: calculateLeadScore(data),
+          form_data: data,
+          user_agent: request.headers.get('user-agent'),
+          ip_address: request.headers.get('x-forwarded-for') || 'unknown',
+          referrer: request.headers.get('referer')
+        },
+        ip_address: request.headers.get('x-forwarded-for') || 'unknown',
+        user_agent: request.headers.get('user-agent')
+      }
+      
+      const { error: activityError } = await supabase
+        .from('activities')
         .insert([activityData])
       
-      console.log(`✅ Contact form submission saved to activity tracking for CEO dashboard`)
+      if (activityError) {
+        console.error('❌ Failed to save activity:', activityError)
+      } else {
+        console.log(`✅ Contact form activity saved to database`)
+      }
       
     } catch (trackingError) {
-      console.error('❌ Activity tracking failed:', trackingError)
+      console.error('❌ Database storage failed:', trackingError)
       // Continue even if tracking fails
     }
     

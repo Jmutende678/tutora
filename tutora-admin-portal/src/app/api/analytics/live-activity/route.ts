@@ -42,27 +42,92 @@ export async function GET(request: NextRequest) {
       
       console.log('🔍 Querying from:', startTime.toISOString(), 'to now')
       
-      // Fetch ALL real website visitor activity (page views + form submissions + interactions)
-      const publicPages = ['/', '/about', '/contact', '/pricing', '/features', '/register', '/demo/ai-module-builder', '/solutions', '/testimonials', '/blog', '/careers', '/faq', '/features/enterprise-security', '/auth/register', '/company/setup', '/dashboard', '/admin/module-builder']
-      const formTypes = ['contact_form_submission', 'registration_form_submission', 'price_button_click', 'ai_module_generation_started', 'ai_module_generation_completed', 'security_audit_form_submission', 'account_registration_completed', 'company_setup_completed', 'user_profile_updated', 'training_module_created', 'training_module_published', 'training_module_deleted', 'page_view']
-      
-      const { data: activities, error } = await supabase
-        .from('website_activity')
+      // Fetch contact form submissions
+      const { data: contactSubmissions, error: contactError } = await supabase
+        .from('contact_submissions')
         .select('*')
-        .gte('timestamp', startTime.toISOString())
-        .or(`source.in.(${publicPages.join(',')}),type.in.(${formTypes.join(',')})`)
-        .order('timestamp', { ascending: false })
-        .limit(100)
+        .gte('created_at', startTime.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(50)
       
-      console.log('📊 Query result - Activities count:', activities?.length || 0)
+      // Fetch activities from the activities table
+      const { data: activities, error: activitiesError } = await supabase
+        .from('activities')
+        .select('*')
+        .gte('created_at', startTime.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(50)
+      
+      // Combine and format the data
+      const allActivities = []
+      
+      // Add contact submissions
+      if (contactSubmissions) {
+        contactSubmissions.forEach(submission => {
+          allActivities.push({
+            id: submission.id,
+            type: 'contact_form_submission',
+            user_email: submission.email,
+            user_name: submission.name,
+            company: submission.company,
+            subject: submission.subject,
+            message: submission.message,
+            lead_score: {
+              score: 75, // Default score for contact forms
+              category: 'warm',
+              reasons: ['Contact form submission', 'Direct inquiry']
+            },
+            data: {
+              inquiry_type: 'contact',
+              source: submission.source || 'website'
+            },
+            timestamp: submission.created_at,
+            source: submission.source || '/contact',
+            metadata: {
+              form_data: submission,
+              status: submission.status
+            }
+          })
+        })
+      }
+      
+      // Add other activities
+      if (activities) {
+        activities.forEach(activity => {
+          allActivities.push({
+            id: activity.id,
+            type: activity.activity_type,
+            user_email: activity.metadata?.email,
+            user_name: activity.metadata?.name,
+            company: activity.metadata?.company,
+            data: activity.metadata || {},
+            timestamp: activity.created_at,
+            source: activity.metadata?.source || 'unknown',
+            metadata: {
+              details: activity.details,
+              ip_address: activity.ip_address,
+              user_agent: activity.user_agent
+            }
+          })
+        })
+      }
+      
+      // Sort by timestamp
+      allActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      
+      const error = contactError || activitiesError
+      
+      console.log('📊 Query result - Total activities count:', allActivities.length)
+      console.log('📊 Contact submissions:', contactSubmissions?.length || 0)
+      console.log('📊 Other activities:', activities?.length || 0)
       console.log('❌ Query error:', error)
       
-      if (activities && activities.length > 0) {
-        console.log('🔍 Sample activity data:', JSON.stringify(activities[0], null, 2))
-        console.log('🎯 Activities with lead scores:', activities.filter(a => a.lead_score).length)
-        console.log('🔥 Hot leads:', activities.filter(a => a.lead_score?.category === 'hot').length)
-        console.log('🌡️ Warm leads:', activities.filter(a => a.lead_score?.category === 'warm').length)
-        console.log('❄️ Cold leads:', activities.filter(a => a.lead_score?.category === 'cold').length)
+      if (allActivities.length > 0) {
+        console.log('🔍 Sample activity data:', JSON.stringify(allActivities[0], null, 2))
+        console.log('🎯 Activities with lead scores:', allActivities.filter(a => a.lead_score).length)
+        console.log('🔥 Hot leads:', allActivities.filter(a => a.lead_score?.category === 'hot').length)
+        console.log('🌡️ Warm leads:', allActivities.filter(a => a.lead_score?.category === 'warm').length)
+        console.log('❄️ Cold leads:', allActivities.filter(a => a.lead_score?.category === 'cold').length)
       }
       
       if (error) {
@@ -87,27 +152,24 @@ export async function GET(request: NextRequest) {
         })
       }
       
-      console.log('✅ Query successful! Found activities:', activities?.length || 0)
-      
-      // Return real activity data without mock enrichment
-      const enrichedActivities = activities || []
+      console.log('✅ Query successful! Found activities:', allActivities.length)
       
       // Calculate real-time stats
       const stats = {
-        totalVisitors: enrichedActivities.filter(a => a.type === 'page_view').length,
-        totalLeads: enrichedActivities.filter(a => a.type === 'contact_form_submission').length,
-        hotLeads: enrichedActivities.filter(a => a.lead_score?.category === 'hot').length,
-        warmLeads: enrichedActivities.filter(a => a.lead_score?.category === 'warm').length,
-        coldLeads: enrichedActivities.filter(a => a.lead_score?.category === 'cold').length,
-        conversionRate: enrichedActivities.length > 0 
-          ? ((enrichedActivities.filter(a => a.type === 'contact_form_submission').length / enrichedActivities.length) * 100).toFixed(1)
+        totalVisitors: allActivities.filter(a => a.type === 'page_view').length,
+        totalLeads: allActivities.filter(a => a.type === 'contact_form_submission').length,
+        hotLeads: allActivities.filter(a => a.lead_score?.category === 'hot').length,
+        warmLeads: allActivities.filter(a => a.lead_score?.category === 'warm').length,
+        coldLeads: allActivities.filter(a => a.lead_score?.category === 'cold').length,
+        conversionRate: allActivities.length > 0 
+          ? ((allActivities.filter(a => a.type === 'contact_form_submission').length / allActivities.length) * 100).toFixed(1)
           : '0'
       }
       
       return NextResponse.json({
         success: true,
         data: {
-          activities: enrichedActivities,
+          activities: allActivities,
           stats,
           timeRange,
           lastUpdated: new Date().toISOString()

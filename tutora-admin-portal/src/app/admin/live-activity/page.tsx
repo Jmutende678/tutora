@@ -111,12 +111,36 @@ export default function LiveActivityDashboard() {
       }
 
       const response = await fetch(
-        `/api/analytics/track?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}`
+        `/api/analytics/live-activity?timeRange=${selectedTimeframe}`
       )
       const result = await response.json()
 
       if (result.success && result.data) {
-        const { events, summary: summaryData } = result.data
+        const { activities, stats: statsData } = result.data
+        
+        // Convert activities to events format for compatibility
+        const events = activities.map((activity: any) => ({
+          id: activity.id,
+          event_type: activity.type,
+          event_data: activity.data || {},
+          page_url: activity.source || '/',
+          country: activity.metadata?.location?.country,
+          city: activity.metadata?.location?.city,
+          device_type: activity.metadata?.device?.type || 'desktop',
+          browser: activity.metadata?.device?.browser || 'unknown',
+          timestamp: activity.timestamp,
+          user_id: activity.metadata?.user_id
+        }))
+        
+        // Create summary from stats
+        const summaryData = {
+          total_events: events.length,
+          unique_sessions: new Set(events.map(e => e.event_data?.session_id).filter(Boolean)).size,
+          page_views: events.filter(e => e.event_type === 'page_view').length,
+          conversions: events.filter(e => e.event_type === 'contact_form_submission').length,
+          button_clicks: events.filter(e => e.event_type === 'button_click').length,
+          form_submissions: events.filter(e => e.event_type === 'contact_form_submission').length
+        }
         
         setSummary(summaryData)
         
@@ -127,7 +151,8 @@ export default function LiveActivityDashboard() {
         console.log('✅ Live activity data loaded:', {
           totalEvents: summaryData.total_events,
           uniqueSessions: summaryData.unique_sessions,
-          activeUsers: processedStats.activeUsers
+          activeUsers: processedStats.activeUsers,
+          activities: activities.length
         })
       } else {
         console.error('❌ Failed to load activity data:', result.error)
@@ -223,6 +248,10 @@ export default function LiveActivityDashboard() {
       case 'click': return <MousePointer className="h-4 w-4" />
       case 'button_click': return <MousePointer className="h-4 w-4" />
       case 'form_submit': return <Zap className="h-4 w-4" />
+      case 'contact_form_submission': return <Zap className="h-4 w-4" />
+      case 'registration_form_submission': return <Users className="h-4 w-4" />
+      case 'ai_module_generation_started': return <Activity className="h-4 w-4" />
+      case 'ai_module_generation_completed': return <TrendingUp className="h-4 w-4" />
       case 'conversion': return <TrendingUp className="h-4 w-4" />
       default: return <Activity className="h-4 w-4" />
     }
@@ -404,6 +433,41 @@ export default function LiveActivityDashboard() {
                       {event.event_data?.button_text && (
                         <p className="text-xs text-blue-600">
                           Button: "{event.event_data.button_text}"
+                        </p>
+                      )}
+                      {event.event_data?.user_name && (
+                        <p className="text-xs text-green-600">
+                          User: {event.event_data.user_name}
+                        </p>
+                      )}
+                      {event.event_data?.user_email && (
+                        <p className="text-xs text-blue-600">
+                          Email: {event.event_data.user_email}
+                        </p>
+                      )}
+                      {event.event_data?.company && (
+                        <p className="text-xs text-purple-600">
+                          Company: {event.event_data.company}
+                        </p>
+                      )}
+                      {event.event_data?.team_size && (
+                        <p className="text-xs text-orange-600">
+                          Team Size: {event.event_data.team_size}
+                        </p>
+                      )}
+                      {event.event_data?.industry && (
+                        <p className="text-xs text-indigo-600">
+                          Industry: {event.event_data.industry}
+                        </p>
+                      )}
+                      {event.event_data?.urgency && (
+                        <p className="text-xs text-red-600">
+                          Urgency: {event.event_data.urgency}
+                        </p>
+                      )}
+                      {event.event_data?.subject && (
+                        <p className="text-xs text-gray-600">
+                          Subject: {event.event_data.subject}
                         </p>
                       )}
                     </div>
