@@ -34,7 +34,7 @@ import {
 
 interface ActivityEvent {
   id: string
-  type: 'contact_form_submission' | 'page_view' | 'demo_request' | 'pricing_view' | 'user_registration'
+  type: 'contact_form_submission' | 'registration_form_submission' | 'price_button_click' | 'ai_module_generation_started' | 'ai_module_generation_completed' | 'security_audit_form_submission' | 'account_registration_completed' | 'company_setup_completed' | 'user_profile_updated' | 'training_module_created' | 'training_module_published' | 'training_module_deleted' | 'page_view'
   user_email?: string
   user_name?: string
   company?: string
@@ -46,6 +46,22 @@ interface ActivityEvent {
     score: number
     category: 'hot' | 'warm' | 'cold'
     reasons: string[]
+  }
+  data?: {
+    plan_id?: string
+    plan_name?: string
+    billing_cycle?: string
+    price?: string
+    team_size?: string
+    industry?: string
+    urgency?: string
+    primary_goal?: string
+    job_title?: string
+    company?: string
+    email?: string
+    name?: string
+    recommended_plan?: string
+    [key: string]: any
   }
   timestamp: string
   source: string
@@ -193,6 +209,18 @@ export default function ComprehensiveLiveActivityDashboard() {
   const getActivityIcon = (type: string) => {
     switch (type) {
       case 'contact_form_submission': return MessageSquare
+      case 'registration_form_submission': return Users
+      case 'price_button_click': return TrendingUp
+      case 'ai_module_generation_started': return Bot
+      case 'ai_module_generation_completed': return CheckCircle
+      case 'security_audit_form_submission': return AlertCircle
+      case 'account_registration_completed': return Users
+      case 'company_setup_completed': return Building
+      case 'user_profile_updated': return Users
+      case 'training_module_created': return Target
+      case 'training_module_published': return Send
+      case 'training_module_deleted': return AlertCircle
+      case 'page_view': return Globe
       case 'demo_request': return Eye
       case 'pricing_view': return Target
       case 'user_registration': return Users
@@ -370,7 +398,11 @@ export default function ComprehensiveLiveActivityDashboard() {
                                   'Send personalized demo',
                                   'Schedule discovery call'
                                 ],
-                                estimatedValue: activity.lead_score?.score >= 70 ? 5000 : activity.lead_score?.score >= 40 ? 2000 : 500
+                                estimatedValue: activity.lead_score?.score >= 90 ? 10000 : 
+                                               activity.lead_score?.score >= 80 ? 7500 :
+                                               activity.lead_score?.score >= 70 ? 5000 : 
+                                               activity.lead_score?.score >= 60 ? 3000 :
+                                               activity.lead_score?.score >= 40 ? 1500 : 750
                               }
                             })
                           }
@@ -393,7 +425,14 @@ export default function ComprehensiveLiveActivityDashboard() {
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-1">
                               <h3 className="font-semibold text-gray-900">
-                                {activity.user_name || 'Anonymous Visitor'}
+                                {activity.user_name || 
+                                 (activity.type === 'contact_form_submission' ? 'Contact Form Lead' :
+                                  activity.type === 'registration_form_submission' ? 'Registration Lead' :
+                                  activity.type === 'price_button_click' ? `${activity.data?.plan_name || 'Pricing'} Interest` :
+                                  activity.type === 'ai_module_generation_started' ? 'AI Module Builder User' :
+                                  activity.type === 'security_audit_form_submission' ? 'Security Audit Request' :
+                                  'Anonymous Visitor')
+                                }
                               </h3>
                               {isLead && activity.lead_score && (
                                 <Badge
@@ -436,6 +475,47 @@ export default function ComprehensiveLiveActivityDashboard() {
                               <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                                 {activity.message}
                               </p>
+                            )}
+
+                            {/* Display rich form data */}
+                            {activity.data && (
+                              <div className="mt-2 space-y-1">
+                                {activity.data.plan_name && (
+                                  <p className="text-xs text-blue-600 font-medium">
+                                    📋 Plan: {activity.data.plan_name} ({activity.data.billing_cycle}) - {activity.data.price}
+                                  </p>
+                                )}
+                                {activity.data.team_size && (
+                                  <p className="text-xs text-gray-600">
+                                    👥 Team Size: {activity.data.team_size}
+                                  </p>
+                                )}
+                                {activity.data.industry && (
+                                  <p className="text-xs text-gray-600">
+                                    🏢 Industry: {activity.data.industry}
+                                  </p>
+                                )}
+                                {activity.data.urgency && (
+                                  <p className="text-xs text-orange-600 font-medium">
+                                    ⏰ Urgency: {activity.data.urgency}
+                                  </p>
+                                )}
+                                {activity.data.primary_goal && (
+                                  <p className="text-xs text-gray-600">
+                                    🎯 Goal: {activity.data.primary_goal}
+                                  </p>
+                                )}
+                                {activity.data.job_title && (
+                                  <p className="text-xs text-gray-600">
+                                    💼 Role: {activity.data.job_title}
+                                  </p>
+                                )}
+                                {activity.inquiry_type && (
+                                  <p className="text-xs text-purple-600 font-medium">
+                                    📝 Inquiry: {activity.inquiry_type}
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
                         </div>
