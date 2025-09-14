@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔥 ACTIVITY TRACKING API CALLED!')
     const activityData = await request.json()
     
     console.log('📊 REAL Activity Tracked:', {
       type: activityData.type,
       timestamp: activityData.timestamp,
       source: activityData.source,
-      session_id: activityData.session_id
+      session_id: activityData.session_id,
+      full_data: activityData
     })
     
     // Try to save to Supabase database

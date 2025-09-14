@@ -102,6 +102,7 @@ export default function ActivityTracker({ userId, enableTracking = true }: Activ
     }
 
     // Track initial page view
+    console.log('🚀 TRACKING PAGE VIEW:', window.location.pathname)
     trackActivity({
       type: 'page_view',
       data: {
@@ -109,6 +110,18 @@ export default function ActivityTracker({ userId, enableTracking = true }: Activ
         title: document.title
       }
     })
+
+    // Test tracking immediately
+    setTimeout(() => {
+      console.log('🧪 TESTING ACTIVITY TRACKING...')
+      trackActivity({
+        type: 'test_tracking',
+        data: {
+          message: 'Activity tracking is working!',
+          browser_test: true
+        }
+      })
+    }, 2000)
 
     // Track button clicks - REAL tracking
     const handleButtonClick = (event: MouseEvent) => {
@@ -327,6 +340,15 @@ export default function ActivityTracker({ userId, enableTracking = true }: Activ
     }
   }, [userId, enableTracking])
 
+  // Show a small indicator that tracking is active (only in development)
+  if (process.env.NODE_ENV === 'development') {
+    return (
+      <div className="fixed bottom-4 right-4 bg-green-500 text-white px-2 py-1 rounded text-xs z-50">
+        Activity Tracking Active
+      </div>
+    )
+  }
+  
   return null
 }
 
