@@ -96,8 +96,8 @@ export default function ComprehensiveLiveActivityDashboard() {
 
     loadActivityData()
     
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(loadActivityData, 30000)
+    // REAL auto-refresh every 5 seconds for live data
+    const interval = setInterval(loadActivityData, 5000)
     return () => clearInterval(interval)
   }, [router, timeRange])
 
@@ -217,10 +217,10 @@ export default function ComprehensiveLiveActivityDashboard() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className={cn(typography.h2, "mb-2")}>
-              🔥 Live Activity & Lead Intelligence
+              Live Activity & Lead Intelligence
             </h1>
             <p className={cn(typography.body, "text-gray-600")}>
-              Real-time website visitors, AI-powered lead scoring, and automated response generation
+              Real-time visitor analytics, intelligent lead scoring, and automated response generation
             </p>
           </div>
           
@@ -266,22 +266,22 @@ export default function ComprehensiveLiveActivityDashboard() {
           
           <Card padding="sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">{stats.hotLeads}</div>
-              <div className="text-sm text-gray-600">🔥 Hot</div>
+                <div className="text-2xl font-bold text-red-600">{stats.hotLeads}</div>
+                <div className="text-sm text-gray-600">Hot Leads</div>
             </div>
           </Card>
           
           <Card padding="sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-yellow-600">{stats.warmLeads}</div>
-              <div className="text-sm text-gray-600">🔥 Warm</div>
+                <div className="text-2xl font-bold text-yellow-600">{stats.warmLeads}</div>
+                <div className="text-sm text-gray-600">Warm Leads</div>
             </div>
           </Card>
           
           <Card padding="sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.coldLeads}</div>
-              <div className="text-sm text-gray-600">❄️ Cold</div>
+                <div className="text-2xl font-bold text-blue-600">{stats.coldLeads}</div>
+                <div className="text-sm text-gray-600">Cold Leads</div>
             </div>
           </Card>
           
@@ -455,7 +455,7 @@ export default function ComprehensiveLiveActivityDashboard() {
           <div>
             <Card padding="lg">
               <h2 className={cn(typography.h3, "mb-6")}>
-                🤖 AI Lead Insights
+                AI Lead Insights
               </h2>
               
               {selectedLead ? (
@@ -481,7 +481,7 @@ export default function ComprehensiveLiveActivityDashboard() {
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">🎯 AI Analysis</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">AI Analysis</h4>
                     <p className="text-sm text-gray-600 mb-3">
                       {selectedLead.aiAnalysis.summary}
                     </p>
@@ -506,7 +506,7 @@ export default function ComprehensiveLiveActivityDashboard() {
                   
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-gray-900">📝 Recommended Response</h4>
+                      <h4 className="font-semibold text-gray-900">Recommended Response</h4>
                       <Button
                         variant="outline"
                         size="sm"
@@ -535,7 +535,7 @@ export default function ComprehensiveLiveActivityDashboard() {
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">📋 Next Steps</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">Next Steps</h4>
                     <ul className="space-y-1">
                       {selectedLead.aiAnalysis.nextSteps.map((step, index) => (
                         <li key={index} className="text-sm text-gray-600 flex items-start">

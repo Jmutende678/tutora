@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import { initializeActivityTracking, getActivityTracker } from '@/lib/activity-tracker'
 
 interface ActivityTrackerProps {
   userId?: string
@@ -12,186 +11,361 @@ export default function ActivityTracker({ userId, enableTracking = true }: Activ
   useEffect(() => {
     if (!enableTracking || typeof window === 'undefined') return
 
-    console.log('🔍 Initializing comprehensive activity tracking...')
-    
-    // Initialize the global activity tracker
-    const tracker = initializeActivityTracking(userId)
-    
-    if (tracker && userId) {
-      tracker.setUserId(userId)
+    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const startTime = Date.now()
+
+    console.log('🎯 REAL ACTIVITY TRACKING STARTED - Session:', sessionId)
+
+    // Real-time activity tracking function
+    const trackActivity = async (activityData: any) => {
+      try {
+        const response = await fetch('/api/analytics/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: activityData.type,
+            user_id: userId,
+            session_id: sessionId,
+            timestamp: new Date().toISOString(),
+            source: window.location.pathname,
+            metadata: {
+              url: window.location.href,
+              referrer: document.referrer,
+              user_agent: navigator.userAgent,
+              viewport: {
+                width: window.innerWidth,
+                height: window.innerHeight
+              },
+              ip_address: 'client-side',
+              location: await getLocationData(),
+              device: getDeviceInfo(),
+              ...activityData.metadata
+            },
+            ...activityData.data
+          })
+        })
+
+        if (response.ok) {
+          console.log('✅ Activity tracked:', activityData.type)
+        } else {
+          console.error('❌ Failed to track activity:', response.status)
+        }
+      } catch (error) {
+        console.error('❌ Activity tracking error:', error)
+      }
     }
 
-    // Track specific business events
-    const trackBusinessEvents = () => {
-      // Track pricing page interactions
-      if (window.location.pathname.includes('/pricing')) {
-        tracker?.trackFeatureUsage('pricing_page_visit')
+    // Get device information
+    const getDeviceInfo = () => {
+      const ua = navigator.userAgent
+      let deviceType = 'desktop'
+      let os = 'unknown'
+      let browser = 'unknown'
+
+      // Detect device type
+      if (/tablet|ipad|playbook|silk/i.test(ua)) {
+        deviceType = 'tablet'
+      } else if (/mobile|iphone|ipod|android|blackberry|opera|mini|windows\sce|palm|smartphone|iemobile/i.test(ua)) {
+        deviceType = 'mobile'
       }
 
-      // Track demo interactions
-      if (window.location.pathname.includes('/demo')) {
-        tracker?.trackFeatureUsage('demo_page_visit')
+      // Detect OS
+      if (ua.includes('Windows')) os = 'Windows'
+      else if (ua.includes('Mac')) os = 'macOS'
+      else if (ua.includes('Linux')) os = 'Linux'
+      else if (ua.includes('Android')) os = 'Android'
+      else if (ua.includes('iOS')) os = 'iOS'
+
+      // Detect browser
+      if (ua.includes('Chrome')) browser = 'Chrome'
+      else if (ua.includes('Firefox')) browser = 'Firefox'
+      else if (ua.includes('Safari')) browser = 'Safari'
+      else if (ua.includes('Edge')) browser = 'Edge'
+
+      return { type: deviceType, os, browser }
+    }
+
+    // Get location data (approximate)
+    const getLocationData = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/')
+        const data = await response.json()
+        return {
+          country: data.country_name,
+          city: data.city,
+          region: data.region
+        }
+      } catch (error) {
+        return { country: 'Unknown', city: 'Unknown', region: 'Unknown' }
       }
+    }
 
-      // Track admin dashboard access
-      if (window.location.pathname.includes('/admin')) {
-        tracker?.trackFeatureUsage('admin_dashboard_access')
+    // Track initial page view
+    trackActivity({
+      type: 'page_view',
+      data: {
+        page: window.location.pathname,
+        title: document.title
       }
+    })
 
-      // Track contact form interactions
-      if (window.location.pathname.includes('/contact')) {
-        tracker?.trackFeatureUsage('contact_page_visit')
-      }
-    }
-
-    trackBusinessEvents()
-
-    // Track route changes for SPA navigation
-    const handleRouteChange = () => {
-      setTimeout(() => {
-        trackBusinessEvents()
-      }, 100)
-    }
-
-    // Listen for navigation events
-    window.addEventListener('popstate', handleRouteChange)
-    
-    // Override pushState and replaceState to catch programmatic navigation
-    const originalPushState = history.pushState
-    const originalReplaceState = history.replaceState
-
-    history.pushState = function(...args) {
-      originalPushState.apply(history, args)
-      handleRouteChange()
-    }
-
-    history.replaceState = function(...args) {
-      originalReplaceState.apply(history, args)
-      handleRouteChange()
-    }
-
-    // Track specific button clicks with business context
-    const trackBusinessButtons = (event: MouseEvent) => {
+    // Track button clicks - REAL tracking
+    const handleButtonClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement
       const button = target.closest('button') || (target.tagName === 'BUTTON' ? target : null)
       const link = target.closest('a') || (target.tagName === 'A' ? target : null)
       
       if (button || link) {
         const element = button || link
-        const text = element?.textContent?.trim().toLowerCase() || ''
+        const text = element?.textContent?.trim() || ''
         const href = link?.getAttribute('href') || ''
         
-        // Track important business actions
-        if (text.includes('get started') || text.includes('start free trial')) {
-          tracker?.trackConversion('trial_signup_intent')
-        } else if (text.includes('contact') || text.includes('demo')) {
-          tracker?.trackConversion('contact_intent')
-        } else if (text.includes('pricing') || text.includes('plans')) {
-          tracker?.trackFeatureUsage('pricing_interest')
-        } else if (text.includes('login') || text.includes('sign in')) {
-          tracker?.trackFeatureUsage('login_attempt')
-        } else if (text.includes('register') || text.includes('sign up')) {
-          tracker?.trackConversion('signup_intent')
-        } else if (href.includes('stripe') || text.includes('subscribe') || text.includes('upgrade')) {
-          tracker?.trackConversion('payment_intent')
+        trackActivity({
+          type: 'button_click',
+          data: {
+            button_text: text,
+            button_href: href,
+            element_id: element?.id,
+            element_class: element?.className
+          }
+        })
+
+        // Special tracking for important buttons
+        if (text.toLowerCase().includes('contact') || text.toLowerCase().includes('demo')) {
+          trackActivity({
+            type: 'high_intent_action',
+            data: {
+              action: 'contact_demo_interest',
+              button_text: text,
+              page: window.location.pathname
+            }
+          })
+        } else if (text.toLowerCase().includes('get started') || text.toLowerCase().includes('sign up')) {
+          trackActivity({
+            type: 'high_intent_action',
+            data: {
+              action: 'signup_interest',
+              button_text: text,
+              page: window.location.pathname
+            }
+          })
+        } else if (text.toLowerCase().includes('pricing') || href.includes('pricing')) {
+          trackActivity({
+            type: 'high_intent_action',
+            data: {
+              action: 'pricing_interest',
+              button_text: text,
+              page: window.location.pathname
+            }
+          })
         }
       }
     }
 
-    document.addEventListener('click', trackBusinessButtons)
+    document.addEventListener('click', handleButtonClick, true)
 
-    // Track form submissions with business context
-    const trackBusinessForms = (event: SubmitEvent) => {
+    // Track form submissions - REAL tracking
+    const handleFormSubmit = (event: SubmitEvent) => {
       const form = event.target as HTMLFormElement
-      const formId = form.id || form.className
+      const formData = new FormData(form)
+      const formObject: any = {}
       
-      if (formId.includes('contact')) {
-        tracker?.trackConversion('contact_form_submit')
-      } else if (formId.includes('signup') || formId.includes('register')) {
-        tracker?.trackConversion('signup_form_submit')
-      } else if (formId.includes('login')) {
-        tracker?.trackFeatureUsage('login_form_submit')
-      } else if (formId.includes('support')) {
-        tracker?.trackFeatureUsage('support_form_submit')
-      }
+      formData.forEach((value, key) => {
+        formObject[key] = value
+      })
+
+      trackActivity({
+        type: 'form_submission',
+        data: {
+          form_id: form.id,
+          form_class: form.className,
+          form_action: form.action,
+          form_method: form.method,
+          field_count: formData.keys().length,
+          has_email: formObject.email ? true : false,
+          has_phone: formObject.phone ? true : false,
+          has_company: formObject.company ? true : false
+        }
+      })
     }
 
-    document.addEventListener('submit', trackBusinessForms)
+    document.addEventListener('submit', handleFormSubmit, true)
 
-    // Track scroll depth milestones
-    let scrollMilestones = [25, 50, 75, 100]
-    let trackedMilestones = new Set()
-
-    const trackScrollMilestones = () => {
+    // Track scroll depth - REAL tracking
+    let maxScrollPercent = 0
+    const handleScroll = () => {
       const scrollPercent = Math.round(
         (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100
       )
-
-      for (const milestone of scrollMilestones) {
-        if (scrollPercent >= milestone && !trackedMilestones.has(milestone)) {
-          tracker?.trackFeatureUsage('scroll_milestone', { milestone, page: window.location.pathname })
-          trackedMilestones.add(milestone)
-        }
-      }
-    }
-
-    window.addEventListener('scroll', trackScrollMilestones)
-
-    // Track time spent on important pages
-    const startTime = Date.now()
-    const trackTimeOnPage = () => {
-      const timeSpent = Date.now() - startTime
-      const pathname = window.location.pathname
       
-      if (timeSpent > 30000) { // 30 seconds
-        if (pathname.includes('/pricing')) {
-          tracker?.trackFeatureUsage('pricing_page_engagement', { time_spent: timeSpent })
-        } else if (pathname.includes('/demo')) {
-          tracker?.trackFeatureUsage('demo_page_engagement', { time_spent: timeSpent })
-        } else if (pathname.includes('/admin')) {
-          tracker?.trackFeatureUsage('admin_dashboard_engagement', { time_spent: timeSpent })
+      if (scrollPercent > maxScrollPercent) {
+        maxScrollPercent = scrollPercent
+        
+        // Track scroll milestones
+        const milestones = [25, 50, 75, 90, 100]
+        for (const milestone of milestones) {
+          if (scrollPercent >= milestone && maxScrollPercent < milestone) {
+            trackActivity({
+              type: 'scroll_milestone',
+              data: {
+                milestone: milestone,
+                page: window.location.pathname
+              }
+            })
+            break
+          }
         }
       }
     }
 
-    const timeTrackingInterval = setInterval(trackTimeOnPage, 30000)
+    window.addEventListener('scroll', handleScroll)
+
+    // Track time on page - REAL tracking
+    let timeOnPageInterval = setInterval(() => {
+      const timeSpent = Date.now() - startTime
+      
+      if (timeSpent > 0 && timeSpent % 30000 === 0) { // Every 30 seconds
+        trackActivity({
+          type: 'time_on_page',
+          data: {
+            time_spent: timeSpent,
+            page: window.location.pathname,
+            is_active: document.hasFocus()
+          }
+        })
+      }
+    }, 30000)
+
+    // Track page visibility changes
+    const handleVisibilityChange = () => {
+      trackActivity({
+        type: 'page_visibility',
+        data: {
+          visibility_state: document.visibilityState,
+          page: window.location.pathname,
+          time_since_load: Date.now() - startTime
+        }
+      })
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Track navigation changes for SPA
+    const originalPushState = history.pushState
+    const originalReplaceState = history.replaceState
+
+    const trackNavigation = (url: string, type: string) => {
+      trackActivity({
+        type: 'navigation',
+        data: {
+          navigation_type: type,
+          from_page: window.location.pathname,
+          to_page: url,
+          time_since_load: Date.now() - startTime
+        }
+      })
+    }
+
+    history.pushState = function(...args) {
+      trackNavigation(args[2] as string, 'pushState')
+      return originalPushState.apply(history, args)
+    }
+
+    history.replaceState = function(...args) {
+      trackNavigation(args[2] as string, 'replaceState')
+      return originalReplaceState.apply(history, args)
+    }
+
+    window.addEventListener('popstate', () => {
+      trackNavigation(window.location.pathname, 'popstate')
+    })
+
+    // Track when user leaves the page
+    const handleBeforeUnload = () => {
+      const timeSpent = Date.now() - startTime
+      
+      // Use sendBeacon for reliable tracking on page unload
+      const data = JSON.stringify({
+        id: `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: 'page_exit',
+        session_id: sessionId,
+        timestamp: new Date().toISOString(),
+        source: window.location.pathname,
+        metadata: {
+          total_time_spent: timeSpent,
+          max_scroll_percent: maxScrollPercent,
+          url: window.location.href
+        }
+      })
+
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/analytics/track', data)
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
 
     // Cleanup function
     return () => {
-      window.removeEventListener('popstate', handleRouteChange)
-      document.removeEventListener('click', trackBusinessButtons)
-      document.removeEventListener('submit', trackBusinessForms)
-      window.removeEventListener('scroll', trackScrollMilestones)
-      clearInterval(timeTrackingInterval)
+      document.removeEventListener('click', handleButtonClick, true)
+      document.removeEventListener('submit', handleFormSubmit, true)
+      window.removeEventListener('scroll', handleScroll)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('popstate', () => {})
+      
+      if (timeOnPageInterval) {
+        clearInterval(timeOnPageInterval)
+      }
       
       // Restore original history methods
       history.pushState = originalPushState
       history.replaceState = originalReplaceState
       
-      console.log('🛑 Activity tracking cleanup completed')
+      console.log('🛑 REAL activity tracking stopped')
     }
   }, [userId, enableTracking])
 
-  // This component doesn't render anything
   return null
 }
 
 // Hook for manual tracking in components
 export function useActivityTracker() {
-  const tracker = getActivityTracker()
+  const trackActivity = async (type: string, data: any) => {
+    try {
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          type,
+          timestamp: new Date().toISOString(),
+          source: window.location.pathname,
+          metadata: {
+            url: window.location.href,
+            user_agent: navigator.userAgent
+          },
+          ...data
+        })
+      })
+    } catch (error) {
+      console.error('Manual tracking error:', error)
+    }
+  }
   
   return {
     trackConversion: (type: string, value?: number, metadata?: any) => {
-      tracker?.trackConversion(type, value, metadata)
+      trackActivity('conversion', { conversion_type: type, value, ...metadata })
     },
     trackFeatureUsage: (feature: string, metadata?: any) => {
-      tracker?.trackFeatureUsage(feature, metadata)
+      trackActivity('feature_usage', { feature, ...metadata })
     },
     trackPurchase: (amount: number, currency: string, productId: string, metadata?: any) => {
-      tracker?.trackPurchase(amount, currency, productId, metadata)
+      trackActivity('purchase', { amount, currency, product_id: productId, ...metadata })
     },
     trackSignup: (method: string, metadata?: any) => {
-      tracker?.trackSignup(method, metadata)
+      trackActivity('signup', { signup_method: method, ...metadata })
     }
   }
 }
