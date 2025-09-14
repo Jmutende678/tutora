@@ -10,8 +10,14 @@ COPY tutora-admin-portal/package*.json ./
 # Install ALL dependencies (including dev dependencies needed for build)
 RUN npm ci
 
-# Copy the rest of the admin portal
-COPY tutora-admin-portal/ ./
+# Copy source code and public assets
+COPY tutora-admin-portal/src ./src
+COPY tutora-admin-portal/public ./public
+COPY tutora-admin-portal/next.config.js ./next.config.js
+COPY tutora-admin-portal/tailwind.config.js ./tailwind.config.js
+COPY tutora-admin-portal/postcss.config.js ./postcss.config.js
+COPY tutora-admin-portal/tsconfig.json ./tsconfig.json
+COPY tutora-admin-portal/.eslintrc.json ./.eslintrc.json
 
 # Build the application with build-time environment variables
 ENV NEXT_TELEMETRY_DISABLED=1
