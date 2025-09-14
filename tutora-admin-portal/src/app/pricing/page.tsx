@@ -167,22 +167,24 @@ export default function PricingPage() {
           },
           data: {
             plan_id: planId,
-            plan_name: planId === 'basic' ? 'Basic Plan' : planId === 'pro' ? 'Pro Plan' : planId === 'enterprise' ? 'Enterprise Plan' : 'Unknown Plan',
+            plan_name: planId === 'starter' ? 'Starter Plan' : planId === 'growth' ? 'Growth Plan' : planId === 'professional' ? 'Professional Plan' : planId === 'enterprise' ? 'Enterprise Plan' : 'Unknown Plan',
             billing_cycle: billingCycle,
             button_text: 'Get Started',
             page: 'pricing',
-            price: planId === 'basic' ? (billingCycle === 'monthly' ? '$29' : '$290') : 
-                   planId === 'pro' ? (billingCycle === 'monthly' ? '$99' : '$990') : 
-                   planId === 'enterprise' ? 'Custom' : 'Unknown'
+            price: planId === 'starter' ? (billingCycle === 'monthly' ? '$89' : '$75') : 
+                   planId === 'growth' ? (billingCycle === 'monthly' ? '$299' : '$249') : 
+                   planId === 'professional' ? (billingCycle === 'monthly' ? '$699' : '$599') :
+                   planId === 'enterprise' ? (billingCycle === 'monthly' ? '$1999' : '$1699') : 'Unknown'
           },
           lead_score: {
-            score: planId === 'enterprise' ? 90 : planId === 'pro' ? 75 : 60,
-            category: planId === 'enterprise' ? 'hot' : planId === 'pro' ? 'warm' : 'cold',
+            score: planId === 'enterprise' ? 95 : planId === 'professional' ? 85 : planId === 'growth' ? 70 : 55,
+            category: planId === 'enterprise' ? 'hot' : planId === 'professional' ? 'hot' : planId === 'growth' ? 'warm' : 'cold',
             reasons: [
               `Clicked ${planId} plan pricing`,
               `Billing cycle: ${billingCycle}`,
-              planId === 'enterprise' ? 'High-value enterprise interest' : 
-              planId === 'pro' ? 'Professional plan interest' : 'Basic plan interest'
+              planId === 'enterprise' ? 'Highest-value enterprise interest ($1999/month)' : 
+              planId === 'professional' ? 'Professional plan interest ($699/month)' : 
+              planId === 'growth' ? 'Growth plan interest ($299/month)' : 'Starter plan interest ($89/month)'
             ]
           }
         })

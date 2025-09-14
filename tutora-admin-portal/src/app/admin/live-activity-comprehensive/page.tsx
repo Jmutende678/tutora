@@ -427,6 +427,7 @@ export default function ComprehensiveLiveActivityDashboard() {
                                   activity.type === 'price_button_click' ? `${activity.data?.plan_name || 'Pricing'} Interest` :
                                   activity.type === 'ai_module_generation_started' ? 'AI Module Builder User' :
                                   activity.type === 'security_audit_form_submission' ? 'Security Audit Request' :
+                                  activity.type === 'account_registration_completed' ? 'Account Registration' :
                                   'Anonymous Visitor')
                                 }
                               </h3>
