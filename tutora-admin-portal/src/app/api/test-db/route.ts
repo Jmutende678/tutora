@@ -14,9 +14,8 @@ export async function GET() {
     console.log('📊 Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
     console.log('🔑 Service key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
     
-    // Test insert a simple record
+    // Test insert a simple record (let Supabase generate UUID)
     const testRecord = {
-      id: `test_${Date.now()}`,
       type: 'database_test',
       session_id: 'test-session',
       timestamp: new Date().toISOString(),
@@ -90,7 +89,6 @@ export async function POST() {
     )
     
     const realData = {
-      id: `manual_${Date.now()}`,
       type: 'manual_test',
       session_id: `session_${Date.now()}`,
       timestamp: new Date().toISOString(),

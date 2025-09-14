@@ -30,7 +30,6 @@ export async function POST(request: NextRequest) {
       const { error } = await supabase
         .from('website_activity')
         .insert([{
-          id: activityData.id,
           type: activityData.type,
           user_id: activityData.user_id,
           session_id: activityData.session_id,
