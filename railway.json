@@ -2,7 +2,8 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "Dockerfile"
+    "dockerfilePath": "tutora-admin-portal/Dockerfile",
+    "buildContext": "tutora-admin-portal"
   },
   "deploy": {
     "healthcheckPath": "/",

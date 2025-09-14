@@ -1,21 +1,21 @@
-# Ignore Flutter/Dart files
-pubspec.yaml
-pubspec.lock
-.metadata
-analysis_options.yaml
-lib/
-android/
-ios/
-macos/
-linux/
-windows/
-web/
-test/
+# Ignore Flutter/Dart files in root
+/pubspec.yaml
+/pubspec.lock
+/.metadata
+/analysis_options.yaml
+/lib/
+/android/
+/ios/
+/macos/
+/linux/
+/windows/
+/web/
+/test/
 
-# Ignore documentation
-*.md
-docs/
-scripts/
+# Ignore documentation in root
+/*.md
+/docs/
+/scripts/
 
 # Ignore git
 .git
@@ -25,10 +25,17 @@ scripts/
 .vscode/
 .idea/
 
-# Node modules will be installed fresh
-node_modules/
-.next/
-.env.local
+# Ignore node modules everywhere
+**/node_modules/
+**/.next/
+**/.env.local
 
-# Keep only tutora-admin-portal
-!tutora-admin-portal/
+# Ignore root level files we don't need
+/next-env.d.ts
+/next.config.js
+/next.config.ts
+/package.json
+/package-lock.json
+/tailwind.config.js
+/tsconfig.json
+/vercel.json
