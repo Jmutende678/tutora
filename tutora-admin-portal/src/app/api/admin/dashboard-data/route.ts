@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripeService } from '@/lib/stripe'
-import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase'
+// Import supabase dynamically to avoid build issues
+async function getSupabase() {
+  try {
+    const supabaseModule = await import('@/lib/supabase')
+    return {
+      supabaseAdmin: supabaseModule.supabaseAdmin,
+      isSupabaseConfigured: supabaseModule.isSupabaseConfigured
+    }
+  } catch (error) {
+    console.warn('Supabase not available:', error)
+    return {
+      supabaseAdmin: null,
+      isSupabaseConfigured: () => false
+    }
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +27,7 @@ export async function GET(request: NextRequest) {
         total: 0,
         monthly: 0,
         growth: 0,
-        chartData: []
+        chartData: [] as Array<{name: string; revenue: number; users: number; companies: number}>
       },
       customers: {
         total: 0,
@@ -24,7 +39,17 @@ export async function GET(request: NextRequest) {
         trial: 0,
         cancelled: 0
       },
-      companies: [],
+      companies: [] as Array<{
+        id: string;
+        name: string;
+        plan: string;
+        status: string;
+        currentUsers: number;
+        maxUsers: number;
+        createdAt: string;
+        lastActivity: string;
+        monthlyRevenue: number;
+      }>,
       users: {
         total: 0,
         active: 0,
@@ -41,8 +66,14 @@ export async function GET(request: NextRequest) {
     try {
       console.log('📊 Fetching Stripe data...')
       
+      // Check if Stripe is available
+      if (!stripeService.stripeInstance) {
+        console.warn('⚠️ Stripe not configured - skipping Stripe data')
+        throw new Error('Stripe not configured')
+      }
+      
       // Get all customers
-      const customers = await stripeService.stripe?.customers.list({
+      const customers = await stripeService.stripeInstance.customers.list({
         limit: 100,
         expand: ['data.subscriptions']
       })
@@ -55,7 +86,7 @@ export async function GET(request: NextRequest) {
       }
 
       // Get all subscriptions
-      const subscriptions = await stripeService.stripe?.subscriptions.list({
+      const subscriptions = await stripeService.stripeInstance.subscriptions.list({
         limit: 100,
         status: 'all'
       })
@@ -74,7 +105,7 @@ export async function GET(request: NextRequest) {
         for (const sub of subscriptions.data) {
           if (sub.status === 'active') {
             const amount = sub.items.data.reduce((sum, item) => {
-              return sum + (item.price.unit_amount || 0) * item.quantity
+              return sum + (item.price.unit_amount || 0) * (item.quantity || 1)
             }, 0)
             
             // Convert from cents to dollars
@@ -123,6 +154,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. FETCH REAL SUPABASE DATA
+    const { supabaseAdmin, isSupabaseConfigured } = await getSupabase()
+    
     if (isSupabaseConfigured() && supabaseAdmin) {
       try {
         console.log('📊 Fetching Supabase data...')

@@ -155,6 +155,10 @@ export class StripeService {
     this.stripe = stripe
   }
 
+  get stripeInstance() {
+    return this.stripe
+  }
+
   async createCheckoutSession(
     planId: string,
     billingCycle: 'monthly' | 'annual',

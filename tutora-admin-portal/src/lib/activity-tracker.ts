@@ -1,4 +1,21 @@
-import { supabaseAdmin, isSupabaseConfigured } from './supabase'
+// Import supabase dynamically to avoid build issues
+let supabaseAdmin: any = null
+let isSupabaseConfigured: any = null
+
+// Dynamically import supabase only when needed
+async function getSupabase() {
+  if (!supabaseAdmin || !isSupabaseConfigured) {
+    try {
+      const supabaseModule = await import('./supabase')
+      supabaseAdmin = supabaseModule.supabaseAdmin
+      isSupabaseConfigured = supabaseModule.isSupabaseConfigured
+    } catch (error) {
+      console.warn('Supabase not available:', error)
+      return { supabaseAdmin: null, isSupabaseConfigured: () => false }
+    }
+  }
+  return { supabaseAdmin, isSupabaseConfigured }
+}
 
 export interface ActivityEvent {
   id?: string
@@ -197,7 +214,9 @@ export class ActivityTracker {
     const formData = new FormData(form)
     const formFields: any = {}
     
-    for (const [key, value] of formData.entries()) {
+    // Convert FormData to array to avoid iteration issues
+    const entries = Array.from(formData.entries())
+    for (const [key, value] of entries) {
       // Don't track sensitive data
       if (!['password', 'ssn', 'credit_card'].includes(key.toLowerCase())) {
         formFields[key] = typeof value === 'string' ? value.substring(0, 100) : 'file'
@@ -401,6 +420,8 @@ export function getActivityTracker(): ActivityTracker | null {
 // Server-side analytics service
 export class AnalyticsService {
   static async saveEvents(events: ActivityEvent[]) {
+    const { supabaseAdmin, isSupabaseConfigured } = await getSupabase()
+    
     if (!isSupabaseConfigured() || !supabaseAdmin) {
       console.warn('Supabase not configured - cannot save analytics events')
       return
@@ -441,6 +462,8 @@ export class AnalyticsService {
   }
 
   static async getAnalytics(companyId?: string, startDate?: Date, endDate?: Date) {
+    const { supabaseAdmin, isSupabaseConfigured } = await getSupabase()
+    
     if (!isSupabaseConfigured() || !supabaseAdmin) {
       return { events: [], summary: {} }
     }
@@ -473,11 +496,11 @@ export class AnalyticsService {
       // Calculate summary metrics
       const summary = {
         total_events: events?.length || 0,
-        unique_sessions: new Set(events?.map(e => e.metadata?.session_id)).size,
-        page_views: events?.filter(e => e.metric_type === 'page_view').length || 0,
-        conversions: events?.filter(e => e.metric_type === 'conversion').length || 0,
-        button_clicks: events?.filter(e => e.metric_type === 'button_click').length || 0,
-        form_submissions: events?.filter(e => e.metric_type === 'form_submit').length || 0
+        unique_sessions: new Set(events?.map((e: any) => e.metadata?.session_id)).size,
+        page_views: events?.filter((e: any) => e.metric_type === 'page_view').length || 0,
+        conversions: events?.filter((e: any) => e.metric_type === 'conversion').length || 0,
+        button_clicks: events?.filter((e: any) => e.metric_type === 'button_click').length || 0,
+        form_submissions: events?.filter((e: any) => e.metric_type === 'form_submit').length || 0
       }
 
       return { events: events || [], summary }
