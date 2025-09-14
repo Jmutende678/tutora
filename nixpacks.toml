@@ -2,10 +2,10 @@
 nixPkgs = ['nodejs_18', 'npm-9_x']
 
 [phases.install]
-cmds = ['npm ci']
+cmds = ['cd tutora-admin-portal && npm ci']
 
 [phases.build]
-cmds = ['npm run build']
+cmds = ['cd tutora-admin-portal && npm run build']
 
 [start]
-cmd = 'npm start'
+cmd = 'cd tutora-admin-portal && npm start'

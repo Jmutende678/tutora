@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tutora Learning Platform
+
+Tutora is a mobile and web application designed to help small businesses onboard and upskill their employees through training modules and quizzes.
+
+## Features
+
+- Company-specific tenant isolation with company codes
+- Training modules with progress tracking
+- Interactive quizzes with different question types
+- Leaderboard to encourage competition
+- Admin dashboard for managers
+- Mobile-first responsive design
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Flutter SDK (2.19.0 or higher)
+- Dart SDK
+- Android Studio, Xcode, or Visual Studio (for device emulation)
+
+### Installation
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/tutora-learn.git
+   cd tutora-learn
+   ```
+
+2. Install dependencies:
+   ```
+   flutter pub get
+   ```
+
+3. Run the app:
+   ```
+   flutter run
+   ```
+
+### Running on Different Platforms
+
+#### Web
+```
+flutter run -d chrome
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### Android
+```
+flutter run -d android
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+#### iOS
+```
+flutter run -d ios
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+#### Windows
+```
+flutter run -d windows
+```
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+- UI-only implementation with placeholder data
+- Backend integration with Supabase for authentication and database
+- Multi-tenant architecture for company isolation
+- Responsive design that works on mobile and desktop
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is proprietary and not open for redistribution without permission.
 
-## Deploy on Vercel
+## Contact
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For support or questions, please contact [your contact information]. 

@@ -1,0 +1,49 @@
+{
+  "folders": [
+    {
+      "name": "Tutora Main (Next.js + Flutter)",
+      "path": "."
+    },
+    {
+      "name": "Admin Portal (Next.js)",
+      "path": "./tutora-admin-portal"
+    }
+  ],
+  "settings": {
+    "typescript.preferences.includePackageJsonAutoImports": "auto",
+    "typescript.suggest.autoImports": true,
+    "eslint.workingDirectories": [
+      ".",
+      "tutora-admin-portal"
+    ],
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/build": true,
+      "**/dist": true,
+      "**/.next": true,
+      "**/android/build": true,
+      "**/ios/build": true,
+      "**/flutter/ephemeral": true
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/build": true,
+      "**/dist": true,
+      "**/.next": true,
+      "**/android/build": true,
+      "**/ios/build": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode.vscode-typescript-next",
+      "bradlc.vscode-tailwindcss",
+      "esbenp.prettier-vscode",
+      "ms-vscode.vscode-eslint",
+      "dart-code.dart-code",
+      "dart-code.flutter"
+    ]
+  }
+}

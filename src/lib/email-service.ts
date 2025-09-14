@@ -1,186 +1,235 @@
-import nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer'
+import { SupportTicket } from './supabase-service'
 
-interface EmailOptions {
-  to: string;
-  subject: string;
-  html?: string;
-  text?: string;
-  from?: string;
-}
-
-// Create reusable transporter
-const createTransporter = () => {
-  const config = {
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false, // true for 465, false for other ports
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  };
-
-  return nodemailer.createTransport(config);
-};
-
-export async function sendEmail(options: EmailOptions): Promise<boolean> {
-  try {
-    // Check if email is configured
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-      console.log('Email not configured, skipping send:', options.subject);
-      return false;
-    }
-
-    const transporter = createTransporter();
-
-    const mailOptions = {
-      from: options.from || `"Tutora" <${process.env.SMTP_USER}>`,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-      text: options.text,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully:', info.messageId);
-    return true;
-
-  } catch (error) {
-    console.error('Email sending failed:', error);
-    return false;
+interface EmailConfig {
+  host: string
+  port: number
+  secure: boolean
+  auth: {
+    user: string
+    pass: string
   }
 }
 
-// Email templates
-export const emailTemplates = {
-  welcome: (name: string, companyName: string) => ({
-    subject: `Welcome to Tutora, ${name}!`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #2563eb;">Welcome to Tutora!</h1>
-        <p>Hi ${name},</p>
-        <p>Welcome to Tutora! We're excited to help ${companyName} transform your training programs with AI-powered solutions.</p>
-        <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3>Getting Started:</h3>
-          <ul>
-            <li>Access your admin dashboard</li>
-            <li>Create your first training module</li>
-            <li>Invite team members</li>
-            <li>Explore AI course builder</li>
-          </ul>
-        </div>
-        <p>If you have any questions, don't hesitate to reach out to our support team.</p>
-        <p>Best regards,<br>The Tutora Team</p>
-      </div>
-    `,
-    text: `
-Welcome to Tutora!
+interface EmailTemplate {
+  subject: string
+  html: string
+  text: string
+}
 
-Hi ${name},
+interface WelcomeEmailData {
+  companyName: string
+  companyCode: string
+  adminName: string
+  adminEmail: string
+  loginUrl: string
+  supportEmail: string
+}
 
-Welcome to Tutora! We're excited to help ${companyName} transform your training programs with AI-powered solutions.
+interface SupportTicketEmailData {
+  ticket: SupportTicket
+  companyName?: string
+  isNotification: boolean // true for support team, false for user confirmation
+}
 
-Getting Started:
-- Access your admin dashboard
-- Create your first training module
-- Invite team members
-- Explore AI course builder
+// Main email service class
+export class EmailService {
+  private transporter: nodemailer.Transporter | null = null
+  private isConfigured: boolean = false
 
-If you have any questions, don't hesitate to reach out to our support team.
+  constructor() {
+    this.initializeTransporter()
+  }
 
-Best regards,
-The Tutora Team
-    `
-  }),
+  private initializeTransporter() {
+    const config: EmailConfig = {
+      host: process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
+      auth: {
+        user: process.env.SMTP_USER || '',
+        pass: process.env.SMTP_PASS || ''
+      }
+    }
 
-  passwordReset: (name: string, resetLink: string) => ({
-    subject: 'Reset Your Tutora Password',
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #2563eb;">Password Reset Request</h1>
-        <p>Hi ${name},</p>
-        <p>You requested to reset your password for your Tutora account.</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${resetLink}" style="background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Reset Password</a>
-        </div>
-        <p>This link will expire in 1 hour for security reasons.</p>
-        <p>If you didn't request this reset, please ignore this email.</p>
-        <p>Best regards,<br>The Tutora Team</p>
-      </div>
-    `,
-    text: `
-Password Reset Request
+    if (config.auth.user && config.auth.pass) {
+      try {
+        this.transporter = nodemailer.createTransport(config)
+        this.isConfigured = true
+        console.log('✅ Email service configured successfully')
+      } catch (error) {
+        console.error('❌ Failed to configure email service:', error)
+        this.isConfigured = false
+      }
+    } else {
+      console.log('⚠️ Email service not configured - missing SMTP credentials')
+      console.log('📝 To enable email:')
+      console.log('   Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in .env.local')
+      this.isConfigured = false
+    }
+  }
 
-Hi ${name},
+  // Core email sending method
+  async sendEmail(options: {
+    to: string | string[]
+    subject: string
+    html: string
+    text: string
+  }): Promise<boolean> {
+    if (!this.isConfigured || !this.transporter) {
+      console.log('📧 Email service not configured, skipping email')
+      return false
+    }
 
-You requested to reset your password for your Tutora account.
-
-Reset your password: ${resetLink}
-
-This link will expire in 1 hour for security reasons.
-
-If you didn't request this reset, please ignore this email.
-
-Best regards,
-The Tutora Team
-    `
-  }),
-
-  moduleCompleted: (name: string, moduleName: string, score: number) => ({
-    subject: `Congratulations! You completed "${moduleName}"`,
-    html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #10b981;">🎉 Module Completed!</h1>
-        <p>Hi ${name},</p>
-        <p>Congratulations on completing the training module: <strong>"${moduleName}"</strong></p>
-        <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-          <h2 style="color: #10b981; margin: 0;">Your Score: ${score}%</h2>
-        </div>
-        <p>Keep up the great work! Continue your learning journey with more modules.</p>
-        <p>Best regards,<br>The Tutora Team</p>
-      </div>
-    `,
-    text: `
-🎉 Module Completed!
-
-Hi ${name},
-
-Congratulations on completing the training module: "${moduleName}"
-
-Your Score: ${score}%
-
-Keep up the great work! Continue your learning journey with more modules.
-
-Best regards,
-The Tutora Team
-    `
-  })
-};
-
-// Queue email for later sending (useful for bulk operations)
-export async function queueEmail(options: EmailOptions, scheduledFor?: Date) {
-  try {
-    const { supabase } = await import('./supabase');
-    
-    const { error } = await supabase
-      .from('email_queue')
-      .insert({
-        to_email: options.to,
-        from_email: options.from || `"Tutora" <${process.env.SMTP_USER}>`,
+    try {
+      await this.transporter.sendMail({
+        from: `"Tutora" <${process.env.SMTP_USER}>`,
+        to: options.to,
         subject: options.subject,
-        html_content: options.html,
-        text_content: options.text,
-        scheduled_for: scheduledFor || new Date()
-      });
+        html: options.html,
+        text: options.text,
+      })
+      return true
+    } catch (error) {
+      console.error('❌ Email sending failed:', error)
+      return false
+    }
+  }
 
-    if (error) {
-      console.error('Failed to queue email:', error);
-      return false;
+  // Welcome email for new companies
+  async sendWelcomeEmail(data: WelcomeEmailData): Promise<boolean> {
+    const template = this.getWelcomeEmailTemplate(data)
+    return await this.sendEmail({
+      to: data.adminEmail,
+      subject: template.subject,
+      html: template.html,
+      text: template.text
+    })
+  }
+
+  // Send support ticket notification emails
+  async sendSupportTicketNotification(data: SupportTicketEmailData): Promise<boolean> {
+    if (!this.isConfigured) {
+      console.log('📧 Email service not configured, skipping support ticket notification')
+      return false
     }
 
-    return true;
-  } catch (error) {
-    console.error('Email queueing failed:', error);
-    return false;
+    try {
+      const { ticket, companyName, isNotification } = data
+
+      // Simple email notification for now - full templating will be added later
+      const subject = isNotification 
+        ? `New Support Ticket: ${ticket.title}`
+        : `Support Ticket Created: ${ticket.title}`
+      
+      const recipientEmail = isNotification 
+        ? (process.env.SUPPORT_EMAIL || 'support@tutoralearn.com')
+        : 'support@tutoralearn.com' // Default for now
+
+      const html = `
+        <h2>${subject}</h2>
+        <p><strong>Ticket ID:</strong> ${ticket.id}</p>
+        <p><strong>Title:</strong> ${ticket.title}</p>
+        <p><strong>Description:</strong> ${ticket.description}</p>
+        <p><strong>Priority:</strong> ${ticket.priority}</p>
+        <p><strong>Status:</strong> ${ticket.status}</p>
+        <p><strong>Company:</strong> ${companyName || 'Unknown'}</p>
+        <p><strong>Created:</strong> ${new Date(ticket.createdAt).toLocaleString()}</p>
+      `
+
+      const text = `
+        ${subject}
+        Ticket ID: ${ticket.id}
+        Title: ${ticket.title}
+        Description: ${ticket.description}
+        Priority: ${ticket.priority}
+        Status: ${ticket.status}
+        Company: ${companyName || 'Unknown'}
+        Created: ${new Date(ticket.createdAt).toLocaleString()}
+      `
+
+      const result = await this.sendEmail({
+        to: recipientEmail,
+        subject: subject,
+        html: html,
+        text: text
+      })
+
+      console.log(`✅ Support ticket email sent successfully to ${recipientEmail}`)
+      return result
+
+    } catch (error) {
+      console.error('❌ Error sending support ticket notification:', error)
+      return false
+    }
+  }
+
+  // Email template for welcome emails
+  private getWelcomeEmailTemplate(data: WelcomeEmailData): EmailTemplate {
+    const subject = `Welcome to Tutora! Your company code: ${data.companyCode}`
+    
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Welcome to Tutora</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Tutora! 🚀</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 18px;">Your AI-powered training platform is ready</p>
+        </div>
+        
+        <div style="background: white; padding: 30px; border: 1px solid #e1e5e9; border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #2c3e50; margin-top: 0;">Hi ${data.adminName}! 👋</h2>
+            
+            <p>Congratulations! Your company <strong>${data.companyName}</strong> has been successfully set up on Tutora.</p>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #495057;">🔑 Your Company Details:</h3>
+                <p style="margin: 5px 0;"><strong>Company Code:</strong> <span style="background: #e3f2fd; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-weight: bold;">${data.companyCode}</span></p>
+                <p style="margin: 5px 0;"><strong>Admin Email:</strong> ${data.adminEmail}</p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="${data.loginUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Access Your Dashboard</a>
+            </div>
+            
+            <p><strong>Need help?</strong> Contact us at <a href="mailto:${data.supportEmail}">${data.supportEmail}</a></p>
+            
+            <p style="margin-top: 30px;">Welcome to the future of training!</p>
+            <p><strong>The Tutora Team</strong></p>
+        </div>
+        
+        <div style="text-align: center; color: #6c757d; font-size: 12px; margin-top: 20px;">
+            <p>© 2024 Tutora. All rights reserved.</p>
+        </div>
+    </body>
+    </html>`
+
+    const text = `
+Welcome to Tutora! 🚀
+
+Hi ${data.adminName}!
+
+Congratulations! Your company ${data.companyName} has been successfully set up on Tutora.
+
+Your Company Details:
+- Company Code: ${data.companyCode}
+- Admin Email: ${data.adminEmail}
+
+Access your dashboard: ${data.loginUrl}
+
+Need help? Contact us at ${data.supportEmail}
+
+Welcome to the future of training!
+The Tutora Team`
+
+    return { subject, html, text }
   }
 }
+
+// Export singleton instance
+export const emailService = new EmailService() 
