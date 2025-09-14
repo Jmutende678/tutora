@@ -21,14 +21,39 @@ export default function AdminLoginPage() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      // Demo credentials
+      // Try API authentication first
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          localStorage.setItem('admin_authenticated', 'true')
+          localStorage.setItem('admin_role', data.user.role)
+          localStorage.setItem('admin_user_name', data.user.name)
+          
+          if (data.user.role === 'ceo') {
+            router.push('/admin/ceo-dashboard')
+          } else {
+            router.push('/admin/manager-dashboard')
+          }
+          return
+        }
+      }
+      
+      // Fallback to hardcoded credentials for backwards compatibility
       if (email === 'ceo@tutoralearn.com' && password === 'demo123') {
         localStorage.setItem('admin_authenticated', 'true')
         localStorage.setItem('admin_role', 'ceo')
+        localStorage.setItem('admin_user_name', 'CEO Demo')
         router.push('/admin/ceo-dashboard')
       } else if (email === 'manager@tutoralearn.com' && password === 'demo123') {
         localStorage.setItem('admin_authenticated', 'true')
         localStorage.setItem('admin_role', 'manager')
+        localStorage.setItem('admin_user_name', 'Manager Demo')
         router.push('/admin/manager-dashboard')
       } else {
         setError('Invalid email or password')
@@ -57,6 +82,12 @@ export default function AdminLoginPage() {
           <p className="mt-2 text-sm text-gray-600">
             Access your admin dashboard to manage your organization
           </p>
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <p className="text-xs text-blue-800 font-medium">Demo Credentials:</p>
+            <p className="text-xs text-blue-700">CEO: admin@tutora.com / ceo123</p>
+            <p className="text-xs text-blue-700">Manager: manager@tutora.com / manager123</p>
+            <p className="text-xs text-blue-700">Fallback: ceo@tutoralearn.com / demo123</p>
+          </div>
         </div>
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
