@@ -86,21 +86,6 @@ export default function ComprehensiveLiveActivityDashboard() {
   const [selectedLead, setSelectedLead] = useState<LeadInsight | null>(null)
   const [isGeneratingResponse, setIsGeneratingResponse] = useState(false)
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem('admin_authenticated')
-    const role = localStorage.getItem('admin_role')
-    if (!isAuthenticated || role !== 'ceo') {
-      router.push('/admin/login')
-      return
-    }
-
-    loadActivityData()
-    
-    // REAL auto-refresh every 5 seconds for live data
-    const interval = setInterval(loadActivityData, 5000)
-    return () => clearInterval(interval)
-  }, [router, timeRange, loadActivityData])
-
   const loadActivityData = useCallback(async () => {
     try {
       setIsLoading(true)
@@ -129,6 +114,21 @@ export default function ComprehensiveLiveActivityDashboard() {
       setIsLoading(false)
     }
   }, [timeRange])
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('admin_authenticated')
+    const role = localStorage.getItem('admin_role')
+    if (!isAuthenticated || role !== 'ceo') {
+      router.push('/admin/login')
+      return
+    }
+
+    loadActivityData()
+    
+    // REAL auto-refresh every 5 seconds for live data
+    const interval = setInterval(loadActivityData, 5000)
+    return () => clearInterval(interval)
+  }, [router, timeRange, loadActivityData])
 
   const generateLeadInsights = async (leads: ActivityEvent[]) => {
     try {
