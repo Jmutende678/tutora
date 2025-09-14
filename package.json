@@ -10,9 +10,17 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/nodemailer": "^7.0.1",
+    "bcryptjs": "^3.0.2",
+    "jsonwebtoken": "^9.0.2",
     "next": "15.5.3",
+    "nodemailer": "^7.0.6",
+    "openai": "^5.20.2",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "stripe": "^18.5.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
