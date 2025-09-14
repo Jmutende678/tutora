@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { getStripe } from '@/lib/stripe-build-safe'
 
 export async function POST() {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2025-08-27.basil',
-    })
+    const stripe = getStripe()
     
     // Create the absolute simplest checkout session possible
     const session = await stripe.checkout.sessions.create({

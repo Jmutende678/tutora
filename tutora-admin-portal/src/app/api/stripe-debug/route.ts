@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { getStripe } from '@/lib/stripe-build-safe'
 
 export async function GET() {
   try {
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2025-08-27.basil',
-    })
+    const stripe = getStripe()
     
     // First, let's see what products exist
     const products = await stripe.products.list({ limit: 10 })

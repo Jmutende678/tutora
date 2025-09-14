@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-})
+import { getStripe } from '@/lib/stripe-build-safe'
 
 export async function POST(request: NextRequest) {
   try {
     const { email, name, companyName, phone } = await request.json()
+    const stripe = getStripe()
 
     // Create Stripe customer
     const customer = await stripe.customers.create({

@@ -13,7 +13,10 @@ RUN npm ci
 # Copy the rest of the admin portal
 COPY tutora-admin-portal/ ./
 
-# Build the application
+# Build the application with build-time environment variables
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
+ENV SKIP_ENV_VALIDATION=1
 RUN npm run build
 
 # Production stage
