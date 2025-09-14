@@ -77,22 +77,8 @@ export async function GET(request: NextRequest) {
       
       console.log('✅ Query successful! Found activities:', activities?.length || 0)
       
-      // Process and enrich activity data
-      const enrichedActivities = activities?.map(activity => ({
-        ...activity,
-        metadata: {
-          ...activity.metadata,
-          location: activity.metadata?.location || {
-            country: getRandomCountry(),
-            city: getRandomCity()
-          },
-          device: activity.metadata?.device || {
-            type: getRandomDevice(),
-            os: getRandomOS(),
-            browser: getRandomBrowser()
-          }
-        }
-      })) || []
+      // Return real activity data without mock enrichment
+      const enrichedActivities = activities || []
       
       // Calculate real-time stats
       const stats = {
