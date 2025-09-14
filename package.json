@@ -1,53 +1,12 @@
 {
-  "name": "tutora-admin-portal",
+  "name": "tutora-railway-deploy",
   "version": "1.0.0",
-  "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "build": "cd tutora-admin-portal && npm install && npm run build",
+    "start": "cd tutora-admin-portal && npm start",
+    "install": "cd tutora-admin-portal && npm install"
   },
-  "dependencies": {
-    "@headlessui/react": "^1.7.0",
-    "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.52.0",
-    "@tailwindcss/forms": "^0.5.10",
-    "@tailwindcss/typography": "^0.5.16",
-    "@types/node": "^24.1.0",
-    "@types/nodemailer": "^6.4.19",
-    "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7",
-    "autoprefixer": "^10.0.1",
-    "bcryptjs": "^2.4.3",
-    "date-fns": "^2.30.0",
-    "dotenv": "^17.2.2",
-    "formidable": "^3.5.4",
-    "framer-motion": "^12.23.0",
-    "googleapis": "^159.0.0",
-    "jsonwebtoken": "^9.0.0",
-    "lucide-react": "^0.290.0",
-    "nanoid": "^5.0.0",
-    "next": "14.0.0",
-    "nodemailer": "^7.0.6",
-    "openai": "^5.8.3",
-    "postcss": "^8",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-hot-toast": "^2.4.0",
-    "recharts": "^2.8.0",
-    "sharp": "^0.34.2",
-    "stripe": "^18.5.0",
-    "styled-jsx": "^5.1.7",
-    "tailwindcss": "^3.3.0",
-    "typescript": "^5.8.3"
-  },
-  "devDependencies": {
-    "@radix-ui/react-slot": "^1.2.3",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "eslint": "^8.57.1",
-    "eslint-config-next": "14.0.0",
-    "tailwind-merge": "^3.3.1"
+  "engines": {
+    "node": "20"
   }
 }
