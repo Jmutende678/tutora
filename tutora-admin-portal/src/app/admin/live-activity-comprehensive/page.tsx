@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Button, Card, Badge, Section, typography } from '@/components/ui/DesignSystem'
@@ -99,9 +99,9 @@ export default function ComprehensiveLiveActivityDashboard() {
     // REAL auto-refresh every 5 seconds for live data
     const interval = setInterval(loadActivityData, 5000)
     return () => clearInterval(interval)
-  }, [router, timeRange])
+  }, [router, timeRange, loadActivityData])
 
-  const loadActivityData = async () => {
+  const loadActivityData = useCallback(async () => {
     try {
       setIsLoading(true)
       
@@ -128,7 +128,7 @@ export default function ComprehensiveLiveActivityDashboard() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [timeRange])
 
   const generateLeadInsights = async (leads: ActivityEvent[]) => {
     try {

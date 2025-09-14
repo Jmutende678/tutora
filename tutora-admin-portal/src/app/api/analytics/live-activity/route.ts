@@ -44,12 +44,22 @@ export async function GET(request: NextRequest) {
       
       if (error) {
         console.error('Supabase query error:', error)
-        // Return mock data if database fails
+        // Return empty data instead of mock data
         return NextResponse.json({
           success: true,
           data: {
-            activities: generateMockActivityData(timeRange),
-            stats: generateMockStats()
+            activities: [],
+            stats: {
+              totalVisitors: 0,
+              totalLeads: 0,
+              hotLeads: 0,
+              warmLeads: 0,
+              coldLeads: 0,
+              conversionRate: '0'
+            },
+            timeRange,
+            lastUpdated: new Date().toISOString(),
+            note: 'Database query error - no mock data'
           }
         })
       }
