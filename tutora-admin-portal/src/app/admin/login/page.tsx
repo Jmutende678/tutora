@@ -84,8 +84,8 @@ export default function AdminLoginPage() {
           </p>
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
             <p className="text-xs text-blue-800 font-medium">Demo Credentials:</p>
-            <p className="text-xs text-blue-700">CEO: admin@tutora.com / ceo123</p>
-            <p className="text-xs text-blue-700">Manager: manager@tutora.com / manager123</p>
+            <p className="text-xs text-blue-700">CEO: admin@tutoralearn.com / ceo123</p>
+            <p className="text-xs text-blue-700">Manager: manager@tutoralearn.com / manager123</p>
             <p className="text-xs text-blue-700">Fallback: ceo@tutoralearn.com / demo123</p>
           </div>
         </div>

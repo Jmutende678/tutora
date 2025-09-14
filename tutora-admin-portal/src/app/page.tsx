@@ -143,22 +143,35 @@ export default function HomePage() {
     {
       icon: '💬',
       title: 'Live Chat',
-      description: 'Instant help in-app'
+      description: 'Instant help in-app',
+      action: () => {
+        // Trigger chat widget (placeholder for future Intercom integration)
+        window.open('mailto:support@tutoralearn.com?subject=Live Chat Request&body=Hi, I need help with...', '_blank')
+      }
     },
     {
       icon: '📧',
       title: 'Email Support',
-      description: 'support@tutoralearn.com'
+      description: 'support@tutoralearn.com',
+      action: () => {
+        window.open('mailto:support@tutoralearn.com?subject=Support Request', '_blank')
+      }
     },
     {
       icon: '📚',
       title: 'Help Center',
-      description: 'Guides & tutorials'
+      description: 'Guides & tutorials',
+      action: () => {
+        window.open('/support', '_self')
+      }
     },
     {
       icon: '👥',
       title: 'Success Manager',
-      description: 'Enterprise customers'
+      description: 'Enterprise customers',
+      action: () => {
+        window.open('mailto:success@tutoralearn.com?subject=Success Manager Request', '_blank')
+      }
     }
   ]
 
@@ -657,7 +670,11 @@ export default function HomePage() {
               <h3 className="text-xl font-semibold text-slate-900 mb-8 text-center">Multiple Ways to Get Help</h3>
               <div className="grid md:grid-cols-4 gap-6">
                 {helpMethods.map((method, index) => (
-                  <div key={index} className="text-center">
+                  <div 
+                    key={index} 
+                    className="text-center cursor-pointer p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                    onClick={method.action}
+                  >
                     <div className="text-3xl mb-3">{method.icon}</div>
                     <h4 className="font-semibold text-slate-900 mb-1">{method.title}</h4>
                     <p className="text-sm text-slate-600">{method.description}</p>

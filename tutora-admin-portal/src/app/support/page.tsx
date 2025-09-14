@@ -103,7 +103,10 @@ export default function SupportPage() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:border-blue-500 transition-colors group cursor-pointer">
+          <div 
+            className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:border-blue-500 transition-colors group cursor-pointer"
+            onClick={() => window.open('mailto:support@tutoralearn.com?subject=Live Chat Request&body=Hi, I need help with...', '_blank')}
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
                 <MessageCircle className="h-6 w-6 text-blue-600" />
@@ -114,7 +117,10 @@ export default function SupportPage() {
             <p className="text-slate-600 text-sm">Get instant help from our support team</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:border-purple-500 transition-colors group cursor-pointer">
+          <div 
+            className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:border-purple-500 transition-colors group cursor-pointer"
+            onClick={() => window.open('tel:+61383766284', '_self')}
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors">
                 <Phone className="h-6 w-6 text-purple-600" />
@@ -122,10 +128,13 @@ export default function SupportPage() {
               <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-purple-500 transition-colors" />
             </div>
             <h3 className="text-lg font-semibold text-slate-900 mb-2">Phone Support</h3>
-            <p className="text-slate-600 text-sm">Schedule a call with a support agent</p>
+            <p className="text-slate-600 text-sm">+61 3 8376 6284 (AU) - Schedule a call</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:border-emerald-500 transition-colors group cursor-pointer">
+          <div 
+            className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:border-emerald-500 transition-colors group cursor-pointer"
+            onClick={() => window.open('/faq', '_self')}
+          >
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-emerald-50 rounded-lg group-hover:bg-emerald-100 transition-colors">
                 <FileText className="h-6 w-6 text-emerald-600" />

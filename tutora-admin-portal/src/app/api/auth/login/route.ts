@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
       
       // Demo credentials for testing
       const demoCredentials = {
-        'admin@tutora.com': { password: 'ceo123', role: 'ceo', name: 'CEO Admin' },
-        'manager@tutora.com': { password: 'manager123', role: 'manager', name: 'Manager Admin' },
-        'demo@tutora.com': { password: 'demo123', role: 'ceo', name: 'Demo User' }
+        'admin@tutoralearn.com': { password: 'ceo123', role: 'ceo', name: 'CEO Admin' },
+        'manager@tutoralearn.com': { password: 'manager123', role: 'manager', name: 'Manager Admin' },
+        'demo@tutoralearn.com': { password: 'demo123', role: 'ceo', name: 'Demo User' }
       }
       
       const userCreds = demoCredentials[email as keyof typeof demoCredentials]
