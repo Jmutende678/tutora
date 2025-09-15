@@ -1,98 +1,158 @@
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Payment Successful | Welcome to Tutora',
+  description: 'Your subscription has been activated! Welcome to Tutora - start creating AI-powered training modules today.',
+}
+
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import Navigation from '@/components/Navigation'
-import { CheckCircle, ArrowRight, Users, Zap } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { Navigation } from '@/components/Navigation'
 import Link from 'next/link'
+import { CheckCircle, ArrowRight, Zap, BookOpen, Users, BarChart3 } from 'lucide-react'
 
 export default function SuccessPage() {
-  const searchParams = useSearchParams()
-  const [plan, setPlan] = useState<string | null>(null)
+  const [sessionId, setSessionId] = useState('')
 
   useEffect(() => {
-    if (searchParams) {
-      setPlan(searchParams.get('plan'))
+    // Get session ID from URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const sessionIdParam = urlParams.get('session_id')
+    if (sessionIdParam) {
+      setSessionId(sessionIdParam)
     }
-  }, [searchParams])
+  }, [])
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       <Navigation />
       
       <div className="pt-32 pb-16">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          {/* Success Icon */}
+        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-3 bg-green-100 text-green-800 text-sm font-medium px-4 py-2 rounded-full mb-6">
+            <CheckCircle className="w-4 h-4" />
+            <span>Payment Successful</span>
+          </div>
+          
           <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-              <CheckCircle className="h-10 w-10 text-green-600" />
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Welcome to Tutora!
+            <CheckCircle className="w-20 h-20 text-green-600 mx-auto mb-6" />
+            <h1 className="text-5xl font-bold text-gray-900 mb-6">
+              Welcome to Tutora! 🎉
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Your {plan ? `${plan.charAt(0).toUpperCase() + plan.slice(1)} plan` : 'subscription'} is now active. 
-              You have 14 days to explore all features risk-free.
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Your subscription has been activated successfully. You're now ready to transform your team's training with AI-powered modules.
             </p>
           </div>
 
-          {/* What's Next */}
-          <div className="bg-gray-50 rounded-2xl p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">What's next?</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
-                  <Users className="h-6 w-6 text-blue-600" />
+          <div className="bg-white shadow-xl rounded-2xl p-10 border border-gray-200 mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">What's Next?</h2>
+            
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div className="text-left">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                    <Zap className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">Start Creating</h3>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Invite Your Team</h3>
-                <p className="text-sm text-gray-600">Add team members and start collaborating on training modules.</p>
+                <p className="text-gray-600">
+                  Jump right into our AI Module Builder and create your first training module in minutes. Upload a video or document and watch our AI transform it into engaging content.
+                </p>
+                <Link 
+                  href="/demo/ai-module-builder"
+                  className="inline-flex items-center mt-4 text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Try AI Module Builder <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
               </div>
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-full mb-4">
-                  <Zap className="h-6 w-6 text-purple-600" />
+
+              <div className="text-left">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                    <BookOpen className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">Explore Content</h3>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Create Your First Module</h3>
-                <p className="text-sm text-gray-600">Upload a video or document and let AI create your first training module.</p>
+                <p className="text-gray-600">
+                  Browse our premium content library with 300+ professionally crafted training modules across multiple industries. Find content that fits your needs.
+                </p>
+                <Link 
+                  href="/features/content-library"
+                  className="inline-flex items-center mt-4 text-purple-600 hover:text-purple-800 font-medium"
+                >
+                  Browse Content Library <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
               </div>
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-full mb-4">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="text-left">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                    <Users className="w-5 h-5 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">Invite Your Team</h3>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">Track Progress</h3>
-                <p className="text-sm text-gray-600">Monitor team progress and engagement with detailed analytics.</p>
+                <p className="text-gray-600">
+                  Add team members to your account and start collaborative training. Assign modules, track progress, and see how your team is learning.
+                </p>
+                <Link 
+                  href="/admin/team-management"
+                  className="inline-flex items-center mt-4 text-green-600 hover:text-green-800 font-medium"
+                >
+                  Manage Team <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </div>
+
+              <div className="text-left">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                    <BarChart3 className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900">Track Progress</h3>
+                </div>
+                <p className="text-gray-600">
+                  Monitor your team's learning progress with detailed analytics. See completion rates, quiz scores, and identify areas for improvement.
+                </p>
+                <Link 
+                  href="/admin/analytics"
+                  className="inline-flex items-center mt-4 text-orange-600 hover:text-orange-800 font-medium"
+                >
+                  View Analytics <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
               </div>
             </div>
           </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/admin/dashboard"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl hover:shadow-lg transition-all duration-200 font-semibold flex items-center justify-center space-x-2"
-            >
-              <span>Go to Dashboard</span>
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-            <Link
-              href="/demo/ai-module-builder"
-              className="border border-gray-300 text-gray-700 px-8 py-4 rounded-xl hover:bg-gray-50 transition-colors font-semibold flex items-center justify-center space-x-2"
-            >
-              <span>Try AI Module Builder</span>
-            </Link>
+          <div className="bg-blue-600 rounded-2xl p-8 text-white">
+            <h2 className="text-2xl font-bold mb-4">Need Help Getting Started?</h2>
+            <p className="text-blue-100 mb-6">
+              Our support team is here to help you make the most of Tutora. Get personalized onboarding and training.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/contact"
+                className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center space-x-2"
+              >
+                <span>Contact Support</span>
+              </Link>
+              <a
+                href="mailto:support@tutoralearn.com?subject=New Customer - Getting Started&body=Hi! I just subscribed to Tutora and would like help getting started."
+                className="border border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors inline-flex items-center justify-center space-x-2"
+              >
+                <span>Email Us</span>
+              </a>
+            </div>
           </div>
 
-          {/* Support */}
-          <div className="mt-12 text-center">
-            <p className="text-gray-600 mb-4">
-              Need help getting started? Our team is here to help!
-            </p>
-            <Link
-              href="/support"
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Contact Support →
-            </Link>
-          </div>
+          {sessionId && (
+            <div className="mt-8 text-center">
+              <p className="text-sm text-gray-500">
+                Session ID: {sessionId}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

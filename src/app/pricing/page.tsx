@@ -131,7 +131,7 @@ export default function PricingPage() {
       const requestedUsers = plan.baseUsers // Can be enhanced later for user input
       console.log('🚀 Starting sophisticated checkout:', { planId, billingCycle, requestedUsers })
       
-      const response = await fetch('/api/create-checkout', {
+      const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,7 +139,13 @@ export default function PricingPage() {
         body: JSON.stringify({
           planId,
           billingCycle,
-          userCount: requestedUsers
+          userCount: requestedUsers,
+          successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: `${window.location.origin}/pricing`,
+          metadata: {
+            source: 'pricing_page',
+            plan_name: plan.name
+          }
         }),
       })
 
