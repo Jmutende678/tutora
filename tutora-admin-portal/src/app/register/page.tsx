@@ -21,6 +21,8 @@ import { Navigation } from '@/components/Navigation'
 export default function RegisterPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
+  const [errors, setErrors] = useState({})
+  const [privacyConsent, setPrivacyConsent] = useState(false)
   const [formData, setFormData] = useState({
     // Step 1: Business Basics
     firstName: '',
@@ -45,6 +47,42 @@ export default function RegisterPage() {
       ...prev,
       [name]: value
     }))
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }))
+    }
+  }
+
+  const validateStep = (step: number) => {
+    const newErrors = {}
+    
+    if (step === 1) {
+      if (!formData.firstName.trim()) newErrors.firstName = 'First name is required'
+      if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required'
+      if (!formData.email.trim()) newErrors.email = 'Work email is required'
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Please enter a valid work email'
+      if (!formData.companyName.trim()) newErrors.companyName = 'Company name is required'
+      if (!formData.jobTitle.trim()) newErrors.jobTitle = 'Job title is required'
+      if (!privacyConsent) newErrors.privacyConsent = 'Please accept the privacy policy to continue'
+    }
+    
+    if (step === 2) {
+      if (!formData.teamSize) newErrors.teamSize = 'Please select your team size'
+      if (!formData.industry) newErrors.industry = 'Please select your industry'
+      if (!formData.currentTrainingMethod) newErrors.currentTrainingMethod = 'Please select your current training method'
+    }
+    
+    if (step === 3) {
+      if (!formData.primaryGoal) newErrors.primaryGoal = 'Please select your primary goal'
+      if (!formData.urgency) newErrors.urgency = 'Please select your urgency level'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const getRecommendedPlan = () => {
@@ -80,7 +118,7 @@ export default function RegisterPage() {
   }
 
   const handleNextStep = () => {
-    if (currentStep < 4) {
+    if (validateStep(currentStep) && currentStep < 4) {
       setCurrentStep(currentStep + 1)
     }
   }
@@ -131,7 +169,13 @@ export default function RegisterPage() {
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
-        return formData.firstName && formData.lastName && formData.email && formData.companyName && formData.jobTitle
+        return formData.firstName.trim() && 
+               formData.lastName.trim() && 
+               formData.email.trim() && 
+               /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) &&
+               formData.companyName.trim() && 
+               formData.jobTitle.trim() && 
+               privacyConsent
       case 2:
         return formData.teamSize && formData.industry && formData.currentTrainingMethod
       case 3:
@@ -189,21 +233,31 @@ export default function RegisterPage() {
               <div className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                       First Name *
                     </label>
                     <div className="relative">
                       <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                       <input
+                        id="firstName"
                         type="text"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                          errors.firstName ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         placeholder="Enter your first name"
                         required
+                        aria-invalid={errors.firstName ? 'true' : 'false'}
+                        aria-describedby={errors.firstName ? 'firstName-error' : undefined}
                       />
                     </div>
+                    {errors.firstName && (
+                      <p id="firstName-error" className="mt-1 text-sm text-red-600" role="alert">
+                        {errors.firstName}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -225,21 +279,31 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     Work Email *
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                     <input
+                      id="email"
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.email ? 'border-red-500' : 'border-gray-300'
+                      }`}
                       placeholder="Enter your work email"
                       required
+                      aria-invalid={errors.email ? 'true' : 'false'}
+                      aria-describedby={errors.email ? 'email-error' : undefined}
                     />
                   </div>
+                  {errors.email && (
+                    <p id="email-error" className="mt-1 text-sm text-red-600" role="alert">
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -280,6 +344,38 @@ export default function RegisterPage() {
                     <option value="department-head">Department Head</option>
                     <option value="other">Other</option>
                   </select>
+                </div>
+
+                {/* Privacy Consent */}
+                <div className="border-t pt-6">
+                  <div className="flex items-start space-x-3">
+                    <input
+                      id="privacyConsent"
+                      type="checkbox"
+                      checked={privacyConsent}
+                      onChange={(e) => setPrivacyConsent(e.target.checked)}
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      aria-describedby={errors.privacyConsent ? 'privacy-error' : undefined}
+                    />
+                    <div className="flex-1">
+                      <label htmlFor="privacyConsent" className="text-sm text-gray-700">
+                        I agree to Tutora's{' '}
+                        <Link href="/privacy" className="text-blue-600 hover:text-blue-800 underline" target="_blank">
+                          Privacy Policy
+                        </Link>
+                        {' '}and{' '}
+                        <Link href="/terms" className="text-blue-600 hover:text-blue-800 underline" target="_blank">
+                          Terms of Service
+                        </Link>
+                        . I understand that my information will be used to provide training services and may be used for marketing communications. *
+                      </label>
+                      {errors.privacyConsent && (
+                        <p id="privacy-error" className="mt-1 text-sm text-red-600" role="alert">
+                          {errors.privacyConsent}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
