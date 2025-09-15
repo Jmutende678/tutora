@@ -104,6 +104,49 @@ export default function PricingPage() {
     ]
   }
 
+  const handleTestBasic = async () => {
+    setIsLoading('test')
+    try {
+      const response = await fetch('/api/stripe-test-basic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      
+      const result = await response.json()
+      
+      if (result.success && result.url) {
+        window.location.href = result.url
+      } else {
+        alert(`Test failed: ${result.error}`)
+      }
+    } catch (error) {
+      alert(`Test error: ${error}`)
+    } finally {
+      setIsLoading(null)
+    }
+  }
+
+  const handleTestFresh = async () => {
+    setIsLoading('fresh')
+    try {
+      const response = await fetch('/api/stripe-create-fresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      
+      const result = await response.json()
+      
+      if (result.success && result.url) {
+        window.location.href = result.url
+      } else {
+        alert(`Fresh test failed: ${result.error}`)
+      }
+    } catch (error) {
+      alert(`Fresh test error: ${error}`)
+    } finally {
+      setIsLoading(null)
+    }
+  }
 
   const handleStartTrial = async (planId: string) => {
     setIsLoading(planId)
@@ -208,6 +251,23 @@ export default function PricingPage() {
       <Navigation />
       
       <div className="pt-32 pb-16">
+        {/* Test Button */}
+        <div className="text-center py-4 bg-yellow-100 mb-8">
+          <button 
+            onClick={handleTestBasic}
+            disabled={isLoading === 'test'}
+            className="bg-red-600 text-white px-4 py-2 rounded font-bold hover:bg-red-700 mr-4"
+          >
+            {isLoading === 'test' ? 'Testing...' : 'TEST BASIC STRIPE'}
+          </button>
+          <button 
+            onClick={handleTestFresh}
+            disabled={isLoading === 'fresh'}
+            className="bg-green-600 text-white px-4 py-2 rounded font-bold hover:bg-green-700"
+          >
+            {isLoading === 'fresh' ? 'Creating...' : 'TEST FRESH PRICE (Try This!)'}
+          </button>
+        </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
