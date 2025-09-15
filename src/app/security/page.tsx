@@ -1,262 +1,186 @@
 'use client'
 
-import React from 'react'
-import Navigation from '@/components/Navigation'
-import { Shield, Lock, Eye, Server, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Navigation } from '@/components/Navigation'
+import Link from 'next/link'
+import { Shield, Lock, FileText, Clock, Users, ExternalLink, CheckCircle, AlertTriangle } from 'lucide-react'
 
 export default function SecurityPage() {
-  const securityFeatures = [
-    {
-      icon: Lock,
-      title: "End-to-End Encryption",
-      description: "All data is encrypted in transit (TLS 1.3) and at rest (AES-256)",
-      details: ["256-bit encryption keys", "Perfect forward secrecy", "Regular key rotation"]
-    },
-    {
-      icon: Shield,
-      title: "SOC 2 Type II Certified",
-      description: "Independently audited security controls and processes",
-      details: ["Annual security audits", "Continuous monitoring", "Compliance reporting"]
-    },
-    {
-      icon: Server,
-      title: "Secure Infrastructure",
-      description: "Enterprise-grade cloud infrastructure with 99.9% uptime",
-      details: ["AWS/GCP hosting", "DDoS protection", "Automated backups"]
-    },
-    {
-      icon: Eye,
-      title: "Access Controls",
-      description: "Multi-factor authentication and role-based permissions",
-      details: ["MFA required", "Principle of least privilege", "Session management"]
-    }
-  ]
-
-  const certifications = [
-    { name: "SOC 2 Type II", status: "Certified", year: "2024" },
-    { name: "GDPR", status: "Compliant", year: "2024" },
-    { name: "CCPA", status: "Compliant", year: "2024" },
-    { name: "ISO 27001", status: "In Progress", year: "2025" }
-  ]
-
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
-      
-      {/* Header */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
-          <div className="text-center">
-            <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-8">
-              <Shield className="h-4 w-4" />
-              <span>Enterprise Security</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Security & 
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {" "}Compliance
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Your data security is our top priority. We implement industry-leading security measures to protect your information.
-            </p>
+      <main className="pt-32 pb-16">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center gap-3 bg-blue-100 text-blue-800 text-sm font-medium px-4 py-2 rounded-full mb-6">
+            <Shield className="w-4 h-4" />
+            <span>Enterprise Security</span>
           </div>
-        </div>
-      </section>
+          <h1 className="text-5xl font-bold text-gray-900 mb-6">
+            Security & Compliance
+          </h1>
+          <p className="text-xl text-gray-600 mb-10">
+            Your data security is our top priority. Learn about our comprehensive security measures and compliance standards.
+          </p>
 
-      {/* Security Features */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Enterprise-Grade 
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Security</span>
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Comprehensive security measures designed to protect your most sensitive training data.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            {securityFeatures.map((feature, index) => (
-              <div key={index} className="group bg-white border border-gray-200 rounded-2xl p-8 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <feature.icon className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 mb-4">{feature.description}</p>
-                <ul className="space-y-2">
-                  {feature.details.map((detail, i) => (
-                    <li key={i} className="flex items-center text-gray-700">
-                      <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                      {detail}
-                    </li>
-                  ))}
-                </ul>
+          {/* Security Standards */}
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-200 text-left">
+              <div className="flex items-center gap-3 mb-4">
+                <Shield className="w-8 h-8 text-blue-600" />
+                <h2 className="text-2xl font-bold text-gray-900">SOC 2 Type II</h2>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Certifications */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Security 
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Certifications</span>
-            </h2>
-            <p className="text-lg text-gray-600">
-              Independently verified security standards and compliance certifications.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {certifications.map((cert, index) => (
-              <div key={index} className="bg-white border border-gray-200 rounded-2xl p-6 text-center">
-                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4 ${
-                  cert.status === 'Certified' || cert.status === 'Compliant' 
-                    ? 'bg-green-100' 
-                    : 'bg-yellow-100'
-                }`}>
-                  {cert.status === 'Certified' || cert.status === 'Compliant' ? (
-                    <CheckCircle className="h-6 w-6 text-green-600" />
-                  ) : (
-                    <AlertTriangle className="h-6 w-6 text-yellow-600" />
-                  )}
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">{cert.name}</h3>
-                <p className="text-sm text-gray-600 mb-1">{cert.status}</p>
-                <p className="text-xs text-gray-500">{cert.year}</p>
+              <div className="flex items-center gap-2 mb-4">
+                <Clock className="w-4 h-4 text-orange-600" />
+                <span className="text-orange-600 font-medium">In Progress (Expected Q4 2025)</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Security Practices */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Security 
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Practices</span>
-            </h2>
-          </div>
-
-          <div className="space-y-8">
-            <div className="bg-white border border-gray-200 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Data Protection</h3>
-              <ul className="space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Encryption at Rest:</strong> All data stored using AES-256 encryption</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Encryption in Transit:</strong> TLS 1.3 for all data transmission</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Data Segregation:</strong> Complete isolation between customer environments</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Backup Security:</strong> Encrypted backups with geographic distribution</span>
-                </li>
-              </ul>
+              <p className="text-gray-700 mb-6">
+                We are actively working towards SOC 2 Type II certification, demonstrating our commitment to managing customer data based on the five trust service principles: security, availability, processing integrity, confidentiality, and privacy.
+              </p>
+              <Link href="/trust" className="inline-flex items-center text-blue-600 hover:underline font-medium">
+                View Trust Center <ExternalLink className="w-4 h-4 ml-2" />
+              </Link>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Access Management</h3>
-              <ul className="space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Multi-Factor Authentication:</strong> Required for all user accounts</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Role-Based Access:</strong> Granular permissions based on user roles</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Session Management:</strong> Automatic logout and session monitoring</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Audit Logging:</strong> Comprehensive logging of all access and changes</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-2xl p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Infrastructure Security</h3>
-              <ul className="space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Cloud Security:</strong> Enterprise-grade AWS/GCP infrastructure</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Network Security:</strong> VPC isolation and firewall protection</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>DDoS Protection:</strong> Advanced threat detection and mitigation</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-5 w-5 text-green-500 mr-3 mt-0.5" />
-                  <span><strong>Vulnerability Management:</strong> Regular security scans and updates</span>
-                </li>
-              </ul>
+            <div className="bg-white shadow-xl rounded-2xl p-8 border border-gray-200 text-left">
+              <div className="flex items-center gap-3 mb-4">
+                <Lock className="w-8 h-8 text-purple-600" />
+                <h2 className="text-2xl font-bold text-gray-900">ISO 27001</h2>
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <Clock className="w-4 h-4 text-orange-600" />
+                <span className="text-orange-600 font-medium">In Progress (Expected Q1 2026)</span>
+              </div>
+              <p className="text-gray-700 mb-6">
+                Tutora is implementing an Information Security Management System (ISMS) aligned with ISO 27001 standards to ensure a systematic approach to managing sensitive company information.
+              </p>
+              <Link href="/contact?subject=Security_Inquiry" className="inline-flex items-center text-purple-600 hover:underline font-medium">
+                Security Inquiry <ExternalLink className="w-4 h-4 ml-2" />
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Contact Security Team */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="max-w-4xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Security 
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> Questions?</span>
-            </h2>
-            <p className="text-lg text-gray-600">
-              Our security team is here to address your concerns and provide additional information.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-8 border border-gray-200 text-center">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Contact Our Security Team</h3>
-            <p className="text-gray-700 mb-6">
-              For security inquiries, vulnerability reports, or compliance questions:
-            </p>
-            <div className="space-y-2 text-gray-700 mb-8">
-              <p><strong>Security Email:</strong> security@tutoralearn.com</p>
-              <p><strong>Compliance Team:</strong> compliance@tutoralearn.com</p>
-              <p><strong>Response Time:</strong> Security issues addressed within 24 hours</p>
-            </div>
-            <div className="space-y-4">
-              <a 
-                href="mailto:security@tutoralearn.com"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 font-semibold transform hover:scale-105 inline-block"
-              >
-                Contact Security Team
-              </a>
+          {/* Security Measures */}
+          <div className="bg-white shadow-xl rounded-2xl p-10 border border-gray-200 text-left mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Our Security Measures</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               <div>
-                <a 
-                  href="/contact"
-                  className="text-blue-600 font-semibold hover:text-blue-700 transition-colors"
-                >
-                  General Contact Form →
-                </a>
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <h3 className="text-xl font-semibold text-gray-900">Data Encryption</h3>
+                </div>
+                <p className="text-gray-700">
+                  All data is encrypted at rest using AES-256 encryption and in transit using TLS 1.3. Your sensitive information is protected at every level.
+                </p>
+              </div>
+              
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <h3 className="text-xl font-semibold text-gray-900">Access Control</h3>
+                </div>
+                <p className="text-gray-700">
+                  Strict role-based access controls, multi-factor authentication, and regular access reviews ensure only authorized personnel can access systems.
+                </p>
+              </div>
+              
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <h3 className="text-xl font-semibold text-gray-900">Infrastructure Security</h3>
+                </div>
+                <p className="text-gray-700">
+                  Our infrastructure is hosted on enterprise-grade cloud platforms with 99.5% uptime SLA and automatic backups.
+                </p>
+              </div>
+              
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <h3 className="text-xl font-semibold text-gray-900">Regular Audits</h3>
+                </div>
+                <p className="text-gray-700">
+                  We conduct regular security audits and engage third-party experts for penetration testing to identify and remediate vulnerabilities.
+                </p>
+              </div>
+              
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <h3 className="text-xl font-semibold text-gray-900">Incident Response</h3>
+                </div>
+                <p className="text-gray-700">
+                  Our dedicated incident response team is available 24/7 to address any security events swiftly and effectively.
+                </p>
+              </div>
+              
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <h3 className="text-xl font-semibold text-gray-900">Employee Training</h3>
+                </div>
+                <p className="text-gray-700">
+                  All Tutora employees undergo regular security awareness training and follow strict data handling procedures.
+                </p>
               </div>
             </div>
           </div>
+
+          {/* Data Protection */}
+          <div className="bg-white shadow-xl rounded-2xl p-10 border border-gray-200 text-left mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Data Protection & Privacy</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <FileText className="w-6 h-6 text-blue-600" /> GDPR Compliance
+                </h3>
+                <p className="text-gray-700 mb-4">
+                  We comply with GDPR requirements for data protection and privacy, giving you control over your personal information.
+                </p>
+                <Link href="/privacy" className="text-blue-600 hover:underline">View Privacy Policy →</Link>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <Users className="w-6 h-6 text-blue-600" /> Data Minimization
+                </h3>
+                <p className="text-gray-700 mb-4">
+                  We only collect and process data that is necessary for providing our services, following the principle of data minimization.
+                </p>
+                <Link href="/gdpr" className="text-blue-600 hover:underline">GDPR Rights →</Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Security Team */}
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-8 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Security Questions?</h2>
+            <p className="text-gray-700 mb-6">
+              Our security team is here to answer any questions about our security practices and compliance standards.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link 
+                href="mailto:security@tutoralearn.com?subject=Security Inquiry"
+                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                Email Security Team
+              </Link>
+              <Link 
+                href="/trust"
+                className="inline-flex items-center px-6 py-3 bg-white text-blue-600 border border-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+              >
+                Visit Trust Center
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center text-sm text-gray-500">
+            <p>Last updated: September 15, 2025</p>
+            <div className="mt-4 flex justify-center space-x-6">
+              <Link href="/privacy" className="hover:text-gray-700">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-gray-700">Terms of Service</Link>
+              <Link href="/cookies" className="hover:text-gray-700">Cookie Policy</Link>
+            </div>
+          </div>
         </div>
-      </section>
+      </main>
     </div>
   )
 }

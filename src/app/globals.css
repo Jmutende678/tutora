@@ -9,6 +9,26 @@
   body {
     @apply bg-white text-gray-900;
   }
+  
+  /* Enhanced focus styles for accessibility */
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex]:focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-600 ring-2 ring-blue-500 ring-offset-2;
+  }
+  
+  /* Skip link for screen readers */
+  .skip-link {
+    @apply absolute -top-40 left-6 bg-blue-600 text-white px-4 py-2 rounded-md z-50 transition-all duration-200;
+  }
+  
+  .skip-link:focus {
+    @apply top-6;
+  }
 }
 
 /* Custom scrollbar */

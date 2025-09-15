@@ -8,6 +8,10 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'AI Employee Training Platform | Create Modules in Minutes | Tutora',
   description: 'Transform videos & documents into engaging training modules with AI. Join 500+ companies saving 60% on training costs. 57% faster creation, 92% engagement rates. Start free trial.',
+  metadataBase: new URL('https://tutora-production.up.railway.app'),
+  alternates: {
+    canonical: '/',
+  },
   icons: {
     icon: '/tutora_logo.png',
     shortcut: '/tutora_logo.png',

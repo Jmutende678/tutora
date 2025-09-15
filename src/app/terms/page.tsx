@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import { FileText, Shield, Users, CreditCard, AlertTriangle, Scale } from 'lucide-react'
 
 export default function TermsPage() {

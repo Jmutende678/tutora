@@ -185,8 +185,8 @@ export default function HomePage() {
     'Single Sign-On (SSO) integration',
     'Regular security audits & pen testing',
     'Data residency options (US, EU, AU)',
-    'Two-factor authentication (2FA)',
-    '99.99% uptime SLA guarantee',
+    'Multi-factor authentication support',
+    '99.9% uptime SLA guarantee',
     'Complete audit logs & compliance reporting'
   ]
 
@@ -1074,7 +1074,7 @@ export default function HomePage() {
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">Company</h3>
                 <ul className="space-y-3">
                   <li><Link href="/about" className="text-gray-600 hover:text-gray-900">About</Link></li>
-                  <li><Link href="/help" className="text-gray-600 hover:text-gray-900">Support</Link></li>
+                  <li><Link href="/support" className="text-gray-600 hover:text-gray-900">Support</Link></li>
                   <li><Link href="/contact" className="text-gray-600 hover:text-gray-900">Contact</Link></li>
                   <li><Link href="/admin/login" className="text-gray-600 hover:text-gray-900">Admin Portal</Link></li>
                 </ul>

@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import { Shield, Lock, Eye, FileText, Users, Globe } from 'lucide-react'
 
 export default function PrivacyPage() {
