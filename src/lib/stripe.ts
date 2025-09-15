@@ -293,8 +293,7 @@ export class StripeService {
           }
         },
         allow_promotion_codes: true,
-        billing_address_collection: 'required',
-        customer_creation: 'always'
+        billing_address_collection: 'required'
       })
 
       console.log('✅ Stripe session created successfully:', session.id)
