@@ -30,23 +30,23 @@ function AboutPage() {
   const achievements = [
     {
       icon: Users,
-      number: "500+",
+      number: "50+",
       label: "Companies using Tutora worldwide"
     },
     {
       icon: Award,
-      number: "1M+",
+      number: "10K+",
       label: "Training modules created with AI"
     },
     {
       icon: TrendingUp,
-      number: "85%",
-      label: "Average completion rate (vs 30% industry average)"
+      number: "75%",
+      label: "Average completion rate"
     },
     {
       icon: Shield,
-      number: "99.9%",
-      label: "Uptime across all customer deployments"
+      number: "99.5%",
+      label: "Platform availability"
     },
     {
       icon: Clock,
@@ -271,7 +271,7 @@ function AboutPage() {
                 </li>
                 <li className="flex items-center space-x-2">
                   <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span className="text-gray-700"><strong>92% higher</strong> employee engagement</span>
+                  <span className="text-gray-700"><strong>Improved</strong> employee engagement</span>
                 </li>
                 <li className="flex items-center space-x-2">
                   <CheckCircle className="h-5 w-5 text-green-500" />
@@ -395,7 +395,7 @@ function AboutPage() {
                 <ul className="space-y-3">
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4" />
-                    <span><strong>99.9% uptime</strong> SLA with global CDN</span>
+                    <span><strong>99.5% uptime</strong> SLA with global CDN</span>
                   </li>
                   <li className="flex items-center space-x-2">
                     <CheckCircle className="h-4 w-4" />

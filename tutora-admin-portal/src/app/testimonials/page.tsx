@@ -9,23 +9,23 @@ export default function TestimonialsPage() {
   const testimonials = [
     {
       name: "Sarah Chen",
-      role: "Head of Learning & Development",
+      role: "Head of Learning & Development", 
       company: "TechFlow Solutions",
-      content: "Tutora transformed our onboarding process. New hires are now productive 40% faster, and our employee satisfaction scores have never been higher.",
+      content: "Tutora has significantly improved our training efficiency. The AI-powered module creation saves our team considerable time in developing learning content.",
       rating: 5
     },
     {
       name: "Marcus Rodriguez",
       role: "VP of Human Resources",
-      company: "InnovateCorpF",
-      content: "The AI-powered content creation is incredible. We've built 50+ custom modules in just 3 months. Our team engagement with training went from 30% to 95%.",
+      company: "InnovateHub",
+      content: "The platform's analytics help us understand training effectiveness better. We've seen improved engagement across our organization.",
       rating: 5
     },
     {
       name: "Lisa Thompson",
       role: "Chief People Officer",
       company: "GrowthTech",
-      content: "ROI was evident within the first quarter. Reduced training costs by 60% while doubling the effectiveness. Tutora is now essential to our success.",
+      content: "Tutora's approach to training content creation aligns well with our digital transformation goals. The platform is intuitive and scalable.",
       rating: 5
     },
     {

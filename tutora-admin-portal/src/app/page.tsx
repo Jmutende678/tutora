@@ -397,7 +397,7 @@ export default function HomePage() {
                         <TrendingUp className="h-4 w-4" />
                         <div className="absolute inset-0 bg-purple-400 rounded-full opacity-0 group-hover:opacity-30 group-hover:animate-ping"></div>
                       </div>
-                      <span className="font-medium">92% higher completion rates</span>
+                      <span className="font-medium">Higher completion rates</span>
                     </div>
                   )}
 
@@ -700,7 +700,7 @@ export default function HomePage() {
                     <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-6 text-lg">&quot;Tutora transformed our onboarding process. New hires are now productive 40% faster, and our employee satisfaction scores have never been higher.&quot;</p>
+                <p className="text-gray-700 mb-6 text-lg">&quot;Tutora has significantly improved our training efficiency. The AI-powered module creation saves our team considerable time in developing learning content.&quot;</p>
                 <div className="flex items-center space-x-4">
                   <div className="relative w-12 h-12 rounded-full overflow-hidden">
                     <Image
@@ -725,7 +725,7 @@ export default function HomePage() {
                     <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-6 text-lg">&quot;The AI-powered content creation is incredible. We&apos;ve built 50+ custom modules in just 3 months. Our team engagement with training went from 30% to 95%.&quot;</p>
+                <p className="text-gray-700 mb-6 text-lg">&quot;The platform's analytics help us understand training effectiveness better. We've seen improved engagement across our organization.&quot;</p>
                 <div className="flex items-center space-x-4">
                   <div className="relative w-12 h-12 rounded-full overflow-hidden">
                     <Image
@@ -738,7 +738,7 @@ export default function HomePage() {
                   <div>
                     <div className="font-semibold text-gray-900">Marcus Rodriguez</div>
                     <div className="text-gray-600">VP of Human Resources</div>
-                    <div className="text-gray-500">InnovateCorpF</div>
+                    <div className="text-gray-500">InnovateHub</div>
                   </div>
                 </div>
               </div>
@@ -750,7 +750,7 @@ export default function HomePage() {
                     <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-700 mb-6 text-lg">&quot;ROI was evident within the first quarter. Reduced training costs by 60% while doubling the effectiveness. Tutora is now essential to our success.&quot;</p>
+                <p className="text-gray-700 mb-6 text-lg">&quot;Tutora's approach to training content creation aligns well with our digital transformation goals. The platform is intuitive and scalable.&quot;</p>
                 <div className="flex items-center space-x-4">
                   <div className="relative w-12 h-12 rounded-full overflow-hidden">
                     <Image
