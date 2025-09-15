@@ -285,20 +285,28 @@ export default function PricingPage() {
             </div>
             
             <div className="flex items-center justify-center gap-4 mb-8">
-              <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}>Monthly</span>
+              <span className={`text-sm font-medium cursor-pointer transition-colors ${billingCycle === 'monthly' ? 'text-gray-900' : 'text-gray-500'}`}
+                    onClick={() => setBillingCycle('monthly')}>Monthly</span>
               <button
                 onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  billingCycle === 'annual' ? 'bg-blue-600' : 'bg-gray-200'
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:scale-105 ${
+                  billingCycle === 'annual' ? 'bg-blue-600 shadow-lg' : 'bg-gray-200 hover:bg-gray-300'
                 }`}
+                aria-label={`Switch to ${billingCycle === 'monthly' ? 'annual' : 'monthly'} billing`}
+                role="switch"
+                aria-checked={billingCycle === 'annual'}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-all duration-200 shadow-sm ${
                     billingCycle === 'annual' ? 'translate-x-6' : 'translate-x-1'
                   }`}
                 />
               </button>
-              <span className={`text-sm font-medium ${billingCycle === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}>Annual</span>
+              <span className={`text-sm font-medium cursor-pointer transition-colors ${billingCycle === 'annual' ? 'text-gray-900' : 'text-gray-500'}`}
+                    onClick={() => setBillingCycle('annual')}>
+                Annual 
+                <span className="ml-1 inline-block px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">Save 20%</span>
+              </span>
             </div>
           </div>
 
