@@ -78,10 +78,10 @@ export function Navigation() {
             onMouseEnter={() => setSolutionsOpen(true)}
             onMouseLeave={() => setSolutionsOpen(false)}
           >
-            <button className="flex items-center space-x-1 text-gray-600 hover:text-gray-900">
+            <Link href="/solutions" className="flex items-center space-x-1 text-gray-600 hover:text-gray-900">
               <span>Solutions</span>
               <ChevronDown className="h-4 w-4" />
-            </button>
+            </Link>
             
             {solutionsOpen && (
               <div className="absolute top-full left-0 w-[400px] bg-white rounded-xl shadow-xl border border-gray-100 p-6 z-50">

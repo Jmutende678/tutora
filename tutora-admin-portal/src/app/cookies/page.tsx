@@ -1,4 +1,10 @@
 import { Navigation } from '@/components/Navigation'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Cookie Policy | Tutora - AI Employee Training Platform',
+  description: 'Learn about how Tutora uses cookies to improve your experience. Our transparent cookie policy explains what data we collect and how you can manage your preferences.',
+}
 
 export default function CookiePolicy() {
   return (
