@@ -28,7 +28,6 @@ export async function POST() {
       subscription_data: {
         trial_period_days: 14,
       },
-      customer_creation: 'always'
     })
     
     console.log('✅ Simple checkout session created:', session.id)
