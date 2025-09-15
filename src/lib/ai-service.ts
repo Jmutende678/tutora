@@ -29,6 +29,38 @@ export interface ModuleSection {
   content: string;
   type: 'text' | 'video' | 'interactive' | 'exercise';
   estimatedTime: number;
+  activities?: ModuleActivity[];
+}
+
+export interface ModuleActivity {
+  type: 'reflection' | 'scenario' | 'simulation' | 'drag-drop' | 'video-checkpoint' | 'diagram';
+  title?: string;
+  prompt?: string;
+  description?: string;
+  timeLimit?: number;
+  instruction?: string;
+  timestamp?: string;
+  question?: string;
+  correctAnswer?: string;
+  explanation?: string;
+  choices?: Array<{
+    id: string;
+    text: string;
+    outcome: string;
+  }>;
+  correctChoice?: string;
+  feedback?: string;
+  steps?: Array<{
+    step: number;
+    action: string;
+    feedback: string;
+  }>;
+  items?: Array<{
+    id: string;
+    text: string;
+    category: string;
+  }>;
+  categories?: string[];
 }
 
 export interface QuizQuestion {
@@ -108,16 +140,37 @@ export async function generateTrainingModule(request: ModuleGenerationRequest): 
 
 function createModulePrompt(request: ModuleGenerationRequest): string {
   return `
-Create a comprehensive training module with the following specifications:
+You are an expert instructional designer creating a comprehensive, interactive training module. Generate REAL, professional content - NO placeholder text, NO generic examples, NO mock data.
 
-Topic: ${request.topic}
-Difficulty Level: ${request.difficulty}
-Target Duration: ${request.duration} minutes
-Industry Context: ${request.industry || 'General business'}
-Company Context: ${request.companyContext || 'Not specified'}
-Learning Objectives: ${request.learningObjectives?.join(', ') || 'To be determined based on topic'}
+SPECIFICATIONS:
+- Topic: ${request.topic}
+- Difficulty: ${request.difficulty} 
+- Duration: ${request.duration} minutes
+- Industry: ${request.industry || 'Cross-industry applicable'}
+- Company Context: ${request.companyContext || 'Modern workplace environment'}
+- Learning Objectives: ${request.learningObjectives?.join(', ') || 'Practical skill development and knowledge application'}
 
-Please generate a complete training module in JSON format with the following structure:
+REQUIREMENTS FOR POWERFUL MODULES:
+1. **Industry-Specific Content**: Tailor examples, scenarios, and case studies to the specified industry
+2. **Interactive Activities**: Include diverse activity types (scenarios, simulations, drag-drop, quizzes, reflections)
+3. **Real-World Application**: Provide concrete, actionable strategies and tools
+4. **Engagement Variety**: Mix text, interactive exercises, video checkpoints, and assessments
+5. **Progressive Difficulty**: Build complexity throughout the module
+6. **Measurable Outcomes**: Clear success criteria and practical takeaways
+
+ACTIVITY TYPES TO INCLUDE:
+- Scenario-based decision making
+- Interactive simulations  
+- Drag-and-drop exercises
+- Knowledge checks and quizzes
+- Reflection prompts
+- Video checkpoint discussions
+- Diagram interactions
+- Case study analysis
+- Role-playing exercises
+- Problem-solving challenges
+
+Generate a complete training module in JSON format with this structure:
 
 {
   "title": "Engaging module title",
@@ -151,23 +204,30 @@ Please generate a complete training module in JSON format with the following str
   ]
 }
 
-Requirements:
-- Create 3-5 sections that build upon each other
-- Include practical examples and real-world scenarios
-- Generate 5-8 quiz questions of varying types
-- Provide 3-5 additional resources for further learning
-- Ensure content is engaging and actionable
-- Use clear, professional language appropriate for ${request.difficulty} level
-- Make content relevant to ${request.industry || 'business'} context
+ENHANCED REQUIREMENTS:
+- Create 3-4 sections with diverse activity types (reflection, scenario, simulation, drag-drop, video-checkpoint)
+- Each section must include specific "activities" array with interactive elements
+- Include industry-specific examples, case studies, and real workplace scenarios  
+- Generate 3-5 quiz questions testing practical application, not just memorization
+- Provide 3 high-quality resources with REAL URLs (not example.com)
+- Content must be immediately actionable and valuable
+- Use professional language appropriate for ${request.difficulty} level
+- Tailor ALL content to ${request.industry || 'cross-industry'} context
+- NO placeholder text, NO generic examples, NO mock data
+- Each activity must be fully specified with all required fields
+- Focus on skills learners can apply immediately in their work
 
-Return only valid JSON, no additional text or formatting.
+Return ONLY valid JSON matching the exact structure above. No additional text.
 `;
 }
 
 function generateDemoModule(request: ModuleGenerationRequest): GeneratedModule {
+  // Generate more realistic content based on topic and context
+  const topicData = getTopicSpecificContent(request.topic, request.industry, request.difficulty);
+  
   return {
-    title: `${request.topic} Training Module`,
-    description: `A comprehensive ${request.difficulty} level training module covering ${request.topic}. This module will help learners understand key concepts and apply them in real-world scenarios.`,
+    title: topicData.title,
+    description: topicData.description,
     duration: request.duration,
     difficulty: request.difficulty,
     sections: [
