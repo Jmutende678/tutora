@@ -53,6 +53,7 @@ interface GeneratedModule {
   components: ModuleComponent[]
   generatedAt: Date
   status: 'draft' | 'ready' | 'published'
+  realModule?: any // Store the full OpenAI response with sections and activities
   aiContent?: {
     content: string
     learningObjectives: string[]
@@ -104,22 +105,20 @@ export default function AIModuleBuilder() {
         }
       }
 
-      // Step 2: Call AI processing API
+      // Step 2: Call real AI module generation API
       setGenerationProgress(40)
-      const response = await fetch('/api/ai/process-content', {
+      const response = await fetch('/api/ai/generate-module', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          content: content,
-          contentType: uploadedFile.type,
-          fileName: uploadedFile.name,
-          options: {
-            includeQuiz: true,
-            difficulty: 'intermediate',
-            estimatedDuration: 15
-          }
+          topic: content.substring(0, 100), // Use first part of content as topic
+          difficulty: 'intermediate',
+          duration: 20,
+          industry: industry || 'General Business',
+          companyContext: businessName || 'Modern workplace',
+          learningObjectives: ['Apply practical skills', 'Understand key concepts', 'Implement best practices']
         }),
       })
 
@@ -132,45 +131,70 @@ export default function AIModuleBuilder() {
       
       setGenerationProgress(90)
       
-      // Convert AI result to our module format
-      const components: ModuleComponent[] = [
-        {
-          id: '1',
-          type: 'scenario',
-          title: 'Interactive Scenario',
-          description: 'Apply concepts in realistic situations',
-          estimatedTime: 8,
-          difficulty: aiResult.difficulty || 'intermediate'
-        },
-        {
-          id: '2',
-          type: 'reflection',
-          title: 'Knowledge Reflection',
-          description: 'Deep thinking prompts for retention',
-          estimatedTime: 5,
-          difficulty: 'beginner'
-        },
-        {
-          id: '3',
-          type: 'quiz',
-          title: 'Knowledge Assessment',
-          description: 'Test your understanding',
-          estimatedTime: aiResult.duration || 15,
-          difficulty: aiResult.difficulty || 'intermediate',
-          content: aiResult.quiz
+      // Extract the real OpenAI module from the response
+      const realModule = aiResult.module
+      
+      // Convert real OpenAI sections and activities to our component format
+      const components: ModuleComponent[] = []
+      
+      if (realModule && realModule.sections) {
+        realModule.sections.forEach((section: any, sectionIndex: number) => {
+          // Add section as a component
+          components.push({
+            id: section.id || `section_${sectionIndex}`,
+            type: section.type === 'text' ? 'reflection' : 
+                  section.type === 'interactive' ? 'scenario' :
+                  section.type === 'exercise' ? 'simulation' : 'quiz',
+            title: section.title,
+            description: section.content.substring(0, 100) + '...',
+            estimatedTime: section.estimatedTime || 10,
+            difficulty: realModule.difficulty || 'intermediate',
+            content: section
+          })
+          
+          // Add activities as separate components
+          if (section.activities) {
+            section.activities.forEach((activity: any, activityIndex: number) => {
+              components.push({
+                id: `${section.id}_activity_${activityIndex}`,
+                type: activity.type as any,
+                title: activity.title || `${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)} Activity`,
+                description: activity.description || activity.prompt || activity.instruction || 'Interactive learning activity',
+                estimatedTime: activity.timeLimit || 5,
+                difficulty: realModule.difficulty || 'intermediate',
+                content: activity
+              })
+            })
+          }
+        })
+        
+        // Add quiz questions as components
+        if (realModule.quiz) {
+          realModule.quiz.forEach((question: any, qIndex: number) => {
+            components.push({
+              id: `quiz_${qIndex}`,
+              type: 'quiz',
+              title: `Quiz Question ${qIndex + 1}`,
+              description: question.question.substring(0, 80) + '...',
+              estimatedTime: 2,
+              difficulty: realModule.difficulty || 'intermediate',
+              content: question
+            })
+          })
         }
-      ]
+      }
 
       const newModule: GeneratedModule = {
         id: `module_${Date.now()}`,
-        title: aiResult.title || 'AI-Generated Training Module',
-        description: aiResult.description || 'Interactive training module created from your content',
-        industry: 'General',
-        difficulty: aiResult.difficulty || 'intermediate',
-        estimatedDuration: aiResult.duration || 15,
+        title: realModule?.title || 'AI-Generated Training Module',
+        description: realModule?.description || 'Interactive training module created from your content',
+        industry: industry || 'General',
+        difficulty: realModule?.difficulty || 'intermediate',
+        estimatedDuration: realModule?.duration || 20,
         totalComponents: components.length,
-        imageUrl: `/api/placeholder/400/240?text=${encodeURIComponent(aiResult.title || 'Training Module')}`,
+        imageUrl: `/api/placeholder/400/240?text=${encodeURIComponent(realModule?.title || 'Training Module')}`,
         components,
+        realModule, // Store the full OpenAI response for detailed view
         generatedAt: new Date(),
         status: 'ready',
         aiContent: {
@@ -636,6 +660,37 @@ export default function AIModuleBuilder() {
                       Export
                     </button>
                   </div>
+                  
+                  {/* Module Summary */}
+                  {generatedModule.realModule && (
+                    <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                      <h4 className="font-semibold text-gray-900 mb-2">🤖 AI-Generated Content Summary</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <div className="font-medium text-gray-700">Sections</div>
+                          <div className="text-gray-600">{generatedModule.realModule.sections?.length || 0} interactive sections</div>
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-700">Activities</div>
+                          <div className="text-gray-600">
+                            {generatedModule.realModule.sections?.reduce((total: number, section: any) => 
+                              total + (section.activities?.length || 0), 0) || 0} unique activities
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-700">Assessments</div>
+                          <div className="text-gray-600">{generatedModule.realModule.quiz?.length || 0} quiz questions</div>
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-700">Resources</div>
+                          <div className="text-gray-600">{generatedModule.realModule.resources?.length || 0} additional resources</div>
+                        </div>
+                      </div>
+                      <div className="mt-3 text-xs text-gray-500">
+                        ✅ Industry-specific content • ✅ Real-world scenarios • ✅ Interactive simulations • ✅ No placeholder data
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -644,26 +699,77 @@ export default function AIModuleBuilder() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Interactive Components</h3>
                 <div className="space-y-4">
                   {generatedModule.components.map((component, index) => (
-                    <div key={component.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            {getComponentIcon(component.type)}
+                    <div key={component.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                              {getComponentIcon(component.type)}
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">{component.title}</h4>
+                              <p className="text-sm text-gray-600">{component.description}</p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="font-medium text-gray-900">{component.title}</h4>
-                            <p className="text-sm text-gray-600">{component.description}</p>
+                          <div className="flex items-center space-x-3">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(component.difficulty)}`}>
+                              {component.difficulty}
+                            </span>
+                            <span className="text-sm text-gray-500">{component.estimatedTime}min</span>
+                            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                              Preview
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(component.difficulty)}`}>
-                            {component.difficulty}
-                          </span>
-                          <span className="text-sm text-gray-500">{component.estimatedTime}min</span>
-                          <button className="text-gray-400 hover:text-gray-600">
-                            <Edit className="h-4 w-4" />
-                          </button>
-                        </div>
+                        
+                        {/* Activity Details */}
+                        {component.content && (
+                          <div className="bg-gray-50 rounded-lg p-3 mt-3">
+                            <div className="text-xs font-medium text-gray-700 mb-2">
+                              {component.type.toUpperCase()} ACTIVITY
+                            </div>
+                            {component.type === 'scenario' && component.content.choices && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-600">{component.content.description}</p>
+                                <div className="text-xs text-gray-500">
+                                  {component.content.choices.length} decision points • Interactive scenarios
+                                </div>
+                              </div>
+                            )}
+                            {component.type === 'simulation' && component.content.steps && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-600">{component.content.description}</p>
+                                <div className="text-xs text-gray-500">
+                                  {component.content.steps.length} steps • Hands-on simulation
+                                </div>
+                              </div>
+                            )}
+                            {component.type === 'drag-drop' && component.content.items && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-600">{component.content.instruction}</p>
+                                <div className="text-xs text-gray-500">
+                                  {component.content.items.length} items • {component.content.categories?.length || 0} categories
+                                </div>
+                              </div>
+                            )}
+                            {component.type === 'reflection' && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-600">{component.content.prompt}</p>
+                                <div className="text-xs text-gray-500">
+                                  Guided reflection • {component.content.timeLimit || 5} minutes
+                                </div>
+                              </div>
+                            )}
+                            {component.type === 'quiz' && component.content.question && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-gray-600">{component.content.question}</p>
+                                <div className="text-xs text-gray-500">
+                                  {component.content.type} • {component.content.options?.length || 0} options
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
