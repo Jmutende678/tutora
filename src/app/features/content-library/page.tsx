@@ -489,6 +489,16 @@ export default function ContentLibraryPage() {
                 Get Library Access
               </h2>
               
+              {/* Browse without registration option */}
+              <div className="text-center mb-6">
+                <button
+                  onClick={() => setShowAccessForm(false)}
+                  className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
+                >
+                  Browse library without registration →
+                </button>
+              </div>
+              
               <form onSubmit={handleFormSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>

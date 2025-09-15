@@ -16,7 +16,7 @@ import {
   Smartphone
 } from 'lucide-react'
 import Link from 'next/link'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -145,7 +145,7 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       
-      <div className="pt-20 pb-16">
+      <div className="pt-32 pb-16">
         <div className="max-w-4xl mx-auto px-6">
           {/* Progress Bar */}
           <div className="mb-8">
