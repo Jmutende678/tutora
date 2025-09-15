@@ -45,6 +45,20 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSubmitting(true)
 
+    // Debug: log form data to identify any missing fields
+    console.log('📝 Contact form submission:', formData)
+
+    // Client-side validation
+    const requiredFields = ['name', 'email', 'subject', 'message']
+    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData])
+    
+    if (missingFields.length > 0) {
+      console.error('❌ Missing required fields:', missingFields)
+      alert(`Please fill in the following required fields: ${missingFields.join(', ')}`)
+      setIsSubmitting(false)
+      return
+    }
+
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -81,11 +95,13 @@ export default function ContactPage() {
           inquiryType: 'general'
         })
       } else {
-        throw new Error('Failed to submit form')
+        const errorData = await response.json()
+        console.error('❌ Contact form API error:', errorData)
+        throw new Error(errorData.error || 'Failed to submit form')
       }
     } catch (error) {
-      console.error('Error submitting form:', error)
-      alert('There was an error submitting your message. Please try again or email us directly at hello@tutoralearn.com')
+      console.error('❌ Error submitting contact form:', error)
+      alert(`Error submitting form: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again or email us directly at hello@tutoralearn.com`)
     } finally {
       setIsSubmitting(false)
     }
