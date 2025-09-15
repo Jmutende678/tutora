@@ -55,11 +55,11 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     maxUsers: 10,
     maxModules: 10,
     priority: 'basic',
-    stripeProductId: 'prod_T14IveWYdXSf0q',
-    stripeMonthlyPriceId: 'price_1S529e3aA9p13T3HurTMrkPc',
-    stripeAnnualPriceId: 'price_1S529f3aA9p13T3HNYO0GSdr',
-    stripeAdditionalUsersMonthlyId: 'price_1S529f3aA9p13T3HWN6prLbH',
-    stripeAdditionalUsersAnnualId: 'price_1S529g3aA9p13T3H6k6CevhV'
+    stripeProductId: 'prod_T3jChyF673mpk0',
+    stripeMonthlyPriceId: 'price_1S7bkU3aA9p13T3HJHT2dwbU',
+    stripeAnnualPriceId: 'price_1S7bkV3aA9p13T3H1COSFXSF',
+    stripeAdditionalUsersMonthlyId: 'price_1S7bkV3aA9p13T3HX9qDNSOy',
+    stripeAdditionalUsersAnnualId: 'price_1S7bkV3aA9p13T3HQ54HHtDa'
   },
   growth: {
     id: 'growth',
@@ -83,11 +83,11 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     maxUsers: 25,
     maxModules: -1,
     priority: 'premium',
-    stripeProductId: 'prod_T14IqZzsHBXDF6',
-    stripeMonthlyPriceId: 'price_1S529h3aA9p13T3HPiruLgpg',
-    stripeAnnualPriceId: 'price_1S529h3aA9p13T3HZwwqPmgt',
-    stripeAdditionalUsersMonthlyId: 'price_1S529i3aA9p13T3HkfyIPzxl',
-    stripeAdditionalUsersAnnualId: 'price_1S529i3aA9p13T3HGlEEK968'
+    stripeProductId: 'prod_T3jCZY6N5JEWXw',
+    stripeMonthlyPriceId: 'price_1S7bkW3aA9p13T3HSs2j3nb6',
+    stripeAnnualPriceId: 'price_1S7bkX3aA9p13T3HHaRDZtlj',
+    stripeAdditionalUsersMonthlyId: 'price_1S7bkX3aA9p13T3HnRII2xv7',
+    stripeAdditionalUsersAnnualId: 'price_1S7bkX3aA9p13T3HU8QfAKzo'
   },
   professional: {
     id: 'professional',
@@ -111,11 +111,11 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     maxUsers: 50,
     maxModules: -1,
     priority: 'enterprise',
-    stripeProductId: 'prod_T14IueuGs3M4hA',
-    stripeMonthlyPriceId: 'price_1S529j3aA9p13T3HZnN1GFDH',
-    stripeAnnualPriceId: 'price_1S529k3aA9p13T3HD3d69blo',
-    stripeAdditionalUsersMonthlyId: 'price_1S529k3aA9p13T3HrppxKCe8',
-    stripeAdditionalUsersAnnualId: 'price_1S529k3aA9p13T3H0H6Z8IcT'
+    stripeProductId: 'prod_T3jCL1LZAIkgBq',
+    stripeMonthlyPriceId: 'price_1S7bkY3aA9p13T3HtGSVyXw6',
+    stripeAnnualPriceId: 'price_1S7bkZ3aA9p13T3HQUp7IETt',
+    stripeAdditionalUsersMonthlyId: 'price_1S7bkZ3aA9p13T3HBUG5DuzO',
+    stripeAdditionalUsersAnnualId: 'price_1S7bkZ3aA9p13T3HelRVknxw'
   },
   enterprise: {
     id: 'enterprise',
@@ -140,11 +140,11 @@ export const PRICING_PLANS: Record<string, PricingPlan> = {
     maxUsers: 100,
     maxModules: -1,
     priority: 'enterprise',
-    stripeProductId: 'prod_T14IVhNwMFwa38',
-    stripeMonthlyPriceId: 'price_1S529l3aA9p13T3HBsN01dnM',
-    stripeAnnualPriceId: 'price_1S529m3aA9p13T3Hz0vMFRR3',
-    stripeAdditionalUsersMonthlyId: 'price_1S529m3aA9p13T3HwA6uzrmd',
-    stripeAdditionalUsersAnnualId: 'price_1S529n3aA9p13T3HtI2iAliB'
+    stripeProductId: 'prod_T3jDsEB4peFLCP',
+    stripeMonthlyPriceId: 'price_1S7bka3aA9p13T3HDsgsQ8Io',
+    stripeAnnualPriceId: 'price_1S7bkb3aA9p13T3HT6b5r75A',
+    stripeAdditionalUsersMonthlyId: 'price_1S7bkb3aA9p13T3HVDDMIQcS',
+    stripeAdditionalUsersAnnualId: 'price_1S7bkc3aA9p13T3HaJlet4QD'
   }
 }
 
