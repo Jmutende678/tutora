@@ -155,7 +155,7 @@ export class StripeService {
     this.stripe = stripe
   }
   
-  // Sophisticated overage calculation preview (public method)
+  // Simple per-user pricing preview (aligned with website display)
   calculatePricingPreview(planId: string, userCount: number, billingCycle: 'monthly' | 'annual') {
     const plan = PRICING_PLANS[planId]
     if (!plan) {
@@ -165,31 +165,15 @@ export class StripeService {
     const effectiveUserCount = Math.max(userCount, plan.baseUsers)
     const additionalUsers = Math.max(0, effectiveUserCount - plan.baseUsers)
     
-    const calculateOverageQuantity = (additionalUsers: number, planId: string): number => {
-      if (additionalUsers === 0) return 0
-      
-      switch (planId) {
-        case 'starter':
-          return additionalUsers // Pay per user
-        case 'growth':
-          return Math.ceil(additionalUsers / 5) * 5 // Min 5 user increments
-        case 'professional':
-          return Math.ceil(additionalUsers / 10) * 10 // Min 10 user increments
-        case 'enterprise':
-          return Math.ceil(additionalUsers / 25) * 25 // Min 25 user increments
-        default:
-          return additionalUsers
-      }
-    }
-    
-    const sophisticatedOverageQuantity = calculateOverageQuantity(additionalUsers, planId)
+    // Simple per-user calculation as advertised on website
+    const overageQuantity = additionalUsers
     
     const basePriceAUD = billingCycle === 'annual' ? plan.annualPrice : plan.monthlyPrice
     const additionalUserPriceAUD = billingCycle === 'annual' 
       ? (plan.additionalUserPrice * 0.85) // 15% discount for annual
       : plan.additionalUserPrice
     
-    const totalPrice = basePriceAUD + (sophisticatedOverageQuantity * additionalUserPriceAUD)
+    const totalPrice = basePriceAUD + (overageQuantity * additionalUserPriceAUD)
     
     return {
       planId,
@@ -198,7 +182,7 @@ export class StripeService {
       effectiveUserCount,
       baseUsers: plan.baseUsers,
       additionalUsers,
-      sophisticatedOverageQuantity,
+      overageQuantity,
       basePriceAUD,
       additionalUserPriceAUD,
       totalPriceAUD: totalPrice,
@@ -228,30 +212,8 @@ export class StripeService {
     const effectiveUserCount = Math.max(userCount || plan.baseUsers, plan.baseUsers)
     const additionalUsers = Math.max(0, effectiveUserCount - plan.baseUsers)
     
-    // Sophisticated overage calculation with tiered pricing
-    const calculateOverageQuantity = (additionalUsers: number, planId: string): number => {
-      if (additionalUsers === 0) return 0
-      
-      // Different overage strategies per plan
-      switch (planId) {
-        case 'starter':
-          // Starter: pay per user above 10
-          return additionalUsers
-        case 'growth':
-          // Growth: pay per user above 25, but min 5 user increments
-          return Math.ceil(additionalUsers / 5) * 5
-        case 'professional':
-          // Professional: pay per user above 50, but min 10 user increments
-          return Math.ceil(additionalUsers / 10) * 10
-        case 'enterprise':
-          // Enterprise: pay per user above 100, but min 25 user increments
-          return Math.ceil(additionalUsers / 25) * 25
-        default:
-          return additionalUsers
-      }
-    }
-    
-    const sophisticatedOverageQuantity = calculateOverageQuantity(additionalUsers, planId)
+    // Simple per-user overage calculation (aligned with website pricing display)
+    const overageQuantity = additionalUsers // Pay exactly for additional users as advertised
 
     // Get the correct price IDs with validation
     const basePriceId = billingCycle === 'annual' ? plan.stripeAnnualPriceId : plan.stripeMonthlyPriceId
@@ -264,24 +226,24 @@ export class StripeService {
       throw new Error(`No ${billingCycle} price ID configured for plan ${planId}`)
     }
     
-    if (sophisticatedOverageQuantity > 0 && !additionalUsersPriceId) {
+    if (overageQuantity > 0 && !additionalUsersPriceId) {
       throw new Error(`No ${billingCycle} additional users price ID configured for plan ${planId}`)
     }
 
-    console.log('🧮 Enhanced pricing calculation:', {
+    console.log('💰 Simple per-user pricing calculation (aligned with website):', {
       planId,
       billingCycle,
       requestedUsers: userCount,
       effectiveUserCount,
       baseUsers: plan.baseUsers,
-      rawAdditionalUsers: additionalUsers,
-      sophisticatedOverageQuantity,
+      additionalUsers,
+      overageQuantity,
       basePriceId,
       additionalUsersPriceId,
       currency: 'AUD'
     })
 
-    // Build line items for subscription with sophisticated overage
+    // Build line items for subscription with simple per-user pricing
     const lineItems: any[] = [
       {
         price: basePriceId,
@@ -289,14 +251,14 @@ export class StripeService {
       }
     ]
 
-    // Add sophisticated overage calculation as separate line item
-    if (sophisticatedOverageQuantity > 0 && additionalUsersPriceId) {
+    // Add simple per-user overage as advertised on website
+    if (overageQuantity > 0 && additionalUsersPriceId) {
       lineItems.push({
         price: additionalUsersPriceId,
-        quantity: sophisticatedOverageQuantity,
+        quantity: overageQuantity,
       })
       
-      console.log(`💰 Adding overage: ${sophisticatedOverageQuantity} additional users at price ${additionalUsersPriceId}`)
+      console.log(`💰 Adding ${overageQuantity} additional users at $${billingCycle === 'annual' ? plan.additionalUserPrice * 0.85 : plan.additionalUserPrice}/month each`)
     }
 
     try {
@@ -314,7 +276,7 @@ export class StripeService {
           userCount: effectiveUserCount.toString(),
           baseUsers: plan.baseUsers.toString(),
           additionalUsers: additionalUsers.toString(),
-          sophisticatedOverageQuantity: sophisticatedOverageQuantity.toString(),
+          overageQuantity: overageQuantity.toString(),
           source: metadata?.source || 'api',
           currency: 'AUD'
         },
@@ -326,7 +288,7 @@ export class StripeService {
             userCount: effectiveUserCount.toString(),
             baseUsers: plan.baseUsers.toString(),
             additionalUsers: additionalUsers.toString(),
-            sophisticatedOverageQuantity: sophisticatedOverageQuantity.toString(),
+            overageQuantity: overageQuantity.toString(),
             currency: 'AUD'
           }
         },
