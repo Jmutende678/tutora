@@ -26,7 +26,7 @@ import {
   Smartphone,
   Globe
 } from 'lucide-react'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import TrialPopup from '@/components/TrialPopup'
 
 export default function HomePage() {
@@ -255,14 +255,14 @@ export default function HomePage() {
               <span>New: AI Module Builder Now Available</span>
             </div>
             <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 mb-6 leading-tight">
-              The Only AI-Powered Training Platform
+              Stop Spending Weeks Creating Training
               <br />
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                That Creates Modules in Minutes, Not Weeks
+                Build Engaging Modules in Minutes with AI
               </span>
             </h1>
             <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-              Transform any video or document into engaging training modules automatically. Join 500+ companies revolutionizing their workforce development.
+              Upload your videos, documents, or presentations. Our AI instantly transforms them into interactive training modules with quizzes, assessments, and progress tracking. <strong>Save 95% of your time</strong> while boosting engagement rates.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
               <Link
