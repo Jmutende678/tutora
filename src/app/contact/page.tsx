@@ -1,7 +1,14 @@
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Contact Tutora | Get Support & Sales Help | AI Training Platform',
+  description: 'Contact Tutora for support, sales inquiries, or partnership opportunities. Get help with AI training platform setup, billing, or technical questions. We\'re here to help your team succeed.',
+}
+
 'use client'
 
 import React, { useState } from 'react'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import { trackContactForm } from '@/lib/activity-tracker'
 import { 
   Mail, 

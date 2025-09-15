@@ -1,8 +1,15 @@
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'About Tutora | Leading AI Employee Training Platform',
+  description: 'Learn about Tutora\'s mission to revolutionize corporate training with AI. Discover our story, values, and commitment to helping organizations build skilled, engaged teams through innovative training solutions.',
+}
+
 'use client'
 
 import React from 'react'
 import Link from 'next/link'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import { 
   Target, 
   Users, 

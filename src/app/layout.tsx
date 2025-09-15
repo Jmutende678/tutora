@@ -17,6 +17,7 @@ export const metadata: Metadata = {
     shortcut: '/tutora_logo.png',
     apple: '/tutora_logo.png',
   },
+  manifest: '/manifest.json',
 }
 
 export default function RootLayout({

@@ -1,7 +1,14 @@
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Pricing Plans | Tutora AI Training Platform - Start Free',
+  description: 'Choose the perfect AI training plan for your team. From Starter ($89/month) to Enterprise solutions. 15% off annual plans. Start your free trial today and transform your employee training.',
+}
+
 'use client'
 
 import { useState } from 'react'
-import Navigation from '@/components/Navigation'
+import { Navigation } from '@/components/Navigation'
 import { CheckCircle, ArrowRight, Zap, Shield, Users, BarChart3, Star, Crown, Info } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/EnhancedButton'
