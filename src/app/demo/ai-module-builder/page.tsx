@@ -445,8 +445,19 @@ export default function AIModuleBuilder() {
           <div className="text-center">
             <button
               onClick={() => {
-                if (!userName.trim() || !userEmail.trim()) {
-                  alert('Please enter your name and email to continue')
+                // Validate email format
+                const validateEmail = (email: string) => {
+                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                  return emailRegex.test(email)
+                }
+                
+                if (!userName.trim() || !userEmail.trim() || !businessName.trim()) {
+                  alert('Please enter your name, email, and business name to continue')
+                  return
+                }
+                
+                if (!validateEmail(userEmail)) {
+                  alert('Please enter a valid email address (e.g., user@company.com)')
                   return
                 }
                 
