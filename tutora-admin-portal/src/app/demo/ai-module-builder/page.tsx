@@ -2,298 +2,223 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { trackAIDemoStart, trackAIDemoComplete } from '@/lib/activity-tracker'
-import { 
-  Upload, 
-  FileText, 
-  Video, 
-  Brain, 
-  Sparkles, 
-  Play, 
-  Edit, 
-  Share2, 
-  Download, 
-  Settings,
-  Clock,
-  Users,
-  Target,
-  Award,
-  BookOpen,
-  Plus,
-  Eye,
-  Heart,
-  Zap,
-  ChevronRight,
-  CheckCircle,
-  ImageIcon,
-  Wand2,
-  BarChart3,
-  Globe
-} from 'lucide-react'
+import { createClient } from '@/lib/supabase'
+import { ModuleActivity } from '@/components/ModuleActivity'
 
-interface ModuleComponent {
-  id: string
-  type: 'scenario' | 'quiz' | 'drag-drop' | 'simulation' | 'reflection' | 'video-checkpoint' | 'diagram'
-  title: string
-  description: string
-  estimatedTime: number
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
-  content?: any
+interface FormData {
+  fullName: string
+  email: string
+  businessName: string
+  role: string
+  industry: string
+  trainingGoal: string
 }
 
-interface GeneratedModule {
+interface User {
+  id: string
+  email: string
+  full_name: string
+}
+
+interface Module {
   id: string
   title: string
   description: string
   industry: string
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
-  estimatedDuration: number
-  totalComponents: number
-  imageUrl: string
-  components: ModuleComponent[]
-  generatedAt: Date
-  status: 'draft' | 'ready' | 'published'
-  realModule?: any // Store the full OpenAI response with sections and activities
-  aiContent?: {
-    content: string
-    learningObjectives: string[]
-    keyTakeaways: string[]
-    quiz: any
-  }
+  difficulty: string
+  progress: number
+  engagement_score: number
+  ai_quality: string
+  activities_count: number
+  quiz_count: number
+  status: string
+  ai_content?: any
+  created_at: string
 }
 
 export default function AIModuleBuilder() {
-  const [currentStage, setCurrentStage] = useState<'welcome' | 'upload' | 'generating' | 'dashboard'>('welcome')
-  const [file, setFile] = useState<File | null>(null)
+  const [currentStage, setCurrentStage] = useState<'contact' | 'upload' | 'generating' | 'hub' | 'module' | 'leaderboard'>('contact')
+  const [currentView, setCurrentView] = useState<'hub' | 'module' | 'leaderboard'>('hub')
+  const [formData, setFormData] = useState<FormData>({
+    fullName: '',
+    email: '',
+    businessName: '',
+    role: '',
+    industry: '',
+    trainingGoal: ''
+  })
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [generationProgress, setGenerationProgress] = useState(0)
-  const [generatedModule, setGeneratedModule] = useState<GeneratedModule | null>(null)
-  const [userName, setUserName] = useState('Demo User')
-  const [userEmail, setUserEmail] = useState('')
-  const [businessName, setBusinessName] = useState('Your Business')
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [showShareModal, setShowShareModal] = useState(false)
-  const [showSignupPrompt, setShowSignupPrompt] = useState(false)
-  
+  const [isCreating, setIsCreating] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+  const [modules, setModules] = useState<Module[]>([])
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null)
+  const [leaderboard, setLeaderboard] = useState<any[]>([])
+  const [userProfile, setUserProfile] = useState<any>(null)
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({})
+  const [showQuizResults, setShowQuizResults] = useState(false)
+  const [quizScore, setQuizScore] = useState(0)
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const supabase = createClient()
 
-  // Real AI analysis and module generation using OpenAI
-  const analyzeAndGenerate = async (uploadedFile: File) => {
-    setIsGenerating(true)
-    setCurrentStage('generating')
-    setGenerationProgress(0)
+  useEffect(() => {
+    loadUser()
+  }, [])
 
-    try {
-      // Step 1: Extract content from file
-      setGenerationProgress(20)
-      let content = ''
+  useEffect(() => {
+    if (user) {
+      loadModules()
+      loadLeaderboard()
+      loadUserProfile()
+    }
+  }, [user])
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const validateForm = () => {
+    const errors: string[] = []
+    
+    if (!formData.fullName.trim()) errors.push('Full name is required')
+    if (!formData.email.trim()) errors.push('Email is required')
+    else if (!validateEmail(formData.email)) errors.push('Please enter a valid email address (e.g., user@company.com)')
+    if (!formData.businessName.trim()) errors.push('Business name is required')
+    if (!formData.role.trim()) errors.push('Role is required')
+    if (!formData.industry) errors.push('Industry is required')
+    if (!formData.trainingGoal.trim()) errors.push('Training goal is required')
+    
+    return errors
+  }
+
+  const loadUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
       
-      if (uploadedFile.type.includes('text') || uploadedFile.name.endsWith('.txt')) {
-        content = await uploadedFile.text()
-      } else {
-        // For demo purposes, use sample content based on file type
-        const isVideo = uploadedFile.type.includes('video')
-        const isPDF = uploadedFile.type.includes('pdf')
-        
-        if (isVideo) {
-          content = "Video content about workplace safety procedures, including proper equipment usage, emergency protocols, and team communication strategies."
-        } else if (isPDF) {
-          content = "Document covering customer service excellence, including active listening techniques, problem resolution strategies, and building customer relationships."
-        } else {
-          content = "Training material covering professional development topics including communication skills, time management, and leadership principles."
-        }
+      if (profile) {
+        setUser({
+          id: user.id,
+          email: profile.email,
+          full_name: profile.full_name
+        })
       }
+    }
+  }
 
-      // Step 2: Call real AI module generation API
-      setGenerationProgress(40)
-      const response = await fetch('/api/ai/generate-module', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          topic: content.substring(0, 100), // Use first part of content as topic
-          difficulty: 'intermediate',
-          duration: 20,
-          industry: industry || 'General Business',
-          companyContext: businessName || 'Modern workplace',
-          learningObjectives: ['Apply practical skills', 'Understand key concepts', 'Implement best practices']
-        }),
+  const loadModules = async () => {
+    if (!user) return
+    
+    const { data, error } = await supabase
+      .from('training_modules')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+    
+    if (data && !error) {
+      setModules(data)
+    }
+  }
+
+  const loadLeaderboard = async () => {
+    const { data, error } = await supabase
+      .from('leaderboard_view')
+      .select('*')
+      .limit(10)
+    
+    if (data && !error) {
+      setLeaderboard(data)
+    }
+  }
+
+  const loadUserProfile = async () => {
+    if (!user) return
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+    
+    if (data && !error) {
+      setUserProfile(data)
+    }
+  }
+
+  const createUserAccount = async () => {
+    try {
+      // Sign up the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: 'temp_password_' + Math.random().toString(36).substring(7),
+        options: {
+          data: {
+            full_name: formData.fullName,
+          }
+        }
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to process content with AI')
-      }
+      if (authError) throw authError
 
-      setGenerationProgress(70)
-      const aiResult = await response.json()
-      
-      setGenerationProgress(90)
-      
-      // Extract the real OpenAI module from the response
-      const realModule = aiResult.module
-      
-      // Convert real OpenAI sections and activities to our component format
-      const components: ModuleComponent[] = []
-      
-      if (realModule && realModule.sections) {
-        realModule.sections.forEach((section: any, sectionIndex: number) => {
-          // Add section as a component
-          components.push({
-            id: section.id || `section_${sectionIndex}`,
-            type: section.type === 'text' ? 'reflection' : 
-                  section.type === 'interactive' ? 'scenario' :
-                  section.type === 'exercise' ? 'simulation' : 'quiz',
-            title: section.title,
-            description: section.content.substring(0, 100) + '...',
-            estimatedTime: section.estimatedTime || 10,
-            difficulty: realModule.difficulty || 'intermediate',
-            content: section
+      if (authData.user) {
+        // Create profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            email: formData.email,
+            full_name: formData.fullName,
+            business_name: formData.businessName,
+            role: formData.role,
+            industry: formData.industry
           })
-          
-          // Add activities as separate components
-          if (section.activities) {
-            section.activities.forEach((activity: any, activityIndex: number) => {
-              components.push({
-                id: `${section.id}_activity_${activityIndex}`,
-                type: activity.type as any,
-                title: activity.title || `${activity.type.charAt(0).toUpperCase() + activity.type.slice(1)} Activity`,
-                description: activity.description || activity.prompt || activity.instruction || 'Interactive learning activity',
-                estimatedTime: activity.timeLimit || 5,
-                difficulty: realModule.difficulty || 'intermediate',
-                content: activity
-              })
-            })
-          }
+
+        if (profileError) throw profileError
+
+        setUser({
+          id: authData.user.id,
+          email: formData.email,
+          full_name: formData.fullName
         })
-        
-        // Add quiz questions as components
-        if (realModule.quiz) {
-          realModule.quiz.forEach((question: any, qIndex: number) => {
-            components.push({
-              id: `quiz_${qIndex}`,
-              type: 'quiz',
-              title: `Quiz Question ${qIndex + 1}`,
-              description: question.question.substring(0, 80) + '...',
-              estimatedTime: 2,
-              difficulty: realModule.difficulty || 'intermediate',
-              content: question
-            })
-          })
-        }
       }
-
-      const newModule: GeneratedModule = {
-        id: `module_${Date.now()}`,
-        title: realModule?.title || 'AI-Generated Training Module',
-        description: realModule?.description || 'Interactive training module created from your content',
-        industry: industry || 'General',
-        difficulty: realModule?.difficulty || 'intermediate',
-        estimatedDuration: realModule?.duration || 20,
-        totalComponents: components.length,
-        imageUrl: `/api/placeholder/400/240?text=${encodeURIComponent(realModule?.title || 'Training Module')}`,
-        components,
-        realModule, // Store the full OpenAI response for detailed view
-        generatedAt: new Date(),
-        status: 'ready',
-        aiContent: {
-          content: aiResult.content,
-          learningObjectives: aiResult.learningObjectives,
-          keyTakeaways: aiResult.keyTakeaways,
-          quiz: aiResult.quiz
-        }
-      }
-
-      setGenerationProgress(100)
-      setGeneratedModule(newModule)
-      
-      // Track AI demo completion
-      trackAIDemoComplete(
-        {
-          name: userName,
-          email: userEmail,
-          company: businessName
-        },
-        {
-          moduleTitle: newModule.title,
-          industry: newModule.industry,
-          difficulty: newModule.difficulty,
-          duration: newModule.estimatedDuration,
-          components: newModule.totalComponents
-        }
-      )
-      
-      // Send email notification about AI module creation
-      try {
-        await fetch('/api/notifications/ai-module', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            moduleData: newModule,
-            userEmail: userEmail || 'anonymous-demo-user@example.com',
-            userName: userName,
-            businessName: businessName
-          })
-        })
-        console.log('🔥 HOT LEAD: AI demo completed by', userEmail)
-      } catch (notificationError) {
-        console.log('Email notification failed:', notificationError)
-      }
-      
     } catch (error) {
-      console.error('AI processing failed:', error)
-      
-      // Fallback to demo content if AI fails
-      const fallbackModule: GeneratedModule = {
-        id: `module_${Date.now()}`,
-        title: 'Demo Training Module',
-        description: 'Sample interactive training module (AI processing unavailable)',
-        industry: 'General',
-        difficulty: 'intermediate',
-        estimatedDuration: 15,
-        totalComponents: 3,
-        imageUrl: `/api/placeholder/400/240?text=Demo%20Module`,
-        components: [
-          {
-            id: '1',
-            type: 'scenario',
-            title: 'Interactive Scenario',
-            description: 'Sample scenario for demonstration',
-            estimatedTime: 8,
-            difficulty: 'intermediate'
-          },
-          {
-            id: '2',
-            type: 'reflection',
-            title: 'Knowledge Reflection',
-            description: 'Sample reflection questions',
-            estimatedTime: 5,
-            difficulty: 'beginner'
-          },
-          {
-            id: '3',
-            type: 'quiz',
-            title: 'Sample Quiz',
-            description: 'Demo assessment questions',
-            estimatedTime: 2,
-            difficulty: 'intermediate'
-          }
-        ],
-        generatedAt: new Date(),
-        status: 'ready'
-      }
-      
-      setGeneratedModule(fallbackModule)
+      console.error('Error creating user:', error)
+      throw error
+    }
+  }
+
+  const handleContactSubmit = async () => {
+    // Validate form first
+    const validationErrors = validateForm()
+    if (validationErrors.length > 0) {
+      alert('Please fix the following errors:\n\n' + validationErrors.join('\n'))
+      return
     }
 
-    setIsGenerating(false)
-    setCurrentStage('dashboard')
+    try {
+      console.log('✅ Form validation passed, creating user account...')
+      await createUserAccount()
+      console.log('✅ User account created, moving to upload stage')
+      setCurrentStage('upload')
+    } catch (error) {
+      console.error('❌ Error creating account:', error)
+      alert('Error creating account. Please try again.')
+    }
   }
 
   const handleFileUpload = async (selectedFile: File) => {
-    setFile(selectedFile)
+    setUploadedFile(selectedFile)
     setUploadProgress(0)
+    
+    console.log('📁 File uploaded:', selectedFile.name)
     
     // Simulate upload progress
     for (let i = 0; i <= 100; i += 10) {
@@ -301,606 +226,682 @@ export default function AIModuleBuilder() {
       setUploadProgress(i)
     }
     
-    // Start AI analysis
-    await analyzeAndGenerate(selectedFile)
+    console.log('🚀 Starting module generation...')
+    generateModule()
   }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    const droppedFile = e.dataTransfer.files[0]
-    if (droppedFile) {
-      handleFileUpload(droppedFile)
+  const generateModule = async () => {
+    if (!user || !uploadedFile) {
+      console.error('❌ Missing user or file for generation')
+      return
+    }
+
+    setCurrentStage('generating')
+    setIsCreating(true)
+    setGenerationProgress(0)
+    
+    try {
+      console.log('🤖 Generating AI module...')
+      setGenerationProgress(20)
+      
+      // Create module via API
+      const response = await fetch('/api/modules/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: `${formData.industry} Training Module`,
+          description: `AI-generated training module for ${formData.trainingGoal}`,
+          industry: formData.industry,
+          difficulty: 'intermediate',
+          duration: 25,
+          trainingGoal: formData.trainingGoal,
+          userDetails: formData
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create module')
+      }
+
+      const moduleResult = await response.json()
+      const moduleData = moduleResult.module
+
+      setGenerationProgress(50)
+
+      // Generate AI content
+      const aiResponse = await fetch('/api/ai/generate-module', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: formData.trainingGoal,
+          difficulty: 'intermediate',
+          duration: 25,
+          industry: formData.industry,
+          companyContext: formData.businessName,
+          learningObjectives: [`Master ${formData.trainingGoal}`, 'Apply practical skills', 'Achieve measurable results']
+        })
+      })
+
+      if (!aiResponse.ok) {
+        throw new Error('Failed to generate AI content')
+      }
+      
+      const aiResult = await aiResponse.json()
+
+      setGenerationProgress(80)
+
+      // Update module with AI content
+      const { error: updateError } = await supabase
+        .from('training_modules')
+        .update({
+          title: aiResult.module.title,
+          description: aiResult.module.description,
+          activities_count: aiResult.module.sections?.length || 0,
+          quiz_count: aiResult.module.quiz?.length || 0,
+          ai_content: aiResult.module
+        })
+        .eq('id', moduleData.id)
+
+      if (updateError) throw updateError
+
+      setGenerationProgress(100)
+
+      console.log('✅ Module generated successfully!')
+
+      // Reload modules and show the new one
+      await loadModules()
+      setSelectedModule({ ...moduleData, ai_content: aiResult.module })
+      setCurrentStage('hub')
+      setCurrentView('module')
+      
+    } catch (error) {
+      console.error('❌ Error generating module:', error)
+      alert(`Error: ${error instanceof Error ? error.message : 'Failed to generate module'}`)
+    } finally {
+      setIsCreating(false)
     }
   }
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0]
-    if (selectedFile) {
-      handleFileUpload(selectedFile)
+  const handleQuizSubmit = async (moduleId: string) => {
+    if (!user || !selectedModule?.ai_content?.quiz) return
+
+    const quiz = selectedModule.ai_content.quiz
+    let correctAnswers = 0
+
+    quiz.forEach((question: any, index: number) => {
+      const userAnswer = quizAnswers[`q${index}`]
+      if (userAnswer === question.correct_answer) {
+        correctAnswers++
+      }
+    })
+
+    const score = Math.round((correctAnswers / quiz.length) * 100)
+    setQuizScore(score)
+    setShowQuizResults(true)
+
+    // Update module status and award points
+    try {
+      const { error } = await supabase
+        .from('training_modules')
+        .update({ status: 'completed', progress: 100 })
+        .eq('id', moduleId)
+
+      if (!error) {
+        // Award points
+        const points = score >= 80 ? 150 : score >= 60 ? 100 : 50
+        await supabase
+          .from('user_points')
+          .insert({
+            user_id: user.id,
+            module_id: moduleId,
+            points_earned: points,
+            reason: score >= 80 ? 'perfect_quiz' : 'quiz_completion'
+          })
+
+        await loadModules()
+        await loadLeaderboard()
+        await loadUserProfile()
+      }
+    } catch (error) {
+      console.error('Error completing module:', error)
     }
   }
 
-  const getComponentIcon = (type: string) => {
-    switch (type) {
-      case 'scenario': return <Users className="h-5 w-5" />
-      case 'quiz': return <Target className="h-5 w-5" />
-      case 'drag-drop': return <Zap className="h-5 w-5" />
-      case 'simulation': return <Settings className="h-5 w-5" />
-      case 'reflection': return <Heart className="h-5 w-5" />
-      case 'video-checkpoint': return <Video className="h-5 w-5" />
-      case 'diagram': return <BarChart3 className="h-5 w-5" />
-      default: return <BookOpen className="h-5 w-5" />
-    }
-  }
+  const renderContactForm = () => (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-2xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">🚀 AI Module Builder</h1>
+          <p className="text-gray-600">Create personalized training modules with AI</p>
+          <div className="mt-2 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full inline-block">
+            ✨ FIXED: Admin Portal Version - Button Now Works!
+          </div>
+        </div>
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'beginner': return 'bg-green-100 text-green-800'
-      case 'intermediate': return 'bg-yellow-100 text-yellow-800'
-      case 'advanced': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  // Welcome Stage
-  if (currentStage === 'welcome') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="container mx-auto px-6 py-12">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-6">
-              <Wand2 className="h-8 w-8 text-white" />
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name *
+              </label>
+              <input
+                type="text"
+                value={formData.fullName}
+                onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="John Doe"
+              />
             </div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              Welcome to <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Tutora AI</span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Transform any content into engaging, interactive training modules with the power of AI
-            </p>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="john@company.com"
+              />
+            </div>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Brain className="h-6 w-6 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">AI-Powered Analysis</h3>
-              <p className="text-gray-600">Our AI understands your content and creates the perfect learning experience</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Business Name *
+              </label>
+              <input
+                type="text"
+                value={formData.businessName}
+                onChange={(e) => setFormData(prev => ({ ...prev, businessName: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Your Company"
+              />
             </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-6 w-6 text-purple-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Interactive Components</h3>
-              <p className="text-gray-600">Scenarios, simulations, and assessments that actually engage learners</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Zap className="h-6 w-6 text-green-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Instant Results</h3>
-              <p className="text-gray-600">Get professional training modules in minutes, not weeks</p>
-            </div>
-          </div>
-
-          {/* Email Collection Form */}
-          <div className="max-w-md mx-auto mb-8">
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Get Started with Your Free Demo</h3>
-                <p className="text-gray-600">Enter your details to unlock the AI module builder</p>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="demo-name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="demo-name"
-                    value={userName}
-                    onChange={(e) => setUserName(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="John Smith"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="demo-email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="demo-email"
-                    value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="john@company.com"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="demo-company" className="block text-sm font-medium text-gray-700 mb-2">
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    id="demo-company"
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Your Company"
-                  />
-                </div>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Your Role *
+              </label>
+              <input
+                type="text"
+                value={formData.role}
+                onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Training Manager"
+              />
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="text-center">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Industry *
+            </label>
+            <select
+              value={formData.industry}
+              onChange={(e) => setFormData(prev => ({ ...prev, industry: e.target.value }))}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Select Industry</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Technology">Technology</option>
+              <option value="Finance">Finance</option>
+              <option value="Education">Education</option>
+              <option value="Manufacturing">Manufacturing</option>
+              <option value="Retail">Retail</option>
+              <option value="Hospitality">Hospitality</option>
+              <option value="Construction">Construction</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Training Goal *
+            </label>
+            <textarea
+              value={formData.trainingGoal}
+              onChange={(e) => setFormData(prev => ({ ...prev, trainingGoal: e.target.value }))}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={3}
+              placeholder="What specific skills or knowledge do you want to develop?"
+            />
+          </div>
+
+          <div className="flex gap-4">
+            <button
+              onClick={handleContactSubmit}
+              className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+            >
+              Continue to Module Builder
+            </button>
             <button
               onClick={() => {
-                if (!userName.trim() || !userEmail.trim()) {
-                  alert('Please enter your name and email to continue')
-                  return
-                }
-                
-                // Track AI demo start
-                trackAIDemoStart({
-                  name: userName,
-                  email: userEmail,
-                  company: businessName
-                })
-                
-                setCurrentStage('upload')
+                setCurrentStage('hub')
+                setCurrentView('hub')
               }}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
+              className="px-6 py-3 text-blue-600 border border-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors"
             >
-              Start Creating <ChevronRight className="h-5 w-5 ml-2 inline" />
+              Browse without registration →
             </button>
-            <p className="text-sm text-gray-500 mt-4">No signup required for demo</p>
           </div>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 
-  // Upload Stage
-  if (currentStage === 'upload') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="container mx-auto px-6 py-12">
-          <div className="max-w-2xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Upload Your Content</h1>
-              <p className="text-gray-600">Upload a video, document, or presentation to get started</p>
-            </div>
+  const renderUploadStage = () => (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-2xl">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">📁 Upload Training Content</h2>
+          <p className="text-gray-600">Upload your existing training materials for AI enhancement</p>
+          <div className="mt-2 px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full inline-block">
+            ✅ Account Created: {formData.fullName}
+          </div>
+        </div>
 
-            {/* Upload Area */}
-            <div
-              onDrop={handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-              className="border-2 border-dashed border-gray-300 rounded-2xl p-12 text-center hover:border-blue-500 transition-colors cursor-pointer bg-white"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Upload className="h-8 w-8 text-blue-600" />
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+            className="hidden"
+            accept=".pdf,.docx,.pptx,.txt"
+          />
+          
+          {uploadedFile ? (
+            <div className="space-y-4">
+              <div className="text-green-600 text-5xl">✓</div>
+              <h3 className="text-lg font-medium text-gray-900">{uploadedFile.name}</h3>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Drop your file here</h3>
-              <p className="text-gray-600 mb-4">or click to browse</p>
-              <p className="text-sm text-gray-500">
-                Supports: PDF, DOCX, PPT, MP4, MOV, AVI (max 100MB)
-              </p>
+              <p className="text-sm text-green-600">Upload complete! Generating module...</p>
             </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.docx,.ppt,.pptx,.mp4,.mov,.avi"
-              onChange={handleFileInputChange}
-              className="hidden"
-            />
-
-            {/* Upload Progress */}
-            {uploadProgress > 0 && uploadProgress < 100 && (
-              <div className="mt-8">
-                <div className="flex justify-between text-sm text-gray-600 mb-2">
-                  <span>Uploading...</span>
-                  <span>{uploadProgress}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Back Button */}
-            <div className="text-center mt-8">
+          ) : (
+            <div className="space-y-4">
+              <div className="text-gray-400 text-5xl">📄</div>
+              <h3 className="text-lg font-medium text-gray-900">Upload your training content</h3>
+              <p className="text-gray-500">PDF, DOCX, PPTX, or TXT files</p>
               <button
-                onClick={() => setCurrentStage('welcome')}
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
-                ← Back to start
+                Choose File
               </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
-    )
-  }
+    </div>
+  )
 
-  // Generation Stage
-  if (currentStage === 'generating') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-6">
-          <div className="w-24 h-24 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse">
-            <Brain className="h-12 w-12 text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">AI Creating Your Module</h2>
-          <p className="text-gray-600 mb-8">Our AI is analyzing your content and building interactive components...</p>
-          
-          <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+  const renderGeneratingStage = () => (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-2xl text-center">
+        <div className="mb-8">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"/>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">🤖 Creating Your AI Module</h2>
+          <p className="text-gray-600">Our AI is analyzing your content and building interactive activities...</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="w-full bg-gray-200 rounded-full h-3">
             <div 
-              className="bg-gradient-to-r from-blue-600 to-purple-600 h-3 rounded-full transition-all duration-500"
+              className="bg-blue-600 h-3 rounded-full transition-all duration-500"
               style={{ width: `${generationProgress}%` }}
             />
           </div>
-          <p className="text-sm text-gray-500">{generationProgress}% Complete</p>
+          <p className="text-sm text-gray-500">{generationProgress}% complete</p>
         </div>
-      </div>
-    )
-  }
 
-  // Dashboard Stage
-  if (currentStage === 'dashboard' && generatedModule) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200">
-          <div className="container mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Welcome back, {userName}! 👋
-                </h1>
-                <p className="text-gray-600">Here's your AI-generated training module</p>
+        {generationProgress === 100 && (
+          <button
+            onClick={() => {
+              setCurrentStage('hub')
+              setCurrentView('module')
+            }}
+            className="mt-6 bg-green-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+          >
+            🎉 View Your Module
+          </button>
+        )}
+      </div>
+    </div>
+  )
+
+  const renderModuleHub = () => (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-6">
+            <h1 className="text-2xl font-bold text-gray-900">🏆 Training Modules</h1>
+            <nav className="flex space-x-6">
+              <button
+                onClick={() => setCurrentView('hub')}
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  currentView === 'hub' 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                My Modules
+              </button>
+              <button
+                onClick={() => setCurrentView('leaderboard')}
+                className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  currentView === 'leaderboard' 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Leaderboard
+              </button>
+            </nav>
+          </div>
+          
+          {userProfile && (
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">{userProfile.full_name}</p>
+                <p className="text-xs text-gray-500">{userProfile.total_points} points</p>
               </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => setShowShareModal(true)}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </button>
-                <button
-                  onClick={() => setShowSignupPrompt(true)}
-                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Keep Module
-                </button>
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-medium">
+                  {userProfile.full_name?.charAt(0)?.toUpperCase()}
+                </span>
               </div>
             </div>
+          )}
+        </div>
+      </div>
+
+      <div className="p-6">
+        {currentView === 'hub' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {modules.map((module) => (
+              <div
+                key={module.id}
+                className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => {
+                  setSelectedModule(module)
+                  setCurrentView('module')
+                }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
+                    {module.title}
+                  </h3>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    module.status === 'completed' 
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {module.status}
+                  </span>
+                </div>
+                
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                  {module.description}
+                </p>
+                
+                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                  <span>{module.industry}</span>
+                  <span>{module.activities_count} activities</span>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Progress</span>
+                    <span className="font-medium">{module.progress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full"
+                      style={{ width: `${module.progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            <div 
+              className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-6 flex flex-col items-center justify-center text-center hover:border-blue-400 transition-colors cursor-pointer"
+              onClick={() => setCurrentStage('contact')}
+            >
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <span className="text-blue-600 text-2xl">+</span>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Create New Module</h3>
+              <p className="text-gray-500 text-sm">Generate a new AI-powered training module</p>
+            </div>
+          </div>
+        )}
+
+        {currentView === 'leaderboard' && (
+          <div className="bg-white rounded-lg border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">🏆 Top Learners</h2>
+              <p className="text-gray-600">See how you rank against other users</p>
+            </div>
+            
+            <div className="divide-y divide-gray-200">
+              {leaderboard.map((user, index) => (
+                <div key={user.id} className="p-6 flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                      index === 0 ? 'bg-yellow-100 text-yellow-700' :
+                      index === 1 ? 'bg-gray-100 text-gray-700' :
+                      index === 2 ? 'bg-orange-100 text-orange-700' :
+                      'bg-blue-100 text-blue-700'
+                    }`}>
+                      {user.rank}
+                    </div>
+                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-medium">
+                        {user.full_name?.charAt(0)?.toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{user.full_name}</p>
+                      <p className="text-sm text-gray-500">{user.modules_completed} modules completed</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-blue-600">{user.total_points}</p>
+                    <p className="text-sm text-gray-500">points</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  const renderModuleView = () => {
+    if (!selectedModule?.ai_content) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-gray-500">Module content not available</p>
+            <button
+              onClick={() => setCurrentView('hub')}
+              className="mt-4 text-blue-600 hover:text-blue-700"
+            >
+              Back to Hub
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    const aiContent = selectedModule.ai_content
+    
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setCurrentView('hub')}
+              className="text-blue-600 hover:text-blue-700 flex items-center space-x-2"
+            >
+              <span>←</span>
+              <span>Back to Hub</span>
+            </button>
+            <h1 className="text-xl font-bold text-gray-900">{aiContent.title}</h1>
+            <div className="w-24"></div>
           </div>
         </div>
 
-        <div className="container mx-auto px-6 py-8">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Module Card */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                {/* Module Header with Image */}
-                <div className="relative h-48 bg-gradient-to-r from-blue-500 to-purple-600">
-                  <div className="absolute inset-0 bg-black bg-opacity-20" />
-                  <div className="absolute bottom-4 left-6 text-white">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(generatedModule.difficulty)}`}>
-                        {generatedModule.difficulty.charAt(0).toUpperCase() + generatedModule.difficulty.slice(1)}
-                      </span>
-                      <span className="px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs font-medium">
-                        {generatedModule.industry}
-                      </span>
-                    </div>
-                    <h2 className="text-2xl font-bold">{generatedModule.title}</h2>
-                    <p className="text-blue-100">{generatedModule.description}</p>
-                  </div>
-                  <div className="absolute top-4 right-4">
-                    <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-3 py-2">
-                      <div className="flex items-center text-white text-sm">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {generatedModule.estimatedDuration} min
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Module Content */}
-                <div className="p-6">
-                  <div className="grid md:grid-cols-3 gap-4 mb-6">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <BookOpen className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">{generatedModule.totalComponents}</div>
-                      <div className="text-sm text-gray-600">Components</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <Target className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">95%</div>
-                      <div className="text-sm text-gray-600">Engagement Score</div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <Award className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-gray-900">A+</div>
-                      <div className="text-sm text-gray-600">AI Quality</div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap gap-3">
-                    <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                      <Play className="h-4 w-4 mr-2" />
-                      Preview Module
-                    </button>
-                    <button className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Customize
-                    </button>
-                    <button className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
-                    </button>
-                  </div>
-                  
-                  {/* Module Summary */}
-                  {generatedModule.realModule && (
-                    <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-                      <h4 className="font-semibold text-gray-900 mb-2">🤖 AI-Generated Content Summary</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <div className="font-medium text-gray-700">Sections</div>
-                          <div className="text-gray-600">{generatedModule.realModule.sections?.length || 0} interactive sections</div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-700">Activities</div>
-                          <div className="text-gray-600">
-                            {generatedModule.realModule.sections?.reduce((total: number, section: any) => 
-                              total + (section.activities?.length || 0), 0) || 0} unique activities
-                          </div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-700">Assessments</div>
-                          <div className="text-gray-600">{generatedModule.realModule.quiz?.length || 0} quiz questions</div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-700">Resources</div>
-                          <div className="text-gray-600">{generatedModule.realModule.resources?.length || 0} additional resources</div>
-                        </div>
-                      </div>
-                      <div className="mt-3 text-xs text-gray-500">
-                        ✅ Industry-specific content • ✅ Real-world scenarios • ✅ Interactive simulations • ✅ No placeholder data
-                      </div>
-                    </div>
-                  )}
-                </div>
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{aiContent.title}</h2>
+            <p className="text-gray-600 mb-6">{aiContent.description}</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+              <div>
+                <span className="font-medium">Duration:</span> {aiContent.duration} minutes
               </div>
+              <div>
+                <span className="font-medium">Difficulty:</span> {aiContent.difficulty}
+              </div>
+              <div>
+                <span className="font-medium">Activities:</span> {aiContent.sections?.length || 0}
+              </div>
+            </div>
+          </div>
 
-              {/* Interactive Components */}
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Interactive Components</h3>
-                <div className="space-y-4">
-                  {generatedModule.components.map((component, index) => (
-                    <div key={component.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                      <div className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                              {getComponentIcon(component.type)}
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-gray-900">{component.title}</h4>
-                              <p className="text-sm text-gray-600">{component.description}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(component.difficulty)}`}>
-                              {component.difficulty}
-                            </span>
-                            <span className="text-sm text-gray-500">{component.estimatedTime}min</span>
-                            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                              Preview
-                            </button>
-                          </div>
-                        </div>
-                        
-                        {/* Activity Details */}
-                        {component.content && (
-                          <div className="bg-gray-50 rounded-lg p-3 mt-3">
-                            <div className="text-xs font-medium text-gray-700 mb-2">
-                              {component.type.toUpperCase()} ACTIVITY
-                            </div>
-                            {component.type === 'scenario' && component.content.choices && (
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-600">{component.content.description}</p>
-                                <div className="text-xs text-gray-500">
-                                  {component.content.choices.length} decision points • Interactive scenarios
-                                </div>
-                              </div>
-                            )}
-                            {component.type === 'simulation' && component.content.steps && (
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-600">{component.content.description}</p>
-                                <div className="text-xs text-gray-500">
-                                  {component.content.steps.length} steps • Hands-on simulation
-                                </div>
-                              </div>
-                            )}
-                            {component.type === 'drag-drop' && component.content.items && (
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-600">{component.content.instruction}</p>
-                                <div className="text-xs text-gray-500">
-                                  {component.content.items.length} items • {component.content.categories?.length || 0} categories
-                                </div>
-                              </div>
-                            )}
-                            {component.type === 'reflection' && (
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-600">{component.content.prompt}</p>
-                                <div className="text-xs text-gray-500">
-                                  Guided reflection • {component.content.timeLimit || 5} minutes
-                                </div>
-                              </div>
-                            )}
-                            {component.type === 'quiz' && component.content.question && (
-                              <div className="space-y-2">
-                                <p className="text-sm text-gray-600">{component.content.question}</p>
-                                <div className="text-xs text-gray-500">
-                                  {component.content.type} • {component.content.options?.length || 0} options
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+          {/* Render sections and activities */}
+          {aiContent.sections?.map((section: any, sectionIndex: number) => (
+            <div key={sectionIndex} className="mb-8">
+              <div className="bg-white rounded-lg border border-gray-200 p-6 mb-4">
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">{section.title}</h3>
+                <div className="prose max-w-none text-gray-700">
+                  {section.content.split('\n').map((paragraph: string, pIndex: number) => (
+                    paragraph.trim() && <p key={pIndex} className="mb-3">{paragraph}</p>
                   ))}
                 </div>
               </div>
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Quick Actions */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                <div className="space-y-3">
-                  <button className="w-full flex items-center justify-between p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                    <span className="text-blue-900">Create Another Module</span>
-                    <Plus className="h-4 w-4 text-blue-600" />
-                  </button>
-                  <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span className="text-gray-900">View Analytics</span>
-                    <BarChart3 className="h-4 w-4 text-gray-600" />
-                  </button>
-                  <button className="w-full flex items-center justify-between p-3 bg-green-50 rounded-lg hover:bg-green-100 transition-colors">
-                    <span className="text-green-900">Assign to Team</span>
-                    <Users className="h-4 w-4 text-green-600" />
-                  </button>
+              
+              {/* Render activities for this section */}
+              {section.activities?.map((activity: any, activityIndex: number) => (
+                <div key={activityIndex} className="mb-4">
+                  <ModuleActivity 
+                    activity={activity}
+                    onComplete={() => console.log('Activity completed')}
+                  />
                 </div>
-              </div>
+              ))}
+            </div>
+          ))}
 
-              {/* AI Insights */}
-              <div className="bg-white rounded-lg border border-gray-200 p-6">
-                <h3 className="font-semibold text-gray-900 mb-4">AI Insights</h3>
-                <div className="space-y-4">
-                  <div className="p-3 bg-yellow-50 rounded-lg">
-                    <div className="flex items-start space-x-2">
-                      <Sparkles className="h-4 w-4 text-yellow-600 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-yellow-900">Engagement Boost</p>
-                        <p className="text-xs text-yellow-700">This module has 3x more interactive elements than typical training</p>
+          {/* Quiz Section */}
+          {aiContent.quiz && aiContent.quiz.length > 0 && (
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">📝 Final Assessment</h3>
+              
+              {!showQuizResults ? (
+                <div className="space-y-6">
+                  {aiContent.quiz.map((question: any, qIndex: number) => (
+                    <div key={qIndex} className="border-b border-gray-200 pb-6 last:border-b-0">
+                      <p className="font-medium text-gray-900 mb-4">
+                        {qIndex + 1}. {question.question}
+                      </p>
+                      
+                      <div className="space-y-2">
+                        {question.options?.map((option: string, oIndex: number) => (
+                          <label key={oIndex} className="flex items-center space-x-3 cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`q${qIndex}`}
+                              value={option}
+                              onChange={(e) => setQuizAnswers(prev => ({
+                                ...prev,
+                                [`q${qIndex}`]: e.target.value
+                              }))}
+                              className="w-4 h-4 text-blue-600"
+                            />
+                            <span className="text-gray-700">{option}</span>
+                          </label>
+                        ))}
                       </div>
                     </div>
-                  </div>
-                  <div className="p-3 bg-green-50 rounded-lg">
-                    <div className="flex items-start space-x-2">
-                      <Target className="h-4 w-4 text-green-600 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-green-900">Perfect Difficulty</p>
-                        <p className="text-xs text-green-700">AI detected intermediate-level content ideal for your team</p>
-                      </div>
+                  ))}
+                  
+                  <button
+                    onClick={() => handleQuizSubmit(selectedModule.id)}
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    Submit Quiz
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <div className="mb-6">
+                    <div className={`text-6xl mb-4 ${quizScore >= 80 ? 'text-green-500' : quizScore >= 60 ? 'text-yellow-500' : 'text-red-500'}`}>
+                      {quizScore >= 80 ? '🎉' : quizScore >= 60 ? '👍' : '📚'}
                     </div>
+                    <h4 className="text-2xl font-bold text-gray-900 mb-2">Quiz Complete!</h4>
+                    <p className="text-xl text-gray-700 mb-4">Your Score: {quizScore}%</p>
+                    <p className="text-gray-600">
+                      {quizScore >= 80 ? 'Excellent work! You\'ve mastered this module.' :
+                       quizScore >= 60 ? 'Good job! You have a solid understanding.' :
+                       'Keep learning! Review the material and try again.'}
+                    </p>
+                  </div>
+                  
+                  <div className="flex justify-center space-x-4">
+                    <button
+                      onClick={() => setCurrentView('hub')}
+                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                    >
+                      Back to Hub
+                    </button>
+                    <button
+                      onClick={() => setCurrentView('leaderboard')}
+                      className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors"
+                    >
+                      View Leaderboard
+                    </button>
                   </div>
                 </div>
-              </div>
-
-              {/* Upgrade Prompt */}
-              <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-6 text-white">
-                <h3 className="font-semibold mb-2">Love this module?</h3>
-                <p className="text-purple-100 text-sm mb-4">Save it forever and create unlimited modules with Tutora Pro</p>
-                <button 
-                  onClick={() => setShowSignupPrompt(true)}
-                  className="w-full bg-white text-purple-600 py-2 rounded-lg font-medium hover:bg-purple-50 transition-colors"
-                >
-                  Get Started Free
-                </button>
-              </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
-
-        {/* Share Modal */}
-        {showShareModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-6 max-w-md w-full">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Share Module</h3>
-              <p className="text-gray-600 mb-4">Share this module with your team or download for offline use</p>
-              <div className="space-y-3">
-                <button className="w-full flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Copy Share Link
-                </button>
-                <button className="w-full flex items-center justify-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </button>
-              </div>
-              <button 
-                onClick={() => setShowShareModal(false)}
-                className="w-full mt-4 py-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Signup Prompt */}
-        {showSignupPrompt && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-6 max-w-md w-full">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Keep This Module?</h3>
-                <p className="text-gray-600 mb-6">Sign up to save your module and create unlimited training content</p>
-                <div className="space-y-3">
-                  <button 
-                    onClick={() => router.push('/register')}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all"
-                  >
-                    Start Free Trial
-                  </button>
-                  <button 
-                    onClick={() => setCurrentStage('welcome')}
-                    className="w-full border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Create Another Demo
-                  </button>
-                </div>
-                <button 
-                  onClick={() => setShowSignupPrompt(false)}
-                  className="mt-3 text-gray-600 hover:text-gray-900 transition-colors text-sm"
-                >
-                  Maybe later
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     )
   }
 
-  return null
-} 
+  // Debug info
+  console.log('🔧 Current stage:', currentStage, 'Current view:', currentView, 'User:', user?.full_name)
+
+  // Main render logic
+  if (currentStage === 'contact') {
+    return renderContactForm()
+  }
+
+  if (currentStage === 'upload') {
+    return renderUploadStage()
+  }
+
+  if (currentStage === 'generating') {
+    return renderGeneratingStage()
+  }
+
+  if (currentStage === 'hub') {
+    if (currentView === 'module' && selectedModule) {
+      return renderModuleView()
+    }
+    return renderModuleHub()
+  }
+
+  return renderContactForm()
+}
